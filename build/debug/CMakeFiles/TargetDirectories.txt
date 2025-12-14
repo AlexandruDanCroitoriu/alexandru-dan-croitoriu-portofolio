@@ -1,0 +1,4 @@
+/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles/alexandru_dan_croitoriu_portofolio.dir
+/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles/run.dir
+/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles/edit_cache.dir
+/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles/rebuild_cache.dir

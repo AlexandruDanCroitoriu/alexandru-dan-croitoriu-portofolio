@@ -193,10 +193,6 @@
     border-style: var(--tw-border-style) !important;
     border-width: 1px !important;
   }
-  .border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
   .border-solid {
     --tw-border-style: solid;
     border-style: solid;

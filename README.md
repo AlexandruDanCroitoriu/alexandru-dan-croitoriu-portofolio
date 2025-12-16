@@ -20,3 +20,12 @@ cmake -DCMAKE_BUILD_TYPE=Release ../..
 make -j$(nproc)
 make run
 ```
+
+Tailwind
+```bash
+cd static/stylus/tailwind/
+npm run watch
+
+# for release, compile the minified css file
+npm run minify
+```

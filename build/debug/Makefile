@@ -238,6 +238,30 @@ src/003_WidgetDisplay/WidgetDisplay.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.s
 .PHONY : src/003_WidgetDisplay/WidgetDisplay.cpp.s
 
+src/004_TailwindTheme/TailwindTheme.o: src/004_TailwindTheme/TailwindTheme.cpp.o
+.PHONY : src/004_TailwindTheme/TailwindTheme.o
+
+# target to build an object file
+src/004_TailwindTheme/TailwindTheme.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o
+.PHONY : src/004_TailwindTheme/TailwindTheme.cpp.o
+
+src/004_TailwindTheme/TailwindTheme.i: src/004_TailwindTheme/TailwindTheme.cpp.i
+.PHONY : src/004_TailwindTheme/TailwindTheme.i
+
+# target to preprocess a source file
+src/004_TailwindTheme/TailwindTheme.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.i
+.PHONY : src/004_TailwindTheme/TailwindTheme.cpp.i
+
+src/004_TailwindTheme/TailwindTheme.s: src/004_TailwindTheme/TailwindTheme.cpp.s
+.PHONY : src/004_TailwindTheme/TailwindTheme.s
+
+# target to generate assembly for a file
+src/004_TailwindTheme/TailwindTheme.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.s
+.PHONY : src/004_TailwindTheme/TailwindTheme.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -284,6 +308,9 @@ help:
 	@echo "... src/003_WidgetDisplay/WidgetDisplay.o"
 	@echo "... src/003_WidgetDisplay/WidgetDisplay.i"
 	@echo "... src/003_WidgetDisplay/WidgetDisplay.s"
+	@echo "... src/004_TailwindTheme/TailwindTheme.o"
+	@echo "... src/004_TailwindTheme/TailwindTheme.i"
+	@echo "... src/004_TailwindTheme/TailwindTheme.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

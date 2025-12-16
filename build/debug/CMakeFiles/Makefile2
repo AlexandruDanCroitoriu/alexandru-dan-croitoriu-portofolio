@@ -82,12 +82,12 @@ clean: CMakeFiles/run.dir/clean
 CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target alexandru_dan_croitoriu_portofolio"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target alexandru_dan_croitoriu_portofolio"
 .PHONY : CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 0
 .PHONY : CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/rule
@@ -113,7 +113,7 @@ CMakeFiles/run.dir/all: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 7
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles 0
 .PHONY : CMakeFiles/run.dir/rule

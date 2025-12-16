@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@source "../xml/**";
+@source "../../../src/**/**";
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme {
+    /* Fonts */
+    --font-title: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-paragraph: 'Inter', sans-serif;
+
+   /* Light Themes */
+    --color-body: var(--color-white);
+    --color-on-body: var(--color-gray-700); 
+    --color-surface: var(--color-white);
+    --color-surface-alt: var(--color-neutral-100);
+
+    --color-on-surface: var(--color-gray-700);
+    --color-on-surface-strong: var(--color-black);
+    
+    --color-primary: var(--color-indigo-600);
+    --color-on-primary: var(--color-white);
+    
+    --color-secondary: var(--color-neutral-700);
+    --color-on-secondary: var(--color-white);
+
+    --color-outline: var(--color-black);
+    --color-outline-strong: var(--color-black);
+
+    --color-info: var(--color-sky-300);
+    --color-on-info: var(--color-black);
+    
+    --color-success: var(--color-green-300);
+    --color-on-success: var(--color-black);
+    
+    --color-warning: var(--color-yellow-200);
+    --color-on-warning: var(--color-black);
+    
+    --color-danger: var(--color-red-300);
+    --color-on-danger: var(--color-black);
+}
+
+
+@variant dark {
+    --color-body: var(--color-gray-950);
+    --color-on-body: var(--color-gray-300); 
+
+    --color-surface: var(--color-gray-900);
+    --color-surface-alt: var(--color-neutral-900);
+    
+    --color-on-surface: var(--color-gray-300);
+    --color-on-surface-strong: var(--color-white);
+    
+    --color-primary: var(--color-indigo-500);
+    --color-on-primary: var(--color-white);
+    
+    --color-secondary: var(--color-neutral-300);
+    --color-on-secondary: var(--color-black);
+    
+    --color-outline: var(--color-white);
+    --color-outline-strong: var(--color-white);
+}

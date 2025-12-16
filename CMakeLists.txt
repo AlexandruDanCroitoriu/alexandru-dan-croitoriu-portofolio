@@ -47,6 +47,8 @@ set(SOURCES
 
     ${SOURCE_DIR}/003_WidgetDisplay/WidgetDisplay.cpp
 
+    ${SOURCE_DIR}/004_TailwindTheme/TailwindTheme.cpp
+
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

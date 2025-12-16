@@ -139,13 +139,28 @@ CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDi
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alex/alexandru-dan-croitoriu-portofolio/src/003_WidgetDisplay/WidgetDisplay.cpp -o CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.s
 
+CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/flags.make
+CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o: ../../src/004_TailwindTheme/TailwindTheme.cpp
+CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o -MF CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o.d -o CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o -c /home/alex/alexandru-dan-croitoriu-portofolio/src/004_TailwindTheme/TailwindTheme.cpp
+
+CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/alex/alexandru-dan-croitoriu-portofolio/src/004_TailwindTheme/TailwindTheme.cpp > CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.i
+
+CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/alex/alexandru-dan-croitoriu-portofolio/src/004_TailwindTheme/TailwindTheme.cpp -o CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.s
+
 # Object files for target alexandru_dan_croitoriu_portofolio
 alexandru_dan_croitoriu_portofolio_OBJECTS = \
 "CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/main.cpp.o" \
 "CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/000_Server/Server.cpp.o" \
 "CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/001_App/App.cpp.o" \
 "CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/002_Components/MonacoEditor.cpp.o" \
-"CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.o"
+"CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.o" \
+"CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o"
 
 # External object files for target alexandru_dan_croitoriu_portofolio
 alexandru_dan_croitoriu_portofolio_EXTERNAL_OBJECTS =
@@ -155,9 +170,10 @@ alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofoli
 alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/001_App/App.cpp.o
 alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/002_Components/MonacoEditor.cpp.o
 alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/003_WidgetDisplay/WidgetDisplay.cpp.o
+alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/004_TailwindTheme/TailwindTheme.cpp.o
 alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/build.make
 alexandru_dan_croitoriu_portofolio: CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable alexandru_dan_croitoriu_portofolio"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/alex/alexandru-dan-croitoriu-portofolio/build/debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable alexandru_dan_croitoriu_portofolio"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

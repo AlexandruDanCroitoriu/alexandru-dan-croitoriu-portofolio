@@ -236,4 +236,6 @@ CMakeFiles/alexandru_dan_croitoriu_portofolio.dir/src/001_App/App.cpp.o: \
  /home/alex/alexandru-dan-croitoriu-portofolio/src/003_WidgetDisplay/WidgetDisplay.h \
  /usr/local/include/Wt/WStackedWidget.h /usr/local/include/Wt/WMenu.h \
  /usr/local/include/Wt/WCompositeWidget.h \
- /usr/local/include/Wt/WMenuItem.h
+ /usr/local/include/Wt/WMenuItem.h \
+ /home/alex/alexandru-dan-croitoriu-portofolio/src/004_TailwindTheme/TailwindTheme.h \
+ /usr/local/include/Wt/WTheme.h /usr/local/include/Wt/WRandom.h

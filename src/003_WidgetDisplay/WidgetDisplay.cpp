@@ -6,7 +6,6 @@
 
 WidgetDisplay::WidgetDisplay()
 {
-
     auto nevigaiton = addNew<Wt::WContainerWidget>();
     
     // Create the stacked widget first
@@ -14,7 +13,9 @@ WidgetDisplay::WidgetDisplay()
     
     // Create the menu and pass the stacked widget to it
     menu_ = nevigaiton->addNew<Wt::WMenu>(stackedWidget_);
-
+    
+    addStyleClass("flex");
+    nevigaiton->addStyleClass("!border border-solid border-black");
     createMonacoEditorExample();
 }
 

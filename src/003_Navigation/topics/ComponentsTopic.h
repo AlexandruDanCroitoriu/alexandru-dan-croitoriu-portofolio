@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../GalleryTopic.h"
+#include "../NavigationTopic.h"
 #include <Wt/WWidget.h>
 #include <memory>
 
-class ComponentsTopic : public GalleryTopic
+class ComponentsTopic : public NavigationTopic
 {
 public:
     ComponentsTopic();

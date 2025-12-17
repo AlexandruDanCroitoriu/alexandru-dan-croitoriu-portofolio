@@ -7,11 +7,11 @@ namespace Wt {
     class WMenu;
 }
 
-class GalleryTopic : public Wt::WObject
+class NavigationTopic : public Wt::WObject
 {
 public:
-    GalleryTopic();
-    virtual ~GalleryTopic() = default;
+    NavigationTopic();
+    virtual ~NavigationTopic() = default;
 
     virtual void populateSubMenu(Wt::WMenu* menu) = 0;
 };

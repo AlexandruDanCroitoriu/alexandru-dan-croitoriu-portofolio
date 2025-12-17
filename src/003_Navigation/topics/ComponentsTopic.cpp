@@ -1,5 +1,5 @@
-#include "005_PersonalGalery/topics/ComponentsTopic.h"
-#include "005_PersonalGalery/DeferredWidget.h"
+#include "003_Navigation/topics/ComponentsTopic.h"
+#include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
 #include <Wt/WApplication.h>
@@ -22,15 +22,15 @@ void ComponentsTopic::populateSubMenu(Wt::WMenu* menu)
 std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
 {
     auto container = std::make_unique<Wt::WContainerWidget>();
-    container->addStyleClass("max-w-5xl mx-auto space-y-6");
+    container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
 
     // Title
-    auto title = container->addNew<Wt::WText>("<h2 class='text-3xl font-bold text-gray-800 mb-4'>Monaco Editor</h2>");
+    auto title = container->addNew<Wt::WText>("<h2 class='text-3xl font-bold text-gray-800 mb-2'>Monaco Editor</h2>");
     title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
     // Description
     auto description = container->addNew<Wt::WText>(
-        "<p class='text-gray-700 leading-relaxed mb-6'>"
+        "<p class='text-gray-700 leading-relaxed mb-2'>"
         "A feature-rich code editor component integrated with Wt, providing syntax highlighting, customizable themes, "
         "line wrapping, minimap toggle, read-only mode, and file operations. The editor supports multiple programming languages and "
         "offers a professional development experience with a familiar, modern interface."

@@ -11,7 +11,8 @@ public:
     DeferredWidget(Function f)
         : f_(f), loaded_(false)
     {
-        addStyleClass("deferred-widget"); // used for debugging when checking the doom in the browser
+        addStyleClass("deferred-widget h-screen overflow-y-auto"); // used for debugging when checking the doom in the browser
+        addStyleClass("[&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-gray-500 [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full"); // custom scrollbar styles
     }
 
 protected:

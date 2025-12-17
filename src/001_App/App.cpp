@@ -1,9 +1,10 @@
 #include "App.h"
 
 #include <Wt/WPushButton.h>
-#include "003_WidgetDisplay/WidgetDisplay.h"
 #include "004_TailwindTheme/TailwindTheme.h"
-#include "005_PersonalGalery/PersonalGalery.h"
+#include "003_Navigation/Navigation.h"
+
+#include <Wt/WTemplate.h>
 
 #include <Wt/WRandom.h>
 
@@ -17,6 +18,8 @@ App::App(const Wt::WEnvironment& env)
     // Load Monaco Editor loader from local static files
     require("/static/monaco/vs/loader.js");
     
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/Utils");
+
     // Load Tailwind Plus Elements
     // require("/static/theme/tailwindcss/tailwindplus/index.js");
     
@@ -42,7 +45,8 @@ void App::createApp()
     Wt::log("debug") << "App::createApp() - creating application UI";
 
     // root()->addNew<Wt::WPushButton>("Hello World");
+    // root()->addNew<Wt::WTemplate>(Wt::WString::tr("favicon.svg"));
 
     // root()->addNew<WidgetDisplay>();
-    root()->addNew<PersonalGalery>();
+    root()->addNew<Navigation>();
 }

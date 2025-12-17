@@ -1,16 +1,22 @@
 #pragma once
 
+#include "006_Auth/AuthWidget.h"
+
 #include <Wt/WContainerWidget.h>
 #include <Wt/WStackedWidget.h>
 #include <Wt/WMenu.h>
 #include <Wt/WPushButton.h>
+#include <Wt/WDialog.h>
+
+#include <memory>
 
 class NavigationTopic;
+class Session;
 
 class Navigation : public Wt::WContainerWidget
 {
 public:
-    Navigation();
+    Navigation(std::shared_ptr<Session> session);
 
 private:
     Wt::WStackedWidget* contentsStack_;
@@ -33,4 +39,10 @@ private:
     void openMenu();
     void closeMenu();
     void setActiveItem(Wt::WMenuItem* item);
+
+    std::shared_ptr<Session> session_;
+    Wt::WDialog* authDialog_;
+    AuthWidget* authWidget_;
+    Wt::WContainerWidget* authWrapper_;
+    void authChanged();
 };

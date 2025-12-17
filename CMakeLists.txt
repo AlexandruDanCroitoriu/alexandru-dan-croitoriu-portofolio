@@ -52,6 +52,15 @@ set(SOURCES
     ${SOURCE_DIR}/003_Navigation/topics/CvPortofolioTopic.cpp
 
     ${SOURCE_DIR}/004_TailwindTheme/TailwindTheme.cpp
+      
+    ${SOURCE_DIR}/005_Dbo/Session.cpp
+    ${SOURCE_DIR}/005_Dbo/Tables/User.cpp
+    ${SOURCE_DIR}/005_Dbo/Tables/Permission.cpp
+
+    
+    ${SOURCE_DIR}/006_Auth/AuthWidget.cpp
+    ${SOURCE_DIR}/006_Auth/RegistrationView.cpp
+    ${SOURCE_DIR}/006_Auth/UserDetailsModel.cpp
 
 
 )

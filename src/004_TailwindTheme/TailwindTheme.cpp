@@ -86,6 +86,15 @@ void TailwindTheme::init(Wt::WApplication *app) const
     //     app->addMetaHeader("viewport", "width=device-width, initial-scale=1");
     // }
 
+    // Define setValidationState function inline for form validation
+    std::string validationJs = WT_CLASS ".setValidationState=function(e,t,n,i,o,s){"
+        "var a=0!==(1&i),l=0!==(2&i);if(t){e.classList.remove(s);a&&e.classList.add(o)}"
+        "else{e.classList.remove(o);l&&e.classList.add(s)}"
+        "if(n){if(0!==(4&i)){e.setAttribute('title',n)}}"
+        "else{if(0!==(8&i)){e.removeAttribute('title')}}"
+    "};";
+    app->doJavaScript(validationJs);
+
     // Load Tailwind Plus Elements JavaScript as an ES module
     // WApplication::require() injects classic scripts only; Elements expects type="module".
     {
@@ -578,9 +587,6 @@ void TailwindTheme::applyValidationStyle(Wt::WWidget *widget,
                                             Wt::WFlags<Wt::ValidationStyleFlag> styles) const
 {
   Wt::WApplication *app = Wt::WApplication::instance();
-
-//   LOAD_JAVASCRIPT(app, "js/BootstrapValidate.js", "validate", wtjs1);
-//   LOAD_JAVASCRIPT(app, "js/BootstrapValidate.js", "setValidationState", wtjs2);
 
   if (app->environment().ajax()) {
     Wt::WStringStream js;

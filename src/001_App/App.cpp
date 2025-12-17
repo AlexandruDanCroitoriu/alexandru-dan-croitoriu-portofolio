@@ -12,13 +12,24 @@ App::App(const Wt::WEnvironment& env)
     : Wt::WApplication(env)
 {
     Wt::log("debug") << "App::App() - application starting";
+    
+    // Initialize database session
+    session_ = std::make_shared<Session>("portfolio.db");
     // Title
     setTitle("Alexandru Dan Croitoriu Portfolio");
     
     // Load Monaco Editor loader from local static files
     require("/static/monaco/vs/loader.js");
     
+
+    // Load utility XML resources (favicon)
     wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/Utils");
+
+    // Load custom Auth system template resources
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth-login");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth-strings");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-registration-view");
 
     // Load Tailwind Plus Elements
     // require("/static/theme/tailwindcss/tailwindplus/index.js");
@@ -27,14 +38,8 @@ App::App(const Wt::WEnvironment& env)
 
     // setCssTheme("polished");
     // setCssTheme("");
-
+    
     setTheme(std::make_shared<TailwindTheme>());
-
-    // #ifdef DEBUG
-    //     useStyleSheet("static/css/tailwind.css?v=" + Wt::WRandom::generateId());
-    // #else
-    //     useStyleSheet("static/css/tailwind.minify.css");
-    // #endif
 
     createApp();
 }
@@ -48,5 +53,5 @@ void App::createApp()
     // root()->addNew<Wt::WTemplate>(Wt::WString::tr("favicon.svg"));
 
     // root()->addNew<WidgetDisplay>();
-    root()->addNew<Navigation>();
+    root()->addNew<Navigation>(session());
 }

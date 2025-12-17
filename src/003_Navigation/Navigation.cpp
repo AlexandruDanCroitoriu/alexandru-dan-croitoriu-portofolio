@@ -2,14 +2,18 @@
 #include "003_Navigation/NavigationTopic.h"
 #include "003_Navigation/topics/ComponentsTopic.h"
 #include "003_Navigation/topics/CvPortofolioTopic.h"
+#include "005_Dbo/Session.h"
 
 #include <Wt/WText.h>
 #include <Wt/WAnimation.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WApplication.h>
+#include <Wt/Auth/Login.h>
+#include <Wt/WPopupMenu.h>
+#include <Wt/WPushButton.h>
 
-Navigation::Navigation()
-    : menuOpen_(false), currentSelectedItem_(nullptr)
+Navigation::Navigation(std::shared_ptr<Session> session)
+    : session_(session), menuOpen_(false), currentSelectedItem_(nullptr)
 {
     // Apply main container styling
     addStyleClass("flex flex-row h-screen bg-gray-100");
@@ -87,6 +91,33 @@ Navigation::Navigation()
 
     addDirectItemToMenu(mainMenu_, "Personal CV/Portfolio", std::move(cvWidget), "");
     addToMenu(mainMenu_, "Components", std::make_unique<ComponentsTopic>());
+
+    authDialog_ = wApp->root()->addNew<Wt::WDialog>("");
+    authDialog_->keyWentDown().connect([=](Wt::WKeyEvent e) {
+        wApp->globalKeyWentDown().emit(e); // Emit the global key event
+    });
+    authDialog_->setTitleBarEnabled(false);
+    authDialog_->setClosable(false);
+    authDialog_->setModal(true);
+    authDialog_->escapePressed().connect([this]() {
+        if (authDialog_ != nullptr) {
+            authDialog_->hide();
+        }
+    });
+    authDialog_->setStyleClass("absolute top-0 left-0 right-0 bottom-0 w-screen h-screen bg-gray-900");
+    authDialog_->contents()->setStyleClass("p-4 bg-gray-900 text-white");
+
+    authWidget_ = authDialog_->contents()->addWidget(std::make_unique<AuthWidget>(session_));
+
+    authWrapper_ = sidebar_->addNew<Wt::WContainerWidget>();
+    authWrapper_->addStyleClass("mt-auto m-2 border-t pt-2 border-gray-700");
+    
+    session_->login().changed().connect(this, &Navigation::authChanged);
+    authWidget_->processEnvironment();
+    if (!session_->login().loggedIn()) {
+        session_->login().changed().emit();
+    }
+    
 }
 
 void Navigation::toggleMenu()
@@ -236,3 +267,35 @@ Wt::WMenuItem* Navigation::addDirectItemToMenu(Wt::WMenu* menu,
     
     return item;
 }
+
+void Navigation::authChanged()
+{
+    std::cout << "\n\n Auth changed, logged in: " << session_->login().loggedIn() << "\n\n";
+    if (!session_->login().loggedIn()) {
+        // User is logged out - login button that shows the auth dialog
+        authWrapper_->clear();
+        auto loginButton = authWrapper_->addNew<Wt::WPushButton>("Login");
+        loginButton->addStyleClass("w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded");
+        loginButton->clicked().connect([this]() {
+            if (authDialog_ != nullptr) {
+                authDialog_->show();
+            }
+        });
+    } else {
+        authDialog_->hide();
+        // User is logged in - show button that opens popup menu with menu items like "settings", "logout", etc.
+        authWrapper_->clear();
+        auto userMenu = std::make_unique<Wt::WPopupMenu>(contentsStack_);
+        userMenu->addStyleClass("bg-gray-800 text-white rounded-md shadow-lg");
+        auto settingsItem = userMenu->addItem("Settings");
+        settingsItem->addStyleClass("px-4 py-2 hover:bg-gray-700 block w-full");
+        settingsItem->clicked().connect([this]() {
+            // Open settings dialog or page
+        });
+        auto userBtn = authWrapper_->addNew<Wt::WPushButton>(session_->login().user().identity(Wt::Auth::Identity::LoginName));
+        userBtn->addStyleClass("w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded");
+        userBtn->setMenu(std::move(userMenu));
+
+    }
+}
+

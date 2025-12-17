@@ -4,7 +4,7 @@
 
 int main(int argc, char **argv)
 {
-    Wt::log("info") << "Starting Wt server...";
+    Wt::log("debug") << "Starting Wt server...";
 
     Server server(argc, argv);
 

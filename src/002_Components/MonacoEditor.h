@@ -39,6 +39,12 @@ public:
     std::string getUnsavedText() { return unsaved_text_; }
     
     /**
+     * @brief Gets the current saved text content
+     * @return String containing the saved text
+     */
+    std::string getSavedText() { return current_text_; }
+    
+    /**
      * @brief Marks the current text as saved (synchronizes current and unsaved text)
      */
     void textSaved();

@@ -14,7 +14,10 @@ PersonalGalery::PersonalGalery()
     // Create sidebar
     sidebar_ = addNew<Wt::WContainerWidget>();
     sidebar_->addStyleClass("w-64 bg-gray-800 text-white flex flex-col transition-all duration-300");
-    sidebar_->addStyleClass("fixed md:static inset-y-0 left-0 z-50");
+    // Keep sidebar fixed on all breakpoints so it doesn't scroll with page
+    sidebar_->addStyleClass("fixed inset-y-0 left-0 z-50");
+    // Ensure the sidebar keeps viewport height and scrolls independently
+    sidebar_->addStyleClass("h-screen overflow-y-auto");
     sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
     sidebar_->addStyleClass("-translate-x-full md:translate-x-0"); // Hidden on mobile by default
 
@@ -26,7 +29,8 @@ PersonalGalery::PersonalGalery()
 
     // Create main content area container
     auto contentArea = addNew<Wt::WContainerWidget>();
-    contentArea->addStyleClass("flex-1 flex flex-col relative");
+    // Add left margin on medium+ screens to account for fixed 16rem sidebar
+    contentArea->addStyleClass("flex-1 flex flex-col relative md:ml-64");
 
     // Create mobile menu toggle button
     menuToggleButton_ = contentArea->addNew<Wt::WPushButton>();
@@ -40,9 +44,17 @@ PersonalGalery::PersonalGalery()
 
     // Create menu
     mainMenu_ = sidebar_->addNew<Wt::WMenu>(contentsStack_);
-    mainMenu_->addStyleClass("flex flex-col space-y-1 p-2 flex-1 overflow-y-auto");
-    mainMenu_->setInternalPathEnabled();
-    mainMenu_->setInternalBasePath("/gallery");
+    // Fill available sidebar height and scroll independently
+    mainMenu_->addStyleClass("flex flex-col space-y-1 p-2 flex-1 h-full overflow-y-auto");
+    // Don't enable internal paths for main menu - only submenus have paths
+    
+    // Auto-select first submenu item when main menu item is selected
+    mainMenu_->itemSelected().connect([this](Wt::WMenuItem* item) {
+        if (item && item->menu() && item->menu()->count() > 0) {
+            // Select first submenu item, which will update the URL path
+            item->menu()->select(0);
+        }
+    });
 
     // Create overlay for mobile
     contentsCover_ = addNew<Wt::WContainerWidget>();
@@ -58,12 +70,10 @@ PersonalGalery::PersonalGalery()
     // Populate menu with topics
     addToMenu(mainMenu_, "Components", std::make_unique<ComponentsTopic>());
 
-    // Select first menu item if nothing selected
-    if (mainMenu_->currentIndex() < 0) {
-        mainMenu_->select(0);
-        if (mainMenu_->itemAt(0)->menu()) {
-            mainMenu_->itemAt(0)->menu()->select(0);
-        }
+    // Select first menu item to trigger auto-select of first submenu
+    mainMenu_->select(0);
+    if (mainMenu_->itemAt(0)->menu()) {
+        mainMenu_->itemAt(0)->menu()->select(0);
     }
 }
 
@@ -133,8 +143,8 @@ Wt::WMenuItem* PersonalGalery::addToMenu(Wt::WMenu* menu,
     // Close mobile menu when submenu item selected
     subMenu->itemSelected().connect(this, &PersonalGalery::closeMenu);
     
-    // Enable internal paths
-    subMenu->setInternalPathEnabled("/" + item->pathComponent());
+    // Enable internal paths for submenu only (not main menu)
+    subMenu->setInternalPathEnabled(item->pathComponent() + "/");
     
     // Populate submenu
     topicPtr->populateSubMenu(subMenu);

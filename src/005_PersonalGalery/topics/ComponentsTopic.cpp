@@ -2,6 +2,8 @@
 #include "005_PersonalGalery/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
+#include <Wt/WApplication.h>
+
 #include <Wt/WMenu.h>
 #include <Wt/WText.h>
 #include <Wt/WContainerWidget.h>
@@ -36,23 +38,15 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     description->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
     // Example section title
-    auto exampleTitle = container->addNew<Wt::WText>("<h3 class='text-xl font-bold text-gray-800 mt-6 mb-4'>Example</h3>");
+    auto exampleTitle = container->addNew<Wt::WText>("<h3 class='font-semibold text-gray-800'>Example</h3>");
     exampleTitle->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+    exampleTitle->addStyleClass("mb-0");
 
     // Example container with border
     auto exampleContainer = container->addNew<Wt::WContainerWidget>();
-    exampleContainer->addStyleClass("border border-gray-300 rounded-lg p-6 bg-white mb-6");
+    exampleContainer->addStyleClass("border border-gray-300 rounded-lg bg-white mb-6");
 
-    // Live editor instance
-    auto editor = exampleContainer->addNew<MonacoEditor>("css");
-    editor->setHeight(Wt::WLength(400, Wt::LengthUnit::Pixel));
-    editor->setReadOnly(false); // ensure unlocked by default
-
-    // Unsaved changes indicator
-    auto statusIndicator = exampleContainer->addNew<Wt::WText>("<div class='text-right text-sm font-semibold text-green-600 mt-3 mb-4'>✓ Saved</div>");
-    statusIndicator->setTextFormat(Wt::TextFormat::UnsafeXHTML);
-
-    // Control panel below editor
+    // Control panel above editor
     auto controlPanel = exampleContainer->addNew<Wt::WContainerWidget>();
     controlPanel->addStyleClass("flex flex-wrap gap-3 pt-4 px-4 py-3 bg-gray-100 rounded-lg border border-gray-200");
 
@@ -72,42 +66,33 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     auto minimapBtn = controlPanel->addNew<Wt::WPushButton>("📊 Minimap");
     minimapBtn->addStyleClass("px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
 
-    // Set initial CSS content
-    std::string initialCSS = 
-        "/* Monaco Editor Example */\n"
-        "body {\n"
-        "  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;\n"
-        "  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n"
-        "  margin: 0;\n"
-        "  padding: 20px;\n"
-        "}\n"
-        "\n"
-        ".editor-demo {\n"
-        "  background: white;\n"
-        "  border-radius: 8px;\n"
-        "  padding: 20px;\n"
-        "  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);\n"
-        "}";
-    
-    // Store initial content for change detection
-    auto lastSavedContent = std::make_shared<std::string>(initialCSS);
-    
+    // Save button / status indicator
+    auto saveBtn = controlPanel->addNew<Wt::WPushButton>("✓ Saved");
+    saveBtn->addStyleClass("px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold transition duration-200 opacity-50 cursor-not-allowed");
+    saveBtn->setEnabled(false); // Initially disabled since no changes
+
+    // Live editor instance
+    auto editor = exampleContainer->addNew<MonacoEditor>("css");
+    editor->setHeight(Wt::WLength(400, Wt::LengthUnit::Pixel));
+    editor->setReadOnly(false); // ensure unlocked by default
+
     // Theme toggle
-    bool darkMode = false;
-    themeBtn->clicked().connect([themeBtn, &darkMode]() {
-        darkMode = !darkMode;
-        MonacoEditor::setDarkTheme(darkMode);
-        themeBtn->setText(darkMode ? "☀️ Light Mode" : "🌙 Dark Mode");
-        themeBtn->removeStyleClass(darkMode ? "bg-slate-700 hover:bg-slate-800" : "bg-amber-700 hover:bg-amber-800");
-        themeBtn->addStyleClass(darkMode ? "bg-amber-700 hover:bg-amber-800" : "bg-slate-700 hover:bg-slate-800");
+    auto darkMode = std::make_shared<bool>(false);
+    themeBtn->clicked().connect([themeBtn, darkMode]() {
+        *darkMode = !*darkMode;
+        wApp->log("debug") << "Toggling theme, now darkMode=" << *darkMode;
+        MonacoEditor::setDarkTheme(*darkMode);
+        themeBtn->setText(*darkMode ? "☀️ Light Mode" : "🌙 Dark Mode");
+        themeBtn->removeStyleClass(*darkMode ? "bg-slate-700 hover:bg-slate-800" : "bg-amber-700 hover:bg-amber-800");
+        themeBtn->addStyleClass(*darkMode ? "bg-amber-700 hover:bg-amber-800" : "bg-slate-700 hover:bg-slate-800");
     });
 
     // Read-only toggle
-    bool isReadOnly = false;
-    readOnlyBtn->clicked().connect([readOnlyBtn, editor, &isReadOnly]() {
-        isReadOnly = !isReadOnly;
-        editor->setReadOnly(isReadOnly);
-        if (!isReadOnly) {
+    auto isReadOnly = std::make_shared<bool>(false);
+    readOnlyBtn->clicked().connect([readOnlyBtn, editor, isReadOnly]() {
+        *isReadOnly = !*isReadOnly;
+        editor->setReadOnly(*isReadOnly);
+        if (!*isReadOnly) {
             editor->resetLayout(); // ensure unlock applies immediately
         }
 
@@ -115,49 +100,64 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
             "px-4 py-2 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg ";
         const std::string onCls = "bg-red-700 hover:bg-red-800";
         const std::string offCls = "bg-slate-700 hover:bg-slate-800";
-        readOnlyBtn->setStyleClass(base + (isReadOnly ? onCls : offCls));
-        readOnlyBtn->setText(isReadOnly ? "🔓 Edit" : "🔒 Read-Only");
+        readOnlyBtn->setStyleClass(base + (*isReadOnly ? onCls : offCls));
+        readOnlyBtn->setText(*isReadOnly ? "🔓 Edit" : "🔒 Read-Only");
     });
 
     // Line wrap toggle
-    bool lineWrapOn = true;
-    lineWrapBtn->clicked().connect([lineWrapBtn, editor, &lineWrapOn]() {
-        lineWrapOn = !lineWrapOn;
+    auto lineWrapOn = std::make_shared<bool>(true);
+    lineWrapBtn->clicked().connect([lineWrapBtn, editor, lineWrapOn]() {
+        *lineWrapOn = !*lineWrapOn;
         editor->toggleLineWrap();
-        lineWrapBtn->removeStyleClass(lineWrapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-emerald-700 hover:bg-emerald-800");
-        lineWrapBtn->addStyleClass(lineWrapOn ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-700 hover:bg-slate-800");
-        lineWrapBtn->setText(lineWrapOn ? "↳ Line Wrap" : "→ No Wrap");
+        lineWrapBtn->removeStyleClass(*lineWrapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-emerald-700 hover:bg-emerald-800");
+        lineWrapBtn->addStyleClass(*lineWrapOn ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-700 hover:bg-slate-800");
+        lineWrapBtn->setText(*lineWrapOn ? "↳ Line Wrap" : "→ No Wrap");
     });
 
     // Minimap toggle
-    bool minimapOn = true;
-    minimapBtn->clicked().connect([minimapBtn, editor, &minimapOn]() {
-        minimapOn = !minimapOn;
+    auto minimapOn = std::make_shared<bool>(true);
+    minimapBtn->clicked().connect([minimapBtn, editor, minimapOn]() {
+        *minimapOn = !*minimapOn;
         editor->toggleMinimap();
-        minimapBtn->removeStyleClass(minimapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-indigo-700 hover:bg-indigo-800");
-        minimapBtn->addStyleClass(minimapOn ? "bg-indigo-700 hover:bg-indigo-800" : "bg-slate-700 hover:bg-slate-800");
-        minimapBtn->setText(minimapOn ? "📊 Minimap" : "📋 No Minimap");
+        minimapBtn->removeStyleClass(*minimapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-indigo-700 hover:bg-indigo-800");
+        minimapBtn->addStyleClass(*minimapOn ? "bg-indigo-700 hover:bg-indigo-800" : "bg-slate-700 hover:bg-slate-800");
+        minimapBtn->setText(*minimapOn ? "📊 Minimap" : "📋 No Minimap");
     });
 
-    // Monitor unsaved changes
-    editor->availableSave().connect([statusIndicator, lastSavedContent, editor]() {
+    // Monitor unsaved changes and update button appearance
+    editor->availableSave().connect([saveBtn, editor]() {
         std::string currentText = editor->getUnsavedText();
-        if (currentText != *lastSavedContent) {
-            statusIndicator->setText("<span class='ml-auto text-sm font-semibold text-orange-600'>⚠ Unsaved Changes</span>");
+        std::string savedText = editor->getSavedText();
+        if (currentText != savedText) {
+            saveBtn->setText("💾 Save");
+            saveBtn->setStyleClass("px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
+            saveBtn->setEnabled(true);
         } else {
-            statusIndicator->setText("<span class='ml-auto text-sm font-semibold text-green-600'>✓ Saved</span>");
+            saveBtn->setText("✓ Saved");
+            saveBtn->setStyleClass("px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold transition duration-200 opacity-50 cursor-not-allowed");
+            saveBtn->setEnabled(false);
+        }
+    });
+
+    // Save button click handler
+    saveBtn->clicked().connect([saveBtn, editor]() {
+        if (editor->getUnsavedText() != editor->getSavedText()) {
+            editor->textSaved();
+            saveBtn->setText("✓ Saved");
+            saveBtn->setStyleClass("px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold transition duration-200 opacity-50 cursor-not-allowed");
+            saveBtn->setEnabled(false);
         }
     });
 
     // Source code section
-    auto sourceTitle = container->addNew<Wt::WText>("<h4 class='font-semibold text-gray-800 mb-2'>Code Example</h4>");
+    auto sourceTitle = container->addNew<Wt::WText>("<h4 class='font-semibold text-gray-800'>Code Example</h4>");
     sourceTitle->setTextFormat(Wt::TextFormat::UnsafeXHTML);
-
+    sourceTitle->addStyleClass("mb-0");
     auto sourceCode = container->addNew<Wt::WText>(
         "<div class='bg-gray-800 border border-gray-700 rounded-lg'>"
         "<pre class='p-4 overflow-x-auto text-sm text-gray-100'>"
         "<span style='color: #d19a66;'>#include</span> &lt;<span style='color: #56b6c2;'>Wt/WContainerWidget.h</span>&gt;\n"
-        "<span style='color: #d19a66;'>#include</span> &lt;<span style='color: #56b6c2;'>\"002_Components/MonacoEditor.h\"</span>&gt;\n\n"
+        "<span style='color: #d19a66;'>#include</span><span style='color: #56b6c2;'>\"002_Components/MonacoEditor.h\"</span>\n\n"
         "<span style='color: #61afef;'>auto</span> editor = container-&gt;<span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>MonacoEditor</span>&gt;(<span style='color: #98c379;'>\"css\"</span>);\n"
         "editor-&gt;<span style='color: #61afef;'>setHeight</span>(<span style='color: #e06c75;'>Wt::WLength</span>(<span style='color: #d19a66;'>400</span>, <span style='color: #e06c75;'>Wt::LengthUnit::Pixel</span>));\n\n"
         "<span style='color: #7d8590;'>// Features:</span>\n"

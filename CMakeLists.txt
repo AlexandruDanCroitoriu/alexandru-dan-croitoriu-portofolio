@@ -49,6 +49,11 @@ set(SOURCES
 
     ${SOURCE_DIR}/004_TailwindTheme/TailwindTheme.cpp
 
+  # PersonalGalery sources
+  ${SOURCE_DIR}/005_PersonalGalery/PersonalGalery.cpp
+  ${SOURCE_DIR}/005_PersonalGalery/GalleryTopic.cpp
+  ${SOURCE_DIR}/005_PersonalGalery/topics/ComponentsTopic.cpp
+
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

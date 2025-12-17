@@ -112,8 +112,23 @@ void MonacoEditor::textSaved()
     available_save_.emit();
 }
 
-void MonacoEditor::setReadOnly(bool readOnly) { 
-    doJavaScript("setTimeout(function() { if(window." + editor_js_var_name_ + ") window." + editor_js_var_name_ + ".updateOptions({ readOnly: " + std::to_string(readOnly) + " }); }, 200);");
+void MonacoEditor::setReadOnly(bool readOnly) {
+    // Try repeatedly until the editor instance is ready to ensure the flag flips.
+    doJavaScript(R"(
+        (function(){
+            var attempts = 0;
+            var setRO = function(){
+                var ed = window.)" + editor_js_var_name_ + R"(;
+                if(ed){
+                    ed.updateOptions({ readOnly: )" + std::string(readOnly ? "true" : "false") + R"( });
+                } else if(attempts < 10) {
+                    attempts++;
+                    setTimeout(setRO, 100);
+                }
+            };
+            setRO();
+        })();
+    )");
 }
 
 bool MonacoEditor::unsavedChanges()

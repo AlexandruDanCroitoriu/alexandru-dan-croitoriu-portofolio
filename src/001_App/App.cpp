@@ -3,6 +3,7 @@
 #include <Wt/WPushButton.h>
 #include "003_WidgetDisplay/WidgetDisplay.h"
 #include "004_TailwindTheme/TailwindTheme.h"
+#include "005_PersonalGalery/PersonalGalery.h"
 
 #include <Wt/WRandom.h>
 
@@ -40,7 +41,8 @@ void App::createApp()
 {
     Wt::log("debug") << "App::createApp() - creating application UI";
 
-    root()->addNew<Wt::WPushButton>("Hello World");
+    // root()->addNew<Wt::WPushButton>("Hello World");
 
-    root()->addNew<WidgetDisplay>();
+    // root()->addNew<WidgetDisplay>();
+    root()->addNew<PersonalGalery>();
 }

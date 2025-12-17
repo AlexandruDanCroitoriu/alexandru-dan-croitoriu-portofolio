@@ -528,7 +528,7 @@
            dynamically manipulate rules in this stylesheet, and will
            no longer work properly when inline-css is disabled.
           -->
-        <inline-css>true</inline-css>
+        <inline-css>false</inline-css>
 
         <!-- The timeout before showing the loading indicator.
 
@@ -689,9 +689,10 @@
         -->
         <head-matter user-agent=".*MSIE.*">
           <meta name="robots" content="noindex" />
+        </head-matter>
+        <head-matter>
           <meta name="viewport" content="width=device-width, initial-scale=1" />
         </head-matter>
-
         <!-- Configure default headers for HTTP responses
 
           Headers required for security of functionality can be added here,

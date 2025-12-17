@@ -64,7 +64,7 @@
       </trusted-proxies>
     </trusted-proxy-config>
 
-    <inline-css>true</inline-css>
+    <inline-css>false</inline-css>
 
     <indicator-timeout>500</indicator-timeout>
 
@@ -102,6 +102,8 @@
 
     <head-matter user-agent=".*MSIE.*">
       <meta name="robots" content="noindex" />
+    </head-matter>
+    <head-matter>
       <meta name="viewport" content="width=device-width, initial-scale=1" />
     </head-matter>
 

@@ -1,6 +1,7 @@
 #include "003_WidgetDisplay/WidgetDisplay.h"
 
 #include "002_Components/MonacoEditor.h"
+#include "005_PersonalGalery/PersonalGalery.h"
 
 #include <Wt/WText.h>
 
@@ -17,6 +18,10 @@ WidgetDisplay::WidgetDisplay()
     addStyleClass("flex");
     nevigaiton->addStyleClass("!border border-solid border-black");
     createMonacoEditorExample();
+
+    // Add Personal Gallery demo page
+    auto personalGalery = std::make_unique<PersonalGalery>();
+    menu_->addItem("Personal Gallery", std::move(personalGalery));
 }
 
 void WidgetDisplay::createMonacoEditorExample()

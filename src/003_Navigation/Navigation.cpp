@@ -2,6 +2,10 @@
 #include "003_Navigation/NavigationTopic.h"
 #include "003_Navigation/topics/ComponentsTopic.h"
 #include "003_Navigation/topics/CvPortofolioTopic.h"
+#include "003_Navigation/topics/BlogTopic.h"
+#include "003_Navigation/topics/NewPostTopic.h"
+#include "003_Navigation/topics/EditPostTopic.h"
+#include "003_Navigation/topics/PostDetailTopic.h"
 #include "003_Navigation/topics/UserSettingsTopic.h"
 #include "003_Navigation/topics/NotFoundTopic.h"
 #include "003_Navigation/topics/NotAuthorizedTopic.h"
@@ -87,17 +91,15 @@ void Navigation::setUI()
     menuToggleButton_->setText("☰");
     menuToggleButton_->clicked().connect(this, &Navigation::toggleMenu);
 
-    // Create logo/title area using WTemplate
-    auto logoArea = sidebar_->addNew<Wt::WTemplate>();
+    // Create logo/title area using direct text (avoid SVG template which causes Magick crash)
+    auto logoArea = sidebar_->addNew<Wt::WContainerWidget>();
     logoArea->addStyleClass("relative h-fit flex items-center pb-4 shrink-0 border-b border-gray-700");
-    logoArea->setTemplateText(
-        "<div class=\"w-12 font-white text-white\">${tr:favicon.svg class=\"\"}</div>"
-        "<div class=\"mx-auto\">"
-        "  <div class=\"font-bold tracking-wide text-xl\">Alexandru Dan</div>"
-        "  <div class=\"font-bold tracking-wide text-xl\">Croitoriu</div>"
-        "</div>"
-    );
-    logoArea->addFunction("tr", &Wt::WTemplate::Functions::tr);
+    
+    auto logoDirDiv = logoArea->addNew<Wt::WContainerWidget>();
+    logoDirDiv->addStyleClass("mx-auto");
+    logoDirDiv->addNew<Wt::WText>("Alexandru Dan")->addStyleClass("font-bold tracking-wide text-xl");
+    logoDirDiv->addNew<Wt::WBreak>();
+    logoDirDiv->addNew<Wt::WText>("Croitoriu")->addStyleClass("font-bold tracking-wide text-xl");
 
     // Create stacked widget for content
     contentsStack_ = contentsArea_->addNew<Wt::WStackedWidget>();
@@ -164,13 +166,53 @@ void Navigation::setupRoutes()
     // Topics instances captured by value in route lambdas
     auto cvTopic = std::make_shared<CvPortofolioTopic>();
     auto components = std::make_shared<ComponentsTopic>();
+    auto blogTopic = std::make_shared<BlogTopic>(session_);
     auto userSettings = std::make_shared<UserSettingsTopic>(session_);
     auto notFound = std::make_shared<NotFoundTopic>();
     auto notAuthorized = std::make_shared<NotAuthorizedTopic>();
+    auto newPostTopic = std::make_shared<NewPostTopic>(session_);
 
     routes_["/"] = [cvTopic]() {
         return cvTopic->createCvPage();
     };
+    routes_["/portfolio/blog"] = [blogTopic]() {
+        return blogTopic->createBlogPage();
+    };
+    routes_["/portfolio/blog/new"] = [this, newPostTopic, notAuthorized]() {
+        // Admin-only route
+        // Check BLOG_ADMIN permission
+        dbo::Transaction t(*session_);
+        auto user = session_->user();
+        auto perms = session_->find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
+        bool isAdmin = user && !perms.empty() && user->hasPermission(perms.front());
+        if (!isAdmin) {
+            return notAuthorized->createNotAuthorizedPage();
+        }
+        return newPostTopic->createNewPostPage();
+    };
+    pathPatterns_.push_back({
+        std::regex("^/portfolio/blog/post/([^/]+)$"),
+        [this](const std::smatch& match) -> std::unique_ptr<Wt::WWidget> {
+            std::string slug = match[1].str();
+            auto postDetail = std::make_shared<PostDetailTopic>(session_, slug);
+            return postDetail->createPostDetailPage();
+        }
+    });
+    pathPatterns_.push_back({
+        std::regex("^/portfolio/blog/post/([^/]+)/edit$"),
+        [this, notAuthorized](const std::smatch& match) -> std::unique_ptr<Wt::WWidget> {
+            dbo::Transaction t(*session_);
+            auto user = session_->user();
+            auto perms = session_->find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
+            bool isAdmin = user && !perms.empty() && user->hasPermission(perms.front());
+            if (!isAdmin) {
+                return notAuthorized->createNotAuthorizedPage();
+            }
+            std::string slug = match[1].str();
+            auto editTopic = std::make_shared<EditPostTopic>(session_, slug);
+            return editTopic->createEditPostPage();
+        }
+    });
     routes_["/components/monaco"] = [components]() {
         return components->createMonacoEditorDemo();
     };
@@ -204,6 +246,10 @@ void Navigation::buildSidebar()
 
     // Top-level links
     makeAnchor(navList_, "Personal CV/Portfolio", "/");
+    // Nested under CV/Portfolio
+    auto portfolioSection = navList_->addNew<Wt::WContainerWidget>();
+    portfolioSection->addStyleClass("flex flex-col space-y-1 pl-4 mt-1");
+    makeAnchor(portfolioSection, "Blog", "/portfolio/blog");
 
     // Section: Components
     auto sectionHeader = navList_->addNew<Wt::WText>("<div class='px-3 pt-3 text-gray-400 text-xs uppercase tracking-wide'>Components</div>");
@@ -244,38 +290,56 @@ void Navigation::navigateTo(const std::string& rawPath)
     std::string path = rawPath;
     if (path.empty()) path = "/";
     
-    auto it = routes_.find(path);
+    // Strip query parameters for route matching (but keep them in URL for widgets to read)
+    std::string pathWithoutQuery = path;
+    size_t queryPos = path.find('?');
+    if (queryPos != std::string::npos) {
+        pathWithoutQuery = path.substr(0, queryPos);
+    }
     
-    // Check if path is known
-    if (it == routes_.end()) {
-        // Path not found: render not-found page WITHOUT changing the URL
-        *lastUnknownPath_ = path;
-        auto notFoundIt = routes_.find("/not-found");
-        if (notFoundIt != routes_.end()) {
-            contentsStack_->clear();
-            contentsStack_->addWidget(notFoundIt->second());
-            markActive("");  // Don't highlight any anchor for 404
+    auto it = routes_.find(pathWithoutQuery);
+    
+    // Check exact routes first
+    if (it != routes_.end()) {
+        // Check if path requires auth
+        bool requiresAuth = authRequiredRoutes_.count(pathWithoutQuery) && authRequiredRoutes_[pathWithoutQuery];
+        if (requiresAuth && !session_->login().loggedIn()) {
+            // Render not-authorized page WITHOUT changing the URL
+            auto notAuthIt = routes_.find("/not-authorized");
+            if (notAuthIt != routes_.end()) {
+                contentsStack_->clear();
+                contentsStack_->addWidget(notAuthIt->second());
+                markActive("");  // Don't highlight any anchor for 403
+            }
+            return;
         }
+        
+        // Route found and authorized: render it
+        contentsStack_->clear();
+        contentsStack_->addWidget(it->second());
+        markActive(pathWithoutQuery);
         return;
     }
     
-    // Check if path requires auth
-    bool requiresAuth = authRequiredRoutes_.count(path) && authRequiredRoutes_[path];
-    if (requiresAuth && !session_->login().loggedIn()) {
-        // Render not-authorized page WITHOUT changing the URL
-        auto notAuthIt = routes_.find("/not-authorized");
-        if (notAuthIt != routes_.end()) {
+    // Try pattern-based routes
+    for (const auto& pattern : pathPatterns_) {
+        std::smatch match;
+        if (std::regex_match(pathWithoutQuery, match, pattern.pattern)) {
             contentsStack_->clear();
-            contentsStack_->addWidget(notAuthIt->second());
-            markActive("");  // Don't highlight any anchor for 403
+            contentsStack_->addWidget(pattern.factory(match));
+            markActive("");  // Don't highlight sidebar for dynamic paths
+            return;
         }
-        return;
     }
     
-    // Route found and authorized: render it
-    contentsStack_->clear();
-    contentsStack_->addWidget(it->second());
-    markActive(path);
+    // Path not found: render not-found page WITHOUT changing the URL
+    *lastUnknownPath_ = path;
+    auto notFoundIt = routes_.find("/not-found");
+    if (notFoundIt != routes_.end()) {
+        contentsStack_->clear();
+        contentsStack_->addWidget(notFoundIt->second());
+        markActive("");  // Don't highlight any anchor for 404
+    }
 }
 
 void Navigation::authChanged()

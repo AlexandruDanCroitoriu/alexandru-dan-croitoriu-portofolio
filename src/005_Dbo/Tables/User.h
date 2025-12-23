@@ -34,6 +34,4 @@ public:
 private:
 };
 
-
-
 DBO_EXTERN_TEMPLATES(User)

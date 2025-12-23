@@ -1,5 +1,8 @@
 #include "005_Dbo/Session.h"
 #include "005_Dbo/Tables/Permission.h"
+#include "005_Dbo/Tables/Post.h"
+#include "005_Dbo/Tables/Comment.h"
+#include "005_Dbo/Tables/Tag.h"
 #include "000_Server/Server.h"
 
 #include <Wt/Dbo/SqlConnection.h>
@@ -80,6 +83,9 @@ Session::Session(const std::string &sqliteDb)
 
   mapClass<User>("user");
   mapClass<Permission>("permission");
+  mapClass<Post>("post");
+  mapClass<Comment>("comment");
+  mapClass<Tag>("tag");
   mapClass<AuthInfo>("auth_info");
   mapClass<AuthInfo::AuthIdentityType>("auth_identity");
   mapClass<AuthInfo::AuthTokenType>("auth_token");
@@ -169,58 +175,192 @@ Wt::Dbo::ptr<User> addUser(Wt::Dbo::Session& session, UserDatabase& users, const
 
 void Session::createInitialData()
 {
-  // Create STYLUS permission if it doesn't exist
+  // Ensure STYLUS and BLOG_ADMIN permissions exist
   {
     Wt::Dbo::Transaction t(*this);
-    
+
     Wt::Dbo::ptr<Permission> stylusPermission = find<Permission>()
       .where("name = ?")
       .bind("STYLUS");
-    
     if (!stylusPermission) {
       stylusPermission = add(std::make_unique<Permission>("STYLUS"));
       Wt::log("info") << "Created STYLUS permission.";
     }
-    
-    t.commit();
-  }
-  
-  // Check if admin user already exists by querying auth_identity table
-  {
-    Wt::Dbo::Transaction t(*this);
-    
-    Wt::Dbo::ptr<AuthInfo::AuthIdentityType> existingIdentity = 
-      find<AuthInfo::AuthIdentityType>()
-      .where("provider = ? AND identity = ?")
-      .bind(Wt::Auth::Identity::LoginName)
-      .bind("maxuli");
-    
-    if (existingIdentity) {
-      Wt::log("info") << "Admin user 'maxuli' already exists, skipping creation.";
-      t.commit();
-      return;
+
+    Wt::Dbo::ptr<Permission> blogAdminPermission = find<Permission>()
+      .where("name = ?")
+      .bind("BLOG_ADMIN");
+    if (!blogAdminPermission) {
+      blogAdminPermission = add(std::make_unique<Permission>("BLOG_ADMIN"));
+      Wt::log("info") << "Created BLOG_ADMIN permission.";
     }
-    
+
     t.commit();
   }
-  
-  // Create admin user using the authentication framework
-  Wt::Dbo::ptr<User> adminUser = addUser(*this, *users_, "maxuli", "maxuli@example.com", "asdfghj1");
-  
-  // Assign STYLUS permission to admin user
+
+  // Lookup or create admin user
+  Wt::Dbo::ptr<User> adminUser;
   {
     Wt::Dbo::Transaction t(*this);
-    
-    // Reload the permission within this transaction
+    Wt::Dbo::ptr<AuthInfo::AuthIdentityType> existingIdentity =
+      find<AuthInfo::AuthIdentityType>()
+        .where("provider = ? AND identity = ?")
+        .bind(Wt::Auth::Identity::LoginName)
+        .bind("maxuli");
+
+    if (existingIdentity) {
+      auto authUser = users_->findWithIdentity(Wt::Auth::Identity::LoginName, std::string("maxuli"));
+      adminUser = user(authUser);
+      Wt::log("info") << "Admin user 'maxuli' already exists.";
+    } else {
+      adminUser = addUser(*this, *users_, "maxuli", "maxuli@example.com", "asdfghj1");
+      Wt::log("info") << "Created admin user 'maxuli'.";
+    }
+    t.commit();
+  }
+
+  // Ensure admin has STYLUS and BLOG_ADMIN permissions
+  {
+    Wt::Dbo::Transaction t(*this);
     Wt::Dbo::ptr<Permission> stylusPermission = find<Permission>()
       .where("name = ?")
       .bind("STYLUS");
-    
-    adminUser.modify()->permissions_.insert(stylusPermission);
+    Wt::Dbo::ptr<Permission> blogAdminPermission = find<Permission>()
+      .where("name = ?")
+      .bind("BLOG_ADMIN");
+
+    if (stylusPermission && !adminUser->hasPermission(stylusPermission)) {
+      adminUser.modify()->permissions_.insert(stylusPermission);
+    }
+    if (blogAdminPermission && !adminUser->hasPermission(blogAdminPermission)) {
+      adminUser.modify()->permissions_.insert(blogAdminPermission);
+    }
     t.commit();
   }
-  
-  Wt::log("info") << "Created admin user 'maxuli' with STYLUS permission.";
+
+  // Seed initial blog tags, posts, and comments if none exist
+  {
+    Wt::Dbo::Transaction t(*this);
+
+    auto existingPosts = find<Post>().resultList();
+    if (existingPosts.empty()) {
+      // Ensure a couple of regular users for comments
+      auto ensureUser = [this](const std::string& loginName,
+                               const std::string& email,
+                               const std::string& password) -> Wt::Dbo::ptr<User>
+      {
+        Wt::Dbo::ptr<AuthInfo::AuthIdentityType> identity =
+          find<AuthInfo::AuthIdentityType>()
+            .where("provider = ? AND identity = ?")
+            .bind(Wt::Auth::Identity::LoginName)
+            .bind(loginName);
+        if (identity)
+        {
+          auto authUser = users_->findWithIdentity(Wt::Auth::Identity::LoginName, loginName);
+          return user(authUser);
+        }
+        return addUser(*this, *users_, loginName, email, password);
+      };
+
+      auto alice = ensureUser("alice", "alice@example.com", "alice123A!");
+      auto bob   = ensureUser("bob",   "bob@example.com",   "bob123A!");
+
+      // Create tags if missing
+      auto getOrCreateTag = [this](const std::string& name, const std::string& slug) -> Wt::Dbo::ptr<Tag>
+      {
+        auto q = find<Tag>().where("slug = ?").bind(slug).resultList();
+        if (!q.empty()) return q.front();
+        auto tag = add(std::make_unique<Tag>());
+        tag.modify()->name_ = name;
+        tag.modify()->slug_ = slug;
+        return tag;
+      };
+
+      auto tagCpp = getOrCreateTag("C++", "cpp");
+      auto tagWt  = getOrCreateTag("Wt",  "wt");
+      auto tagPf  = getOrCreateTag("Portfolio", "portfolio");
+
+      auto now = Wt::WDateTime::currentDateTime();
+
+      auto createPost = [this, &now, &adminUser](const std::string& title,
+                                                 const std::string& briefHtml,
+                                                 const std::string& bodyHtml) -> Wt::Dbo::ptr<Post>
+      {
+        auto post = add(std::make_unique<Post>());
+        auto p = post.modify();
+        p->title_ = title;
+        // simple slug: lowercase with dashes
+        std::string slug = title;
+        for (char& c : slug) { if (c == ' ') c = '-'; else c = std::tolower(c); }
+        p->slug_ = slug;
+        p->briefSrc_ = briefHtml; // storing same content for now
+        p->briefHtml_ = briefHtml;
+        p->bodySrc_ = bodyHtml;
+        p->bodyHtml_ = bodyHtml;
+        p->author_ = adminUser;
+        p->state_ = Post::State::Published;
+        p->publishedAt_ = now;
+        p->createdAt_ = now;
+        p->updatedAt_ = now;
+        p->viewCount_ = 0;
+        return post;
+      };
+
+      auto p1 = createPost(
+        "Welcome to the Portfolio Blog",
+        "<p>Short intro to the portfolio and blog.</p>",
+        "<p>Welcome! This blog shares updates on C++ projects, Wt components, and portfolio highlights.</p>"
+      );
+      auto p2 = createPost(
+        "Wt + Tailwind UI Notes",
+        "<p>Combining Wt with Tailwind CSS.</p>",
+        "<p>We use Wt for robust server-side C++ web apps and Tailwind for modern UI styling.</p>"
+      );
+      auto p3 = createPost(
+        "C++ Tips for Web Apps",
+        "<p>Practical C++ techniques in web contexts.</p>",
+        "<p>RAII, smart pointers, and Dbo mappings help keep web app code clean and safe.</p>"
+      );
+
+      // Attach tags
+      p1.modify()->tags_.insert(tagPf);
+      p1.modify()->tags_.insert(tagWt);
+      p2.modify()->tags_.insert(tagWt);
+      p2.modify()->tags_.insert(tagCpp);
+      p3.modify()->tags_.insert(tagCpp);
+
+      // Comments on each post
+      auto addComment = [this, &now](const Wt::Dbo::ptr<Post>& post,
+                                     const Wt::Dbo::ptr<User>& author,
+                                     const std::string& content,
+                                     const Wt::Dbo::ptr<Comment>& parent = Wt::Dbo::ptr<Comment>()) -> Wt::Dbo::ptr<Comment>
+      {
+        auto c = add(std::make_unique<Comment>());
+        auto cm = c.modify();
+        cm->post_ = post;
+        cm->author_ = author;
+        cm->parent_ = parent;
+        cm->content_ = content;
+        cm->createdAt_ = now;
+        cm->updatedAt_ = now;
+        cm->isApproved_ = true;
+        return c;
+      };
+
+      auto c11 = addComment(p1, alice, "Great start! Looking forward to more posts.");
+      addComment(p1, bob,   "+1, excited to see Wt content.", c11);
+
+      auto c21 = addComment(p2, bob,   "Tailwind + Wt is a nice combo.");
+      addComment(p2, alice, "Would love code snippets.", c21);
+
+      auto c31 = addComment(p3, alice, "RAII saves the day.");
+      addComment(p3, bob,   "Smart pointers FTW!", c31);
+
+      Wt::log("info") << "Seeded initial blog posts, tags, and comments.";
+    }
+
+    t.commit();
+  }
 }
 
 

@@ -56,6 +56,12 @@ public:
     void setEditorText(std::string resourcePath);
     
     /**
+     * @brief Sets editor content directly via JavaScript (avoids resource registration)
+     * @param content The text content to set in the editor
+     */
+    void setContent(const std::string& content);
+    
+    /**
      * @brief Saves the current editor content to the selected file
      */
     void saveFile();

@@ -13,6 +13,8 @@
 #include <functional>
 #include <unordered_map>
 #include <string>
+#include <regex>
+#include <vector>
 
 class NavigationTopic;
 class Session;
@@ -35,6 +37,12 @@ private:
 
     // Routing: internal path -> content factory
     std::unordered_map<std::string, std::function<std::unique_ptr<Wt::WWidget>()>> routes_;
+    // Pattern-based routes (for dynamic paths like /blog/post/<slug>)
+    struct PathPattern {
+        std::regex pattern;
+        std::function<std::unique_ptr<Wt::WWidget>(const std::smatch&)> factory;
+    };
+    std::vector<PathPattern> pathPatterns_;
     // Paths that require authentication
     std::unordered_map<std::string, bool> authRequiredRoutes_;
     // Keep anchor by path to toggle active styles

@@ -59,11 +59,24 @@ set(SOURCES
     ${SOURCE_DIR}/005_Dbo/Session.cpp
     ${SOURCE_DIR}/005_Dbo/Tables/User.cpp
     ${SOURCE_DIR}/005_Dbo/Tables/Permission.cpp
+    ${SOURCE_DIR}/005_Dbo/Tables/Post.cpp
+    ${SOURCE_DIR}/005_Dbo/Tables/Comment.cpp
+    ${SOURCE_DIR}/005_Dbo/Tables/Tag.cpp
 
     
     ${SOURCE_DIR}/006_Auth/AuthWidget.cpp
     ${SOURCE_DIR}/006_Auth/RegistrationView.cpp
     ${SOURCE_DIR}/006_Auth/UserDetailsModel.cpp
+
+    # Blog views
+    ${SOURCE_DIR}/007_Blog/BlogView.cpp
+    ${SOURCE_DIR}/007_Blog/PostView.cpp
+
+    # Blog topic
+    ${SOURCE_DIR}/003_Navigation/topics/BlogTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/NewPostTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/EditPostTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/PostDetailTopic.cpp
 
 
 )

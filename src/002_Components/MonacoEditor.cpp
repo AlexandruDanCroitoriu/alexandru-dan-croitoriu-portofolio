@@ -21,8 +21,6 @@ MonacoEditor::MonacoEditor(std::string language)
     editor_js_var_name_ = language + Wt::WRandom::generateId() + "_editor";
     
     resize(Wt::WLength::Auto, Wt::WLength::Auto);
-    // Check for dark theme globally
-    bool isDarkMode = wApp->htmlClass().find("dark") != std::string::npos;
     
     std::string initializer =
         R"(
@@ -30,7 +28,7 @@ MonacoEditor::MonacoEditor(std::string language)
             window.)" + editor_js_var_name_ + R"(_current_text = `)" + current_text_ + R"(`;
             window.)" + editor_js_var_name_ + R"( = monaco.editor.create(document.getElementById(')" + id() + R"('), {
                 language: ')" + language + R"(',
-                theme: )" + (isDarkMode ? "'vs-dark'" : "'vs-light'") + R"(,
+                theme: 'vs-dark',
                 wordWrap: 'on',
                 lineNumbers: 'on',
                 tabSize: 4,
@@ -181,6 +179,52 @@ void MonacoEditor::setEditorText(std::string resourcePath)
 void MonacoEditor::resetLayout()
 {
     doJavaScript("setTimeout(function() { window." + editor_js_var_name_ + ".layout() }, 200);");
+}
+
+void MonacoEditor::setContent(const std::string& content)
+{
+    // Set content directly via JavaScript without using the resource system
+    // This avoids resource path conflicts when editing the same post multiple times
+    std::string escapedContent = content;
+    
+    // Escape backslashes and quotes for JavaScript string
+    size_t pos = 0;
+    while ((pos = escapedContent.find('\\', pos)) != std::string::npos) {
+        escapedContent.replace(pos, 1, "\\\\");
+        pos += 2;
+    }
+    pos = 0;
+    while ((pos = escapedContent.find('"', pos)) != std::string::npos) {
+        escapedContent.replace(pos, 1, "\\\"");
+        pos += 2;
+    }
+    pos = 0;
+    while ((pos = escapedContent.find('\n', pos)) != std::string::npos) {
+        escapedContent.replace(pos, 1, "\\n");
+        pos += 2;
+    }
+    pos = 0;
+    while ((pos = escapedContent.find('\r', pos)) != std::string::npos) {
+        escapedContent.replace(pos, 1, "\\r");
+        pos += 2;
+    }
+    
+    doJavaScript(
+        R"(
+            setTimeout(function() {
+                if (window.)" + editor_js_var_name_ + R"() {
+                    var content = ")" + escapedContent + R"(";
+                    window.)" + editor_js_var_name_ + R"(_current_text = content;
+                    window.)" + editor_js_var_name_ + R"(.setValue(content);
+                } else {
+                    console.error("Editor instance )" + editor_js_var_name_ + R"( is not yet initialized");
+                }
+            }, 100);
+        )");
+    
+    current_text_ = content;
+    unsaved_text_ = content;
+    resetLayout();
 }
 
 void MonacoEditor::setDarkTheme(bool dark)

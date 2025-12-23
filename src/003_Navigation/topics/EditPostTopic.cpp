@@ -1,0 +1,282 @@
+#include "003_Navigation/topics/EditPostTopic.h"
+#include "003_Navigation/DeferredWidget.h"
+#include "002_Components/MonacoEditor.h"
+
+#include "005_Dbo/Session.h"
+#include "005_Dbo/Tables/Post.h"
+#include "005_Dbo/Tables/Tag.h"
+#include "005_Dbo/Tables/Permission.h"
+
+#include <Wt/WContainerWidget.h>
+#include <Wt/WText.h>
+#include <Wt/WLineEdit.h>
+#include <Wt/WPushButton.h>
+#include <Wt/WComboBox.h>
+#include <Wt/WCheckBox.h>
+#include <Wt/Dbo/Transaction.h>
+#include <Wt/WApplication.h>
+
+#include <cctype>
+#include <algorithm>
+
+namespace dbo = Wt::Dbo;
+
+static bool isBlogAdmin(Session& session)
+{
+  if (!session.login().loggedIn()) return false;
+  dbo::Transaction t(session);
+  auto user = session.user();
+  if (!user) return false;
+  auto perms = session.find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
+  if (perms.empty()) return false;
+  return user->hasPermission(perms.front());
+}
+
+static std::string slugify(const std::string& value)
+{
+  std::string slug = value;
+  for (char& c : slug) {
+    const unsigned char uc = static_cast<unsigned char>(c);
+    if (std::isspace(uc)) c = '-';
+    else c = static_cast<char>(std::tolower(uc));
+  }
+  return slug;
+}
+
+EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string& slug)
+  : session_(std::move(session)), slug_(slug)
+{
+}
+
+std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
+{
+  return editPage();
+}
+
+std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
+{
+  auto container = std::make_unique<Wt::WContainerWidget>();
+  container->addStyleClass("w-full max-w-4xl mx-auto space-y-4 p-6");
+
+  // Access guard
+  if (!isBlogAdmin(*session_)) {
+    auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Not Authorized</h2>"));
+    title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+    container->addNew<Wt::WText>("Only the admin can edit posts.");
+    return container;
+  }
+
+  dbo::Transaction t(*session_);
+  auto posts = session_->find<Post>("where slug = ?").bind(slug_).resultList();
+  if (posts.empty()) {
+    auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Post not found</h2>"));
+    title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+    return container;
+  }
+  auto post = posts.front();
+
+  auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Edit Post</h2>"));
+  title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+
+  auto titleEdit = container->addNew<Wt::WLineEdit>(post->title_);
+  titleEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
+
+  auto briefEdit = container->addNew<MonacoEditor>("html");
+  briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
+  briefEdit->setContent(post->briefSrc_);
+  
+  auto bodyEdit = container->addNew<MonacoEditor>("html");
+  bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
+  bodyEdit->setContent(post->bodySrc_);
+
+  // State selection
+  auto stateLabel = container->addNew<Wt::WText>("State:");
+  stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
+  auto stateCombo = container->addNew<Wt::WComboBox>();
+  stateCombo->addItem("Draft");
+  stateCombo->addItem("Published");
+  stateCombo->addItem("Archived");
+  int stateIdx = 0;
+  if (post->state_ == Post::State::Published) stateIdx = 1;
+  else if (post->state_ == Post::State::Archived) stateIdx = 2;
+  stateCombo->setCurrentIndex(stateIdx);
+  stateCombo->addStyleClass("rounded-md border border-gray-300 p-2");
+
+  // Tag selection (existing tags)
+  auto tagLabel = container->addNew<Wt::WText>("Tags:");
+  tagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
+  
+  auto tagContainer = container->addNew<Wt::WContainerWidget>();
+  tagContainer->addStyleClass("space-y-2 p-3 bg-gray-50 rounded-md");
+
+  auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox*>>();
+  auto tagSlugs = std::make_shared<std::vector<std::string>>();
+
+  // Collect current post tags for pre-check
+  std::vector<std::string> prechecked;
+  for (const auto& tag : post->tags_) {
+    prechecked.push_back(tag->slug_);
+  }
+
+  auto refreshTags = [this, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string>& pre) {
+    tagContainer->clear();
+    tagCheckboxes->clear();
+    tagSlugs->clear();
+
+    dbo::Transaction t(*session_);
+    auto tags = session_->find<Tag>("order by name asc").resultList();
+    for (const dbo::ptr<Tag>& tag : tags) {
+      auto cb = tagContainer->addNew<Wt::WCheckBox>(tag->name_);
+      cb->addStyleClass("mr-4");
+      const bool checked = std::find(pre.begin(), pre.end(), tag->slug_) != pre.end();
+      cb->setChecked(checked);
+      tagCheckboxes->push_back(cb);
+      tagSlugs->push_back(tag->slug_);
+    }
+  };
+
+  refreshTags(prechecked);
+
+  // New tag input
+  auto newTagLabel = container->addNew<Wt::WText>("Add new tag:");
+  newTagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
+  auto newTagEdit = container->addNew<Wt::WLineEdit>();
+  newTagEdit->setPlaceholderText("Type tag name and press Enter");
+  newTagEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
+  newTagEdit->enterPressed().connect([this, newTagEdit, refreshTags, tagCheckboxes, tagSlugs]() {
+    std::string tagName = newTagEdit->text().toUTF8();
+    tagName.erase(0, tagName.find_first_not_of(" \t\n\r"));
+    if (!tagName.empty())
+      tagName.erase(tagName.find_last_not_of(" \t\n\r") + 1);
+
+    if (tagName.empty()) return;
+
+    std::string tagSlug = slugify(tagName);
+
+    // Capture selected tags
+    std::vector<std::string> selected;
+    for (size_t i = 0; i < tagCheckboxes->size() && i < tagSlugs->size(); ++i) {
+      if ((*tagCheckboxes)[i]->isChecked()) {
+        selected.push_back((*tagSlugs)[i]);
+      }
+    }
+    selected.push_back(tagSlug);
+
+    {
+      dbo::Transaction t(*session_);
+      auto existingTags = session_->find<Tag>("where slug = ?").bind(tagSlug).resultList();
+      if (existingTags.empty()) {
+        auto newTag = session_->add(std::make_unique<Tag>());
+        auto tm = newTag.modify();
+        tm->name_ = tagName;
+        tm->slug_ = tagSlug;
+      }
+      t.commit();
+    }
+
+    refreshTags(selected);
+    newTagEdit->setText("");
+  });
+
+  auto saveBtn = container->addNew<Wt::WPushButton>("Save");
+  saveBtn->addStyleClass("bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1 mt-4");
+
+  auto status = container->addNew<Wt::WText>("");
+  status->addStyleClass("mt-2");
+
+  // Capture session as shared_ptr and slug as value to avoid dangling references
+  auto sessionPtr = session_;
+  auto postSlug = slug_;
+  
+  saveBtn->clicked().connect([sessionPtr, postSlug, titleEdit, briefEdit, bodyEdit, stateCombo, tagCheckboxes, tagSlugs, status]() {
+    if (!sessionPtr || !titleEdit || !briefEdit || !bodyEdit || !stateCombo || !tagCheckboxes || !tagSlugs || !status) {
+      if (status) status->setText("Widget error");
+      return;
+    }
+    
+    if (!isBlogAdmin(*sessionPtr)) {
+      status->setText("Not authorized.");
+      return;
+    }
+
+    std::string postTitle = titleEdit->text().toUTF8();
+    if (postTitle.empty()) {
+      status->setText("Title is required.");
+      return;
+    }
+
+    try {
+      std::string redirectSlug;
+      {
+        dbo::Transaction t(*sessionPtr);
+        
+        auto posts = sessionPtr->find<Post>("where slug = ?").bind(postSlug).resultList();
+        if (posts.empty()) {
+          status->setText("Post not found.");
+          return;
+        }
+
+        // Nested scope forces dbo::ptr to destruct before commit
+        {
+          auto p = posts.front().modify();
+          p->title_ = postTitle;
+          p->briefSrc_ = briefEdit->getUnsavedText();
+          p->briefHtml_ = p->briefSrc_;
+          p->bodySrc_ = bodyEdit->getUnsavedText();
+          p->bodyHtml_ = p->bodySrc_;
+
+          // Recompute slug from title to keep URL in sync
+          redirectSlug = slugify(postTitle);
+          p->slug_ = redirectSlug;
+
+          int stateIdx = stateCombo->currentIndex();
+          if (stateIdx == 1) {
+            p->state_ = Post::State::Published;
+            p->publishedAt_ = Wt::WDateTime::currentDateTime();
+          } else if (stateIdx == 2) {
+            p->state_ = Post::State::Archived;
+          } else {
+            p->state_ = Post::State::Draft;
+          }
+
+          p->updatedAt_ = Wt::WDateTime::currentDateTime();
+
+          // Update tags: clear then re-add selected
+          p->tags_.clear();
+          
+          // Build list of selected tag slugs first
+          std::vector<std::string> selectedTagSlugs;
+          for (size_t i = 0; i < tagCheckboxes->size() && i < tagSlugs->size(); ++i) {
+            Wt::WCheckBox* cb = (*tagCheckboxes)[i];
+            if (cb && cb->isChecked()) {
+              selectedTagSlugs.push_back((*tagSlugs)[i]);
+            }
+          }
+          
+          // Add tags from the collected slugs
+          for (const auto& slug : selectedTagSlugs) {
+            auto tags = sessionPtr->find<Tag>("where slug = ?").bind(slug).resultList();
+            if (!tags.empty()) {
+              p->tags_.insert(tags.front());
+            }
+          }
+        }  // dbo::ptr<Post> p destroyed here
+
+        t.commit();
+      }
+
+      // Redirect back to post detail
+      if (!redirectSlug.empty()) {
+        Wt::WApplication::instance()->setInternalPath("/portfolio/blog/post/" + redirectSlug, true);
+      }
+    } catch (const std::exception& ex) {
+      status->setText(std::string("Error: ") + ex.what());
+    } catch (...) {
+      status->setText("Unknown error saving post");
+    }
+  });
+
+  return container;
+}

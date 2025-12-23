@@ -9,11 +9,6 @@ CvPortofolioTopic::CvPortofolioTopic()
 {
 }
 
-void CvPortofolioTopic::populateSubMenu(Wt::WMenu* menu)
-{
-    // Not used for direct menu items
-}
-
 std::unique_ptr<Wt::WWidget> CvPortofolioTopic::createCvPage()
 {
     return deferCreate([this]() { return cvPage(); });

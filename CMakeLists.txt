@@ -50,6 +50,9 @@ set(SOURCES
     ${SOURCE_DIR}/003_Navigation/NavigationTopic.cpp
     ${SOURCE_DIR}/003_Navigation/topics/ComponentsTopic.cpp
     ${SOURCE_DIR}/003_Navigation/topics/CvPortofolioTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/UserSettingsTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/NotFoundTopic.cpp
+    ${SOURCE_DIR}/003_Navigation/topics/NotAuthorizedTopic.cpp
 
     ${SOURCE_DIR}/004_TailwindTheme/TailwindTheme.cpp
       

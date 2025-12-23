@@ -13,7 +13,7 @@
 
 AuthWidget::AuthWidget(std::shared_ptr<Session> session)
   : Wt::Auth::AuthWidget(Session::auth(), session->users(), session->login()),
-    session_(session)
+    session_(session), loginTemplateId_("Wt.Auth.template.login-v1")
 { 
   // setInternalBasePath("/user");
 
@@ -97,13 +97,18 @@ Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt
   if (contents) {
     dialog_ = std::make_unique<Wt::WDialog>(title);
     dialog_->contents()->addWidget(std::move(contents));
-    dialog_->setMinimumSize(Wt::WLength(100, Wt::LengthUnit::ViewportWidth), Wt::WLength(100, Wt::LengthUnit::ViewportHeight));
-    dialog_->setMaximumSize(Wt::WLength(100, Wt::LengthUnit::ViewportWidth), Wt::WLength(100, Wt::LengthUnit::ViewportHeight));
-    dialog_->setStyleClass("absolute top-0 left-0 right-0 bottom-0 w-screen h-screen");
+    // dialog_->setMinimumSize(Wt::WLength(100, Wt::LengthUnit::ViewportWidth), Wt::WLength(100, Wt::LengthUnit::ViewportHeight));
+    // dialog_->setMaximumSize(Wt::WLength(100, Wt::LengthUnit::ViewportWidth), Wt::WLength(100, Wt::LengthUnit::ViewportHeight));
+    // dialog_->setStyleClass("absolute top-0 left-0 right-0 bottom-0 w-screen h-screen");
     dialog_->setTitleBarEnabled(false);
     dialog_->escapePressed().connect([this]() { dialog_.reset(); });
-    dialog_->contents()->setStyleClass("min-h-screen min-w-screen m-1 p-1 flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white");
+    // dialog_->contents()->setStyleClass("min-h-screen min-w-screen m-1 p-1 flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white");
     dialog_->contents()->childrenChanged().connect(this, [this]() { dialog_.reset(); });
+
+    dialog_->setStyleClass("absolute bg-gray-900 rounded-md [&>div]:h-full");
+    dialog_->addStyleClass("top-0 left-0 right-0 bottom-0");
+    dialog_->contents()->setStyleClass("p-4 h-full flex justify-center");
+
 
     dialog_->footer()->hide();
 
@@ -112,8 +117,8 @@ Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt
        * try to center it better, we need to set the half width and
        * height as negative margins.
        */
-      dialog_->setMargin(Wt::WLength("-21em"), Wt::Side::Left); // .Wt-form width
-      dialog_->setMargin(Wt::WLength("-200px"), Wt::Side::Top); // ???
+      // dialog_->setMargin(Wt::WLength("-21em"), Wt::Side::Left); // .Wt-form width
+      // dialog_->setMargin(Wt::WLength("-200px"), Wt::Side::Top); // ???
     }
 
     dialog_->show();

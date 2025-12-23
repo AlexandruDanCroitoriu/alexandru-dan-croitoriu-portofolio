@@ -438,7 +438,7 @@ void TailwindTheme::apply(Wt::WWidget *widget, Wt::DomElement &element, int elem
         auto sl = dynamic_cast<Wt::WSlider *>(widget);
         auto fu = dynamic_cast<Wt::WFileUpload *>(widget);
         if (!(tb || sl || fu))
-            element.addPropertyWord(Wt::Property::Class, "form-control");
+            element.addPropertyWord(Wt::Property::Class, "block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500");
         else if (sl && !sl->nativeControl())
         {
             element.addPropertyWord(Wt::Property::Class, "form-range");
@@ -629,7 +629,7 @@ std::string TailwindTheme::classBtn(const Wt::WWidget *widget)
 {
   auto button = dynamic_cast<const Wt::WPushButton *>(widget);
   return (hasButtonStyleClass(widget)
-          || (button && button->isDefault())) ? "btn" : "btn btn-secondary";
+          || (button && button->isDefault())) ? "btn" : "rounded-md px-2.5 py-1.5 text-sm font-semibold text-white ring-1 ring-inset cursor-pointer";
 }
 
 

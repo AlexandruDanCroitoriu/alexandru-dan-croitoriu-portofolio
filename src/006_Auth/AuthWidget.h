@@ -21,7 +21,6 @@ protected:
 private:
   std::shared_ptr<Session> session_;
   void createInitialData();
-  std::string loginTemplateId_ = "Wt.Auth.template.login-v1"; // default template id
-  // std::string loginTemplateId_ = "Wt.Auth.template.login"; // default template id
+  std::string loginTemplateId_; // default template id
   std::unique_ptr<Wt::WDialog> dialog_;
 };

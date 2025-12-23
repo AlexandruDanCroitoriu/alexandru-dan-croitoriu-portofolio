@@ -1,17 +1,11 @@
 #pragma once
 
 #include <Wt/WObject.h>
-#include <Wt/WString.h>
 
-namespace Wt {
-    class WMenu;
-}
-
+// Base class for content topics (minimal interface, no submenu needed)
 class NavigationTopic : public Wt::WObject
 {
 public:
-    NavigationTopic();
+    NavigationTopic() = default;
     virtual ~NavigationTopic() = default;
-
-    virtual void populateSubMenu(Wt::WMenu* menu) = 0;
 };

@@ -13,12 +13,6 @@ ComponentsTopic::ComponentsTopic()
 {
 }
 
-void ComponentsTopic::populateSubMenu(Wt::WMenu* menu)
-{
-    menu->addItem("Monaco Editor",
-                  deferCreate([this]{ return monacoEditorDemo(); }));
-}
-
 std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
 {
     auto container = std::make_unique<Wt::WContainerWidget>();
@@ -52,19 +46,19 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
 
     // Theme toggle button
     auto themeBtn = controlPanel->addNew<Wt::WPushButton>("🌙 Dark Mode");
-    themeBtn->addStyleClass("px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
+    themeBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 ring-gray-50/10");
     
     // Read-only toggle button
     auto readOnlyBtn = controlPanel->addNew<Wt::WPushButton>("🔒 Read-Only");
-    readOnlyBtn->addStyleClass("px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
+    readOnlyBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 ring-gray-50/10");
     
     // Line wrap toggle button
     auto lineWrapBtn = controlPanel->addNew<Wt::WPushButton>("↳ Line Wrap");
-    lineWrapBtn->addStyleClass("px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
+    lineWrapBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 ring-gray-50/10");
     
     // Minimap toggle button
     auto minimapBtn = controlPanel->addNew<Wt::WPushButton>("📊 Minimap");
-    minimapBtn->addStyleClass("px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
+    minimapBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 ring-gray-50/10");
 
     // Save button / status indicator
     auto saveBtn = controlPanel->addNew<Wt::WPushButton>("✓ Saved");
@@ -83,8 +77,6 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
         wApp->log("debug") << "Toggling theme, now darkMode=" << *darkMode;
         MonacoEditor::setDarkTheme(*darkMode);
         themeBtn->setText(*darkMode ? "☀️ Light Mode" : "🌙 Dark Mode");
-        themeBtn->removeStyleClass(*darkMode ? "bg-slate-700 hover:bg-slate-800" : "bg-amber-700 hover:bg-amber-800");
-        themeBtn->addStyleClass(*darkMode ? "bg-amber-700 hover:bg-amber-800" : "bg-slate-700 hover:bg-slate-800");
     });
 
     // Read-only toggle
@@ -96,11 +88,8 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
             editor->resetLayout(); // ensure unlock applies immediately
         }
 
-        const std::string base =
-            "px-4 py-2 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg ";
-        const std::string onCls = "bg-red-700 hover:bg-red-800";
-        const std::string offCls = "bg-slate-700 hover:bg-slate-800";
-        readOnlyBtn->setStyleClass(base + (*isReadOnly ? onCls : offCls));
+        readOnlyBtn->toggleStyleClass("!bg-red-600", *isReadOnly, true);
+        readOnlyBtn->toggleStyleClass("!hover:bg-red-700", *isReadOnly, true);
         readOnlyBtn->setText(*isReadOnly ? "🔓 Edit" : "🔒 Read-Only");
     });
 
@@ -109,8 +98,6 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     lineWrapBtn->clicked().connect([lineWrapBtn, editor, lineWrapOn]() {
         *lineWrapOn = !*lineWrapOn;
         editor->toggleLineWrap();
-        lineWrapBtn->removeStyleClass(*lineWrapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-emerald-700 hover:bg-emerald-800");
-        lineWrapBtn->addStyleClass(*lineWrapOn ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-700 hover:bg-slate-800");
         lineWrapBtn->setText(*lineWrapOn ? "↳ Line Wrap" : "→ No Wrap");
     });
 
@@ -119,8 +106,6 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     minimapBtn->clicked().connect([minimapBtn, editor, minimapOn]() {
         *minimapOn = !*minimapOn;
         editor->toggleMinimap();
-        minimapBtn->removeStyleClass(*minimapOn ? "bg-slate-700 hover:bg-slate-800" : "bg-indigo-700 hover:bg-indigo-800");
-        minimapBtn->addStyleClass(*minimapOn ? "bg-indigo-700 hover:bg-indigo-800" : "bg-slate-700 hover:bg-slate-800");
         minimapBtn->setText(*minimapOn ? "📊 Minimap" : "📋 No Minimap");
     });
 
@@ -130,11 +115,9 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
         std::string savedText = editor->getSavedText();
         if (currentText != savedText) {
             saveBtn->setText("💾 Save");
-            saveBtn->setStyleClass("px-4 py-2 bg-orange-700 hover:bg-orange-800 text-white rounded-lg text-sm font-semibold transition duration-200 shadow-md hover:shadow-lg");
             saveBtn->setEnabled(true);
         } else {
             saveBtn->setText("✓ Saved");
-            saveBtn->setStyleClass("px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold transition duration-200 opacity-50 cursor-not-allowed");
             saveBtn->setEnabled(false);
         }
     });
@@ -144,7 +127,6 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
         if (editor->getUnsavedText() != editor->getSavedText()) {
             editor->textSaved();
             saveBtn->setText("✓ Saved");
-            saveBtn->setStyleClass("px-4 py-2 bg-gray-500 text-white rounded-lg text-sm font-semibold transition duration-200 opacity-50 cursor-not-allowed");
             saveBtn->setEnabled(false);
         }
     });
@@ -171,4 +153,9 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     sourceCode->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
     return container;
+}
+
+std::unique_ptr<Wt::WWidget> ComponentsTopic::createMonacoEditorDemo()
+{
+    return monacoEditorDemo();
 }

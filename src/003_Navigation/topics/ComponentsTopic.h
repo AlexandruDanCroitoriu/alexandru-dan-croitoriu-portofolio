@@ -8,7 +8,7 @@ class ComponentsTopic : public NavigationTopic
 {
 public:
     ComponentsTopic();
-    void populateSubMenu(Wt::WMenu* menu) override;
+    std::unique_ptr<Wt::WWidget> createMonacoEditorDemo();
 
 private:
     std::unique_ptr<Wt::WWidget> monacoEditorDemo();

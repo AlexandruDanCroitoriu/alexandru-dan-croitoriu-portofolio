@@ -25,6 +25,7 @@ services:
     #   context: .
     #   dockerfile: Dockerfile
     image: maxuli/alexandru-dan-croitoriu-portofolio:latest
+    pull_policy: always
     container_name: portfolio-app
     depends_on:
       postgres:

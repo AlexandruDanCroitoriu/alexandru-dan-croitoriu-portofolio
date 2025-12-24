@@ -18,6 +18,9 @@ public:
 protected:
   /* specialize to also validate the user details */
   bool validate() override;
+  
+  /* override to hook cancel button after rendering */
+  void render(Wt::WFlags<Wt::RenderFlag> flags) override;
 
   /* specialize to register user details */
   void registerUserDetails(Wt::Auth::User& user) override;

@@ -20,7 +20,7 @@
 #include <Wt/WPushButton.h>
 
 Navigation::Navigation(std::shared_ptr<Session> session)
-    : session_(session), menuOpen_(false), currentActiveAnchor_(nullptr)
+    : session_(session), menuOpen_(false), currentActiveAnchor_(nullptr), previousPath_("/")
 {
     lastUnknownPath_ = std::make_shared<std::string>("");
     // Apply main container styling
@@ -58,12 +58,29 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     // authDialog_->addStyleClass("sm:top-5 sm:left-5 sm:right-5 sm:bottom-5"); // Centered on small+ screens
     authDialog_->contents()->setStyleClass("p-4 h-full flex justify-center");
 
-    authWidget_ = authDialog_->contents()->addWidget(std::make_unique<AuthWidget>(session_));
-    authWidget_->addStyleClass("bg-gray-700 text-white p-4 rounded-md shadow-lg w-full max-w-sm mt-20 h-fit");
+    auto authWrapper = authDialog_->contents()->addNew<Wt::WContainerWidget>();
+    authWrapper->addStyleClass("bg-gray-700 text-white p-4 rounded-md shadow-lg w-full max-w-sm mt-20 h-fit relative");
+
+    auto hideDialogBtn = authWrapper->addNew<Wt::WPushButton>("✕");
+    hideDialogBtn->addStyleClass("absolute top-2 right-2 bg-transparent text-white text-md hover:text-gray-300 ring-gray-500 hover:ring-gray-400");
+    hideDialogBtn->clicked().connect([this]() {
+        if (authDialog_ != nullptr) {
+            authDialog_->hide();
+            wApp->setInternalPath(previousPath_.empty() ? "/" : previousPath_, true);
+        }
+    });
+
+    authWidget_ = authWrapper->addWidget(std::make_unique<AuthWidget>(session_));
+    // authWidget_->addStyleClass("bg-gray-700 text-white p-4 rounded-md shadow-lg w-full max-w-sm mt-20 h-fit");
     authWidget_->keyWentDown().connect([=](Wt::WKeyEvent e) {
         wApp->globalKeyWentDown().emit(e); // Emit the global key event
     });
-
+    authWidget_->escapePressed().connect([this]() {
+        if (authDialog_ != nullptr) {
+            authDialog_->hide();
+            wApp->setInternalPath(previousPath_.empty() ? "/" : previousPath_, true);
+        }
+    });
     // Create overlay for mobile
     contentsCover_ = addNew<Wt::WContainerWidget>();
     contentsCover_->addStyleClass("fixed inset-0 bg-black/40 hidden z-40");
@@ -281,22 +298,49 @@ void Navigation::connectRouting()
     });
 }
 
+void Navigation::syncAuthDialogWithPath(const std::string& path)
+{
+    // Synchronize auth dialog visibility and view based on current path
+    if (path == "/account/login") {
+        if (authWidget_ && authWidget_->getCurrentView() != AuthWidget::ViewState::Login) {
+            authWidget_->showLoginView();
+        }
+        if (authDialog_->isHidden()) {
+            authDialog_->show();
+        }
+    } else {
+        if (authWidget_) {
+            authWidget_->hideInternalDialog();
+        }
+        if (!authDialog_->isHidden()) {
+            authDialog_->hide();
+        }
+    }
+}
+
 void Navigation::markActive(const std::string& path)
 {
     std::cout << "\nMarking active path: " << path << "\n";
+    
+    auto it = anchorsByPath_.find(path);
+    Wt::WAnchor* newAnchor = (it != anchorsByPath_.end()) ? it->second : nullptr;
+    
+    // If already active, return early
+    if (currentActiveAnchor_ == newAnchor) {
+        return;
+    }
+    
     if (currentActiveAnchor_) {
         currentActiveAnchor_->removeStyleClass("bg-gray-600", true);
         currentActiveAnchor_->removeStyleClass("text-white", true);
         currentActiveAnchor_->removeStyleClass("border-blue-400", true);
     }
-    auto it = anchorsByPath_.find(path);
-    if (it != anchorsByPath_.end()) {
-        currentActiveAnchor_ = it->second;
+    
+    currentActiveAnchor_ = newAnchor;
+    if (currentActiveAnchor_) {
         currentActiveAnchor_->addStyleClass("bg-gray-600");
         currentActiveAnchor_->addStyleClass("text-white");
         currentActiveAnchor_->addStyleClass("border-blue-400");
-    } else {
-        currentActiveAnchor_ = nullptr;
     }
 }
 
@@ -311,6 +355,17 @@ void Navigation::navigateTo(const std::string& rawPath)
     if (queryPos != std::string::npos) {
         pathWithoutQuery = path.substr(0, queryPos);
     }
+    
+    // Synchronize auth dialog state with the current path
+    syncAuthDialogWithPath(pathWithoutQuery);
+    
+    // If on auth paths, just update dialog without changing content
+    if (pathWithoutQuery == "/account/login") {
+        return;
+    }
+    
+    // Normal route: update previousPath_ before processing
+    previousPath_ = pathWithoutQuery;
     
     auto it = routes_.find(pathWithoutQuery);
     
@@ -406,20 +461,31 @@ void Navigation::authChanged()
     // Rebuild UI without changing internal path; let the current path be handled by navigateTo()
     setUI();
 
+    // Check current path and sync auth dialog
+    std::string currentPath = wApp->internalPath();
+    syncAuthDialogWithPath(currentPath);
+    
+    bool isLoginPath = (currentPath == "/account/login");
+
     if (!session_->login().loggedIn()) {
-        if(!authDialog_->isHidden()) {
-            authDialog_->hide();
-        }
         // Show login button
         auto loginButton = authWrapper_->addNew<Wt::WPushButton>("Login");
         loginButton->addStyleClass("w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded");
         loginButton->clicked().connect([this]() {
-            if (authDialog_ != nullptr) {
-                authDialog_->show();
-            }
+            wApp->setInternalPath("/account/login", true);
         });
+        // Keep dialog logic minimal; navigation handles login path
     } else {
-        if(!authDialog_->isHidden()) authDialog_->hide();
+        // Logged in: if currently on an auth path, redirect back
+        if (isLoginPath) {
+            std::string target = previousPath_.empty() ? "/" : previousPath_;
+            if (target == "/account/login") {
+                target = "/";
+            }
+            if (currentPath != target) {
+                wApp->setInternalPath(target, true);
+            }
+        }
 
         // User is logged in
         // Get user name within transaction
@@ -442,7 +508,11 @@ void Navigation::authChanged()
         
         auto logoutItem = userMenu->addItem("Logout");
         logoutItem->addStyleClass("px-4 py-2 hover:bg-slate-800 block w-full border-t border-gray-700 mt-2 pt-2 text-gray-200 hover:text-white transition-colors");
-        logoutItem->clicked().connect([this]() {
+        
+        // Store menu pointer for logout handler
+        auto menuPtrForLogout = userMenu.get();
+        logoutItem->clicked().connect([this, menuPtrForLogout]() {
+            menuPtrForLogout->hide();
             session_->login().logout();
         });
         

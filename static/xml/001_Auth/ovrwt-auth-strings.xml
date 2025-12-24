@@ -68,9 +68,9 @@
     <message id="Wt.Auth.or-oauth-registration">Or, register with an identity provider:</message>
     <message id="Wt.Auth.valid">Valid</message>
     <message id="Wt.Auth.choose-password">Choose Password</message>
-    <message id="Wt.Auth.choose-password-info">Choose a password</message>
+    <message id="Wt.Auth.choose-password-info"></message>
     <message id="Wt.Auth.repeat-password">Repeat password</message>
-    <message id="Wt.Auth.repeat-password-info">Re-enter your password</message>
+    <message id="Wt.Auth.repeat-password-info"></message>
     <message id="Wt.Auth.email-invalid">Invalid email address</message>
     <message id="Wt.Auth.email-exists">Email already registered</message>
     <message id="Wt.Auth.oauth">Your external account</message>

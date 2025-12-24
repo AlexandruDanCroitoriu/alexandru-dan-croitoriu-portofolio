@@ -56,6 +56,7 @@ private:
     void setupRoutes();
     void buildSidebar();
     void navigateTo(const std::string& path);
+    void syncAuthDialogWithPath(const std::string& path);
     void markActive(const std::string& path);
     void toggleMenu();
     void openMenu();
@@ -67,5 +68,6 @@ private:
     Wt::WDialog* authDialog_;
     AuthWidget* authWidget_;
     Wt::WContainerWidget* authWrapper_;
+    std::string previousPath_;
     void authChanged();
 };

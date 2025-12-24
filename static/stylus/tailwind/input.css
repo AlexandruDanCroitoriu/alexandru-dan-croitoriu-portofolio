@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-@source "../xml/**";
+@source "../../xml/**";
+/* @source "../xml/001_Auth/**"; */
 @source "../../../src/**/**";
 
 

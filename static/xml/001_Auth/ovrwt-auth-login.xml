@@ -42,17 +42,17 @@
                 <div class="border-t border-gray-300"></div>
 				${<if:passwords>}
 				<div class="">
-                    <div class="flex flex-col">
+                    <div class="flex items-center space-x-2">
                         <label for="${id:user-name}" class="font-semibold">${user-name-label}</label>
-                        <span class="text-xs ">${user-name-info class=""}</span>
+                        <span class="text-xs font-bold text-sky-400 ">${user-name-info class=""}</span>
                     </div>
                     <span>${user-confirm-email class=""}</span>
                     <span class="">${user-name}</span>
                 </div>
                 <div class="">
-                        <div class="flex flex-col">
+                        <div class="flex items-center space-x-2">
                             <label for="${id:password}" class="font-semibold">${tr:Wt.Auth.password message_path="003-Auth/ovrwt-auth-strings.xml"}</label>
-                            <span class="text-xs ">${password-info class=""}</span>
+                            <span class="text-xs font-bold text-sky-400 ">${password-info class=""}</span>
                         </div>
                         <span class="">${password class=""}</span>
                     </div>

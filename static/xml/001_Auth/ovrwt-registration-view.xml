@@ -69,8 +69,10 @@
             <div class="my-4">
                 ${<if:user-name>}
                 <label for="${id:user-name}">
-                    <span class="font-bold">${user-name-label}:</span>
-                    <span>${user-name-info class="Wt-info"}</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold">${user-name-label}:</span>
+                        <span class="text-xs font-bold text-sky-400">${user-name-info class="Wt-info"}</span>
+                    </div>
                     <span>${confirm-is-you class="Wt-info"}</span>
                 </label>
                 <span class="block mb-2">${user-name}</span>
@@ -79,12 +81,12 @@
                 ${<if:choose-password>}
                 <label for="${id:choose-password}">
                     <span class="font-bold">${tr:Wt.Auth.choose-password message_path="003-Auth/ovrwt-auth-strings.xml"}:</span>
-                    <span class="font-italic text-sm">${choose-password-info class="Wt-info"}</span>
+                    <span class="text-xs font-bold text-sky-400 ">${choose-password-info class="Wt-info"}</span>
                 </label>
                 <span class="block mb-2">${choose-password}</span>
                 <label for="${id:repeat-password}">
                     <span class="font-bold">${tr:Wt.Auth.repeat-password message_path="003-Auth/ovrwt-auth-strings.xml"}:</span>
-                    <span class="font-italic text-sm">${repeat-password-info class="Wt-info"}</span>
+                    <span class="text-xs font-bold text-sky-400">${repeat-password-info class="Wt-info"}</span>
                 </label>
                 <span class="block mb-2">${repeat-password}</span>
                 ${</if:choose-password>}
@@ -92,7 +94,7 @@
                 ${<if:email>}
                 <label for="${id:email}">
                     <span class="font-bold">${tr:Wt.Auth.email message_path="003-Auth/ovrwt-auth-strings.xml"}</span>
-                    <span class="font-italic text-sm">${email-info class="Wt-info"}</span>
+                    <span class="text-xs font-bold text-sky-400">${email-info class="Wt-info"}</span>
                 </label>
                 <span class="block mb-2">${email}</span>
                 ${</if:email>}

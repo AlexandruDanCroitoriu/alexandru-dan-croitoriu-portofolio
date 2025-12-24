@@ -8,6 +8,8 @@
 #include <Wt/Auth/PasswordService.h>
 #include <Wt/Auth/AuthModel.h>
 #include <Wt/WApplication.h>
+#include <Wt/WAnchor.h>
+#include <Wt/WPushButton.h>
 #include <Wt/WButtonGroup.h>
 #include <Wt/WDialog.h>
 #include <Wt/WRadioButton.h>
@@ -17,7 +19,8 @@ AuthWidget::AuthWidget(std::shared_ptr<Session> session)
   : Wt::Auth::AuthWidget(Session::auth(), session->users(), session->login()),
     session_(session), loginTemplateId_("Wt.Auth.template.login-v1")
 { 
-  // setInternalBasePath("/user");
+  // Disable internal path routing; Navigation drives dialog via its own paths
+  setInternalBasePath("");
 
   model()->addPasswordAuth(&Session::passwordAuth());
   model()->addOAuth(Session::oAuth());
@@ -98,6 +101,15 @@ void AuthWidget::createLoginView()
   if (auto rememberCheckbox = resolve<Wt::WCheckBox*>(Wt::Auth::AuthModel::RememberMeField)) {
     rememberCheckbox->setChecked(true);
   }
+
+  // Keep registration in the same dialog without changing internal paths
+  if (auto regAnchor = resolve<Wt::WAnchor*>("register")) {
+    regAnchor->setLink(Wt::WLink(Wt::LinkType::InternalPath, Wt::WApplication::instance()->internalPath()));
+    regAnchor->clicked().connect([this]() { showRegistrationView(); });
+  } else if (auto regBtn = resolve<Wt::WPushButton*>("register")) {
+    regBtn->clicked().connect([this]() { showRegistrationView(); });
+  }
+
 }
 
 Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt::WWidget> contents) 
@@ -133,4 +145,26 @@ Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt
   }
 
   return dialog_.get();
+}
+
+void AuthWidget::showRegistrationView()
+{
+  // Switch to registration flow; base provides registerNewUser()
+    currentView_ = ViewState::Registration;
+  this->registerNewUser();
+}
+
+void AuthWidget::showLoginView()
+{
+  // Switch back to login view by resetting the model
+    currentView_ = ViewState::Login;
+  model()->reset();
+}
+
+void AuthWidget::hideInternalDialog()
+{
+  if (dialog_) {
+    dialog_->hide();
+    dialog_.reset();
+  }
 }

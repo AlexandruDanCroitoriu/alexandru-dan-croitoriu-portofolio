@@ -24,7 +24,8 @@ App::App(const Wt::WEnvironment& env)
     
     // Load Monaco Editor loader from local static files
     require("/static/monaco/vs/loader.js");
-    
+    // require("/static/js/animate-css-grid.js");
+    // require("https://unpkg.com/animate-css-grid@latest");
 
     // Load utility XML resources (favicon)
     wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/Utils");

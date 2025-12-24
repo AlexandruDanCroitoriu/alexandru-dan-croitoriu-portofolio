@@ -45,6 +45,10 @@ docker-compose up
 
 Build docker image and push to docker hub:
 ```bash 
-docker build -t maxuli/alexandru-dan-croitoriu-portofolio:latest -f dockerfiles/full_dockerfile .
+docker build \
+  -t maxuli/alexandru-dan-croitoriu-portofolio:latest \
+  -f dockerfiles/full_dockerfile . \
+  --build-arg CACHE_BUST=$(date +%s)
+  
 docker push maxuli/alexandru-dan-croitoriu-portofolio:latest
 ```

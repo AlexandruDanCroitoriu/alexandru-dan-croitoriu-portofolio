@@ -8,7 +8,7 @@
 RegistrationView::RegistrationView(std::shared_ptr<Session> session, Wt::Auth::AuthWidget *authWidget)
   : Wt::Auth::RegistrationWidget(authWidget),
     session_(session)
-{
+{ 
   setTemplateText(tr("template.registration-v1")); // custom implementation v1
   detailsModel_ = std::make_unique<UserDetailsModel>(session_);
 

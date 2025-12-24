@@ -3,7 +3,9 @@
 
 #include <Wt/WText.h>
 #include <Wt/WContainerWidget.h>
-#include <Wt/WMenu.h>
+#include <Wt/WRadioButton.h>
+#include <Wt/WButtonGroup.h>
+#include <Wt/WApplication.h>
 
 CvPortofolioTopic::CvPortofolioTopic()
 {
@@ -23,6 +25,58 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     auto title = container->addNew<Wt::WText>("<h2 class='text-3xl font-bold text-gray-800 mb-4'>CV & Portfolio</h2>");
     title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
+    // Chose tipe of CV/Portfolio to display (Coding and IT, All)
+    auto typeSelector = container->addNew<Wt::WContainerWidget>();
+    typeSelector->addStyleClass("mb-6 flex items-center space-x-4");
+    auto buttonGroup = std::make_shared<Wt::WButtonGroup>();
+    auto codingCvRadio = typeSelector->addNew<Wt::WRadioButton>("Coding and IT");
+    
+    auto allCvRadio = typeSelector->addNew<Wt::WRadioButton>("Full");
+    buttonGroup->addButton(allCvRadio, 0);
+    allCvRadio->addStyleClass("[&>input]:hidde text-white text-sm lg:text-md inline-block cursor-pointer");
+    allCvRadio->addStyleClass("[&>input]:[&~span]:p-1");
+    allCvRadio->addStyleClass("[&>input]:[&~span]:rounded-md");
+    allCvRadio->addStyleClass("[&>input]:[&~span]:bg-gray-400");
+    allCvRadio->addStyleClass("[&>input]:checked:[&~span]:bg-gray-700");
+
+    codingCvRadio->setChecked(true);
+    buttonGroup->addButton(codingCvRadio, 1);
+
+    codingCvRadio->addStyleClass("[&>input]:hidde text-white text-sm lg:text-md inline-block cursor-pointer");
+    codingCvRadio->addStyleClass("[&>input]:[&~span]:p-1");
+    codingCvRadio->addStyleClass("[&>input]:[&~span]:rounded-md");
+    codingCvRadio->addStyleClass("[&>input]:[&~span]:bg-gray-400");
+    codingCvRadio->addStyleClass("[&>input]:checked:[&~span]:bg-gray-700");
+
+
+    auto gridContainer = container->addNew<Wt::WContainerWidget>();
+
+    std::string gridCellStyle = "bg-green-300 rounded-md shadow-md w-60 h-60";
+
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    
+    buttonGroup->checkedChanged().connect([gridContainer, codingCvRadio, allCvRadio](Wt::WRadioButton* selectedRadioButton) {
+        std::cout << "CvPortofolioTopic::cvPage() - Selected radio button changed" << std::endl;
+        if (codingCvRadio == selectedRadioButton) {
+            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]");
+        } else if (allCvRadio == selectedRadioButton) {
+            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit,minmax(400px,1fr))]");
+        }else {
+            wApp->log("error") << "CvPortofolioTopic::cvPage() - Unknown radio button selected";
+        }
+    });
+
+    buttonGroup->checkedChanged().emit(buttonGroup->checkedButton());
+
     // Personal Info Section
     auto infoSection = container->addNew<Wt::WContainerWidget>();
     infoSection->addStyleClass("bg-white rounded-lg shadow-md p-6 mb-4");
@@ -35,64 +89,6 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     );
     infoContent->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
-    // About Section
-    auto aboutSection = container->addNew<Wt::WContainerWidget>();
-    aboutSection->addStyleClass("bg-white rounded-lg shadow-md p-6 mb-4");
-    
-    auto aboutContent = aboutSection->addNew<Wt::WText>(
-        "<h3 class='text-2xl font-semibold text-gray-800 mb-3'>About Me</h3>"
-        "<p class='text-gray-700 leading-relaxed'>"
-        "Experienced C++ developer with expertise in web frameworks, particularly Wt. "
-        "Passionate about building modern, responsive web applications with clean architecture."
-        "</p>"
-    );
-    aboutContent->setTextFormat(Wt::TextFormat::UnsafeXHTML);
-
-    // Experience Section
-    auto expSection = container->addNew<Wt::WContainerWidget>();
-    expSection->addStyleClass("bg-white rounded-lg shadow-md p-6 mb-4");
-    
-    auto expContent = expSection->addNew<Wt::WText>(
-        "<h3 class='text-2xl font-semibold text-gray-800 mb-3'>Experience</h3>"
-        "<div class='mb-4'>"
-        "  <h4 class='text-xl font-medium text-gray-800'>Your Position</h4>"
-        "  <p class='text-gray-600 italic mb-2'>Company Name • Year - Present</p>"
-        "  <ul class='list-disc list-inside text-gray-700 space-y-1'>"
-        "    <li>Developed web applications using C++ and Wt framework</li>"
-        "    <li>Implemented responsive UI components with Tailwind CSS</li>"
-        "    <li>Built and maintained CI/CD pipelines</li>"
-        "  </ul>"
-        "</div>"
-    );
-    expContent->setTextFormat(Wt::TextFormat::UnsafeXHTML);
-
-    // Skills Section
-    auto skillsSection = container->addNew<Wt::WContainerWidget>();
-    skillsSection->addStyleClass("bg-white rounded-lg shadow-md p-6 mb-4");
-    
-    auto skillsContent = skillsSection->addNew<Wt::WText>(
-        "<h3 class='text-2xl font-semibold text-gray-800 mb-3'>Skills</h3>"
-        "<div class='grid grid-cols-2 gap-4'>"
-        "  <div>"
-        "    <h4 class='font-medium text-gray-800 mb-2'>Programming Languages</h4>"
-        "    <ul class='list-disc list-inside text-gray-700'>"
-        "      <li>C++</li>"
-        "      <li>JavaScript/TypeScript</li>"
-        "      <li>Python</li>"
-        "    </ul>"
-        "  </div>"
-        "  <div>"
-        "    <h4 class='font-medium text-gray-800 mb-2'>Technologies</h4>"
-        "    <ul class='list-disc list-inside text-gray-700'>"
-        "      <li>Wt Framework</li>"
-        "      <li>CMake</li>"
-        "      <li>Tailwind CSS</li>"
-        "      <li>Docker</li>"
-        "    </ul>"
-        "  </div>"
-        "</div>"
-    );
-    skillsContent->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
     return container;
 }

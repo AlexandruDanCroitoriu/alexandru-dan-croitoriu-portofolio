@@ -34,15 +34,22 @@ COPY ./src /app/src
 COPY ./static /app/static
 COPY ./CMakeLists.txt /app/CMakeLists.txt
 
-# Build Tailwind CSS
-RUN cd /app/static/stylus/tailwind && \
-    npm install && \
-    npx @tailwindcss/cli -i ./input.css -o ../../theme/tailwindcss/tailwind.minify.css --minify
 
 # Build application
 WORKDIR /app/build/release
-RUN cmake -DCMAKE_BUILD_TYPE=Release ../../ 
-RUN make
+ARG CACHE_BUST
+# Cache busting mechanism to force Docker to rebuild these layers even if the commands haven't changed.
+# The CACHE_BUST build argument (set during docker build with --build-arg CACHE_BUST=$(date +%s))
+# ensures that when its value changes, Docker will invalidate the cache for this layer and all
+# subsequent layers, forcing a fresh execution of the commands. This is useful for ensuring
+# dependencies are updated and the latest code changes are included in the build.
+RUN echo "CACHE_BUST=${CACHE_BUST}" && cmake -DCMAKE_BUILD_TYPE=Release ../../ 
+# Build Tailwind CSS
+RUN echo "CACHE_BUST=${CACHE_BUST}" && cd /app/static/stylus/tailwind && \
+    npm install && \
+    npx @tailwindcss/cli -i ./input.css -o ../../theme/tailwindcss/tailwind.minify.css --minify
+RUN echo "CACHE_BUST=${CACHE_BUST}" && make
+
 
 # Stage 2: Runtime
 FROM alpine:latest

@@ -104,7 +104,8 @@ void AuthWidget::createLoginView()
 
   // Keep registration in the same dialog without changing internal paths
   if (auto regAnchor = resolve<Wt::WAnchor*>("register")) {
-    regAnchor->setLink(Wt::WLink(Wt::LinkType::InternalPath, Wt::WApplication::instance()->internalPath()));
+    // Prevent navigation: keep anchor but disable default link behavior
+    regAnchor->setLink(Wt::WLink("javascript:void(0)"));
     regAnchor->clicked().connect([this]() { showRegistrationView(); });
   } else if (auto regBtn = resolve<Wt::WPushButton*>("register")) {
     regBtn->clicked().connect([this]() { showRegistrationView(); });

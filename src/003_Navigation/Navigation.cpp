@@ -109,16 +109,22 @@ void Navigation::setUI()
     menuToggleButton_->setText("☰");
     menuToggleButton_->clicked().connect(this, &Navigation::toggleMenu);
 
-    // Create logo/title area using direct text (avoid SVG template which causes Magick crash)
-    auto logoArea = sidebar_->addNew<Wt::WContainerWidget>();
-    logoArea->addStyleClass("relative h-fit flex items-center pb-4 shrink-0 border-b border-gray-700");
-    
-    auto logoDirDiv = logoArea->addNew<Wt::WContainerWidget>();
-    logoDirDiv->addStyleClass("mx-auto");
-    logoDirDiv->addNew<Wt::WText>("Alexandru Dan")->addStyleClass("font-bold tracking-wide text-xl");
-    logoDirDiv->addNew<Wt::WBreak>();
-    logoDirDiv->addNew<Wt::WText>("Croitoriu")->addStyleClass("font-bold tracking-wide text-xl");
+     // Create logo/title area using WTemplate
+    auto logoArea = sidebar_->addNew<Wt::WTemplate>();
+    logoArea->addStyleClass("relative h-fit flex items-center pb-4 shrink-0 border-b border-gray-700 cursor-pointer");
+    logoArea->setTemplateText(
+        "<div class=\"\">${tr:favicon.svg class=\"\"}</div>"
+        "<div class=\"mx-auto\">"
+        "  <div class=\"font-bold tracking-wide text-xl\">Alexandru Dan</div>"
+        "  <div class=\"font-bold tracking-wide text-xl\">Croitoriu</div>"
+        "</div>"
+    );
+    logoArea->addFunction("tr", &Wt::WTemplate::Functions::tr);
 
+    logoArea->clicked().connect([this]() { 
+        wApp->setInternalPath("/", true);
+        closeMenu();
+    });
     // Create stacked widget for content
     contentsStack_ = contentsArea_->addNew<Wt::WStackedWidget>();
     contentsStack_->addStyleClass("flex-1 overflow-auto");

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../NavigationTopic.h"
+#include "003_Navigation/NavigationTopic.h"
 #include <Wt/WWidget.h>
 #include <memory>
 
-class ComponentsTopic : public NavigationTopic
+class MonacoTopic : public NavigationTopic
 {
 public:
-    ComponentsTopic();
+    MonacoTopic();
     std::unique_ptr<Wt::WWidget> createMonacoEditorDemo();
 
 private:

@@ -1,4 +1,4 @@
-#include "003_Navigation/topics/NewPostTopic.h"
+#include "007_Blog/topics/NewPostTopic.h"
 #include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 

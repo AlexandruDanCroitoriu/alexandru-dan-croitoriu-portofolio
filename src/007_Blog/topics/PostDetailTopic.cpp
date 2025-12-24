@@ -1,8 +1,9 @@
-#include "003_Navigation/topics/PostDetailTopic.h"
-#include "003_Navigation/topics/EditPostTopic.h"
+#include "007_Blog/topics/PostDetailTopic.h"
+#include "007_Blog/topics/EditPostTopic.h"
 
 #include "005_Dbo/Session.h"
 #include "005_Dbo/Tables/Post.h"
+#include "005_Dbo/Tables/Permission.h"
 #include "007_Blog/PostView.h"
 
 #include <Wt/WText.h>

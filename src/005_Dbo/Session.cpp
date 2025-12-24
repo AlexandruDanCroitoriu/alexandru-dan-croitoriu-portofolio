@@ -363,5 +363,33 @@ void Session::createInitialData()
   }
 }
 
+void Session::restoreLogin()
+{
+  // Try to restore login from remember-me token if present
+  // This is called when a new session starts, to restore login from auth token cookie
+  if (!login_.loggedIn()) {
+    const std::string* tokenCookiePtr = Wt::WApplication::instance()->environment().getCookie("logincookie");
+    if (tokenCookiePtr) {
+      std::string tokenCookie = *tokenCookiePtr;
+      // Query the auth_token table to find and verify the token
+      Wt::Dbo::Transaction t(*this);
+      auto tokenResult = find<AuthInfo::AuthTokenType>("where value = ?")
+        .bind(tokenCookie);
+      
+      auto token = tokenResult.resultValue();
+      if (token && !token->expires().isNull() && token->expires() > Wt::WDateTime::currentDateTime()) {
+        // Token is valid, get the associated AuthInfo
+        Wt::Dbo::ptr<AuthInfo> authInfo = token->authInfo();
+        
+        if (authInfo) {
+          login_.login(Wt::Auth::User(std::to_string(authInfo->id()), *users_));
+          Wt::log("info") << "Restored login from remember-me token";
+        }
+      }
+      t.commit();
+    }
+  }
+}
+
 
 

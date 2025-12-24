@@ -9,6 +9,7 @@
 #include <Wt/WText.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WComboBox.h>
+#include <Wt/WCheckBox.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLink.h>
 #include <Wt/Dbo/Query.h>
@@ -66,37 +67,49 @@ void BlogView::renderPostsList()
   std::string orderColumn = (effectiveFilter == Post::State::Published) ? "published_at" : "created_at";
 
   Wt::Dbo::Query<dbo::ptr<Post>> postsQuery;
-  if (effectiveShowAll) {
-    // Show all states
-    if (currentTagSlug_.empty()) {
+  
+  if (selectedTagSlugs_.empty()) {
+    // No tag filter
+    if (effectiveShowAll) {
       postsQuery = session_->find<Post>("order by " + orderColumn + " desc");
     } else {
-      std::string sql =
-        "select p from post p "
-        "join posts_tags pt on pt.post_id = p.id "
-        "join tag t on t.id = pt.tag_id "
-        "where t.slug = ? "
-        "order by p." + orderColumn + " desc";
-      postsQuery = session_->query<dbo::ptr<Post>>(sql)
-                      .bind(currentTagSlug_);
-    }
-  } else {
-    // Filter by specific state
-    if (currentTagSlug_.empty()) {
       postsQuery = session_->find<Post>(
                       "where state = ? order by " + orderColumn + " desc")
                     .bind(effectiveFilter);
-    } else {
-      std::string sql =
-        "select p from post p "
-        "join posts_tags pt on pt.post_id = p.id "
-        "join tag t on t.id = pt.tag_id "
-        "where p.state = ? and t.slug = ? "
-        "order by p." + orderColumn + " desc";
-      postsQuery = session_->query<dbo::ptr<Post>>(sql)
-                      .bind(effectiveFilter)
-                      .bind(currentTagSlug_);
     }
+  } else {
+    // Filter by multiple tags (ANY tag match)
+    std::string tagCondition;
+    for (size_t i = 0; i < selectedTagSlugs_.size(); ++i) {
+      if (i > 0) tagCondition += " or ";
+      tagCondition += "t.slug = ?";
+    }
+
+    std::string sql =
+      "select distinct p from post p "
+      "join posts_tags pt on pt.post_id = p.id "
+      "join tag t on t.id = pt.tag_id "
+      "where (" + tagCondition + ")";
+    
+    if (!effectiveShowAll) {
+      sql += " and p.state = ?";
+    }
+    
+    sql += " order by p." + orderColumn + " desc";
+
+    auto query = session_->query<dbo::ptr<Post>>(sql);
+    
+    // Bind all tag slugs
+    for (const auto& slug : selectedTagSlugs_) {
+      query.bind(slug);
+    }
+    
+    // Bind state if filtering by state
+    if (!effectiveShowAll) {
+      query.bind(effectiveFilter);
+    }
+    
+    postsQuery = query;
   }
 
   auto posts = postsQuery.resultList();
@@ -122,16 +135,19 @@ void BlogView::renderFilter()
 {
   // Filter bar
   auto filterBar = addNew<Wt::WContainerWidget>();
-  filterBar->addStyleClass("flex items-center gap-3");
+  filterBar->addStyleClass("flex flex-col gap-4");
 
   const bool isAdmin = currentUserIsBlogAdmin();
 
   // State filter: only visible to admin
   if (isAdmin) {
-    auto stateLabel = filterBar->addNew<Wt::WText>("State:");
+    auto stateContainer = filterBar->addNew<Wt::WContainerWidget>();
+    stateContainer->addStyleClass("flex items-center gap-3");
+
+    auto stateLabel = stateContainer->addNew<Wt::WText>("State:");
     stateLabel->addStyleClass("text-sm text-gray-600");
 
-    filterCombo_ = filterBar->addNew<Wt::WComboBox>();
+    filterCombo_ = stateContainer->addNew<Wt::WComboBox>();
     filterCombo_->addStyleClass("bg-gray-50/10 ring-1 ring-gray-50/5 rounded px-2 py-1 text-sm");
 
     filterCombo_->addItem("All States");
@@ -173,46 +189,47 @@ void BlogView::renderFilter()
   }
 
   // Tag filter: visible to all
-  auto tagLabel = filterBar->addNew<Wt::WText>("Tag:");
-  tagLabel->addStyleClass("text-sm text-gray-600");
+  auto tagSection = filterBar->addNew<Wt::WContainerWidget>();
+  tagSection->addStyleClass("space-y-2");
 
-  tagCombo_ = filterBar->addNew<Wt::WComboBox>();
-  tagCombo_->addStyleClass("bg-gray-50/10 ring-1 ring-gray-50/5 rounded px-2 py-1 text-sm");
+  auto tagLabel = tagSection->addNew<Wt::WText>("Tags:");
+  tagLabel->addStyleClass("text-sm text-gray-600 block");
 
-  tagCombo_->addItem("All Tags");
-  tagSlugs_.clear();
+  tagFilterContainer_ = tagSection->addNew<Wt::WContainerWidget>();
+  tagFilterContainer_->addStyleClass("flex flex-wrap gap-2");
+
+  allTagSlugs_.clear();
+  tagCheckboxes_.clear();
 
   {
     dbo::Transaction t(*session_);
     auto tags = session_->find<Tag>("order by name asc").resultList();
     for (const dbo::ptr<Tag>& tag : tags) {
-      tagCombo_->addItem(tag->name_);
-      tagSlugs_.push_back(tag->slug_);
+      auto checkbox = tagFilterContainer_->addNew<Wt::WCheckBox>(tag->name_);
+      checkbox->addStyleClass("text-sm text-gray-700");
+      
+      allTagSlugs_.push_back(tag->slug_);
+      tagCheckboxes_.push_back(checkbox);
+      
+      // Check if this tag is already selected
+      auto it = std::find(selectedTagSlugs_.begin(), selectedTagSlugs_.end(), tag->slug_);
+      if (it != selectedTagSlugs_.end()) {
+        checkbox->setChecked(true);
+      }
+      
+      checkbox->changed().connect([this, slug = tag->slug_]() {
+        // Update selectedTagSlugs_ based on checkbox states
+        selectedTagSlugs_.clear();
+        for (size_t i = 0; i < tagCheckboxes_.size(); ++i) {
+          if (tagCheckboxes_[i]->isChecked()) {
+            selectedTagSlugs_.push_back(allTagSlugs_[i]);
+          }
+        }
+        updateUrlWithFilters();
+        renderPostsList();
+      });
     }
   }
-
-  // Set current index based on initialized tag filter
-  int tagIdx = 0;
-  if (!currentTagSlug_.empty()) {
-    auto it = std::find(tagSlugs_.begin(), tagSlugs_.end(), currentTagSlug_);
-    if (it != tagSlugs_.end()) {
-      tagIdx = std::distance(tagSlugs_.begin(), it) + 1; // +1 for "All Tags"
-    }
-  }
-  tagCombo_->setCurrentIndex(tagIdx);
-
-  tagCombo_->changed().connect([this]() {
-    const int idx = tagCombo_->currentIndex();
-    if (idx <= 0) {
-      currentTagSlug_.clear();
-    } else {
-      // idx - 1 into tagSlugs_
-      if (static_cast<size_t>(idx - 1) < tagSlugs_.size())
-        currentTagSlug_ = tagSlugs_[idx - 1];
-    }
-    updateUrlWithFilters();
-    renderPostsList();
-  });
 }
 
 void BlogView::initializeFiltersFromUrl()
@@ -221,7 +238,9 @@ void BlogView::initializeFiltersFromUrl()
   std::string internalPath = app->internalPath();
   
   // Parse query parameters from internal path
-  std::string stateValue, tagValue;
+  std::string stateValue;
+  std::vector<std::string> tagValues;
+  
   size_t queryPos = internalPath.find('?');
   if (queryPos != std::string::npos) {
     std::string queryString = internalPath.substr(queryPos + 1);
@@ -242,7 +261,7 @@ void BlogView::initializeFiltersFromUrl()
         if (key == "state") {
           stateValue = value;
         } else if (key == "tag") {
-          tagValue = value;
+          tagValues.push_back(value);
         }
       }
       
@@ -275,7 +294,7 @@ void BlogView::initializeFiltersFromUrl()
   }
   
   // Apply tag filter
-  currentTagSlug_ = tagValue; // Empty string if not found
+  selectedTagSlugs_ = tagValues; // Empty if no tags
 }
 
 void BlogView::updateUrlWithFilters()
@@ -299,9 +318,9 @@ void BlogView::updateUrlWithFilters()
     }
   }
   
-  // Add tag parameter
-  if (!currentTagSlug_.empty()) {
-    params.push_back("tag=" + currentTagSlug_);
+  // Add tag parameters (support multiple tags)
+  for (const auto& tagSlug : selectedTagSlugs_) {
+    params.push_back("tag=" + tagSlug);
   }
   
   // Construct final path with query string

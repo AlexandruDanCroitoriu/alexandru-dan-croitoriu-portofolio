@@ -77,3 +77,4 @@ npm run minify  # Production (minified output)
  - **Light** bg-gray-50/10 hover:bg-gray-50/20 ring-gray-50/5
  - **Dark** bg-slate-700 hover:bg-slate-800 ring-gray-50/10
 
+**HARD RULE**: build the app, in debug, to check for any compilation errors after any changes

@@ -7,6 +7,7 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WComboBox.h>
+#include <Wt/WCheckBox.h>
 
 #include "005_Dbo/Tables/Post.h"
 #include "005_Dbo/Tables/Tag.h"
@@ -30,9 +31,10 @@ private:
   Post::State currentFilter_ = Post::State::Published; // Active = Published
   bool showAllStates_ = false;
   // Tag filter (visible to all)
-  Wt::WComboBox* tagCombo_ {nullptr};
-  std::vector<std::string> tagSlugs_;
-  std::string currentTagSlug_;
+  Wt::WContainerWidget* tagFilterContainer_ {nullptr};
+  std::vector<std::string> allTagSlugs_;
+  std::vector<std::string> selectedTagSlugs_;
+  std::vector<Wt::WCheckBox*> tagCheckboxes_;
 
   void renderHeader();
   void renderFilter();

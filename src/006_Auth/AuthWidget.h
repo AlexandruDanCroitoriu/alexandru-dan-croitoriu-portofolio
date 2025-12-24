@@ -20,7 +20,6 @@ protected:
 
 private:
   std::shared_ptr<Session> session_;
-  void createInitialData();
   std::string loginTemplateId_; // default template id
   std::unique_ptr<Wt::WDialog> dialog_;
 };

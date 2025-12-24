@@ -1,4 +1,4 @@
-#include "003_Navigation/topics/EditPostTopic.h"
+#include "007_Blog/topics/EditPostTopic.h"
 #include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
@@ -50,7 +50,13 @@ EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string
 
 std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
 {
-  return editPage();
+  // Capture session and slug by value to avoid dangling references in deferred execution
+  auto session = session_;
+  auto slug = slug_;
+  return deferCreate([session, slug]() {
+    EditPostTopic topic(session, slug);
+    return topic.editPage();
+  });
 }
 
 std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
@@ -66,30 +72,52 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
     return container;
   }
 
-  dbo::Transaction t(*session_);
-  auto posts = session_->find<Post>("where slug = ?").bind(slug_).resultList();
-  if (posts.empty()) {
-    auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Post not found</h2>"));
-    title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
-    return container;
-  }
-  auto post = posts.front();
+  // Load post data and copy values we need (transaction scope is critical)
+  std::string postTitle;
+  std::string postBrief;
+  std::string postBody;
+  int stateIdx = 0;
+  std::vector<std::string> prechecked;
+  
+  {
+    dbo::Transaction t(*session_);
+    auto posts = session_->find<Post>("where slug = ?").bind(slug_).resultList();
+    if (posts.empty()) {
+      auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Post not found</h2>"));
+      title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+      return container;
+    }
+    auto post = posts.front();
+
+    // Copy all data we need while transaction is active
+    postTitle = post->title_;
+    postBrief = post->briefSrc_;
+    postBody = post->bodySrc_;
+    
+    if (post->state_ == Post::State::Published) stateIdx = 1;
+    else if (post->state_ == Post::State::Archived) stateIdx = 2;
+    
+    // Collect current post tags for pre-check
+    for (const auto& tag : post->tags_) {
+      prechecked.push_back(tag->slug_);
+    }
+  } // Transaction ends here, post pointer is no longer valid
 
   auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Edit Post</h2>"));
   title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
-  auto titleEdit = container->addNew<Wt::WLineEdit>(post->title_);
+  auto titleEdit = container->addNew<Wt::WLineEdit>(postTitle);
   titleEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
 
   auto briefEdit = container->addNew<MonacoEditor>("html");
   briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
   briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
-  briefEdit->setContent(post->briefSrc_);
+  briefEdit->setContent(postBrief);
   
   auto bodyEdit = container->addNew<MonacoEditor>("html");
   bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
   bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
-  bodyEdit->setContent(post->bodySrc_);
+  bodyEdit->setContent(postBody);
 
   // State selection
   auto stateLabel = container->addNew<Wt::WText>("State:");
@@ -98,9 +126,6 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   stateCombo->addItem("Draft");
   stateCombo->addItem("Published");
   stateCombo->addItem("Archived");
-  int stateIdx = 0;
-  if (post->state_ == Post::State::Published) stateIdx = 1;
-  else if (post->state_ == Post::State::Archived) stateIdx = 2;
   stateCombo->setCurrentIndex(stateIdx);
   stateCombo->addStyleClass("rounded-md border border-gray-300 p-2");
 
@@ -113,12 +138,6 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
 
   auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox*>>();
   auto tagSlugs = std::make_shared<std::vector<std::string>>();
-
-  // Collect current post tags for pre-check
-  std::vector<std::string> prechecked;
-  for (const auto& tag : post->tags_) {
-    prechecked.push_back(tag->slug_);
-  }
 
   auto refreshTags = [this, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string>& pre) {
     tagContainer->clear();

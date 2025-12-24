@@ -1,4 +1,4 @@
-#include "003_Navigation/topics/UserSettingsTopic.h"
+#include "006_Auth/topics/UserSettingsTopic.h"
 #include "005_Dbo/Session.h"
 
 #include <Wt/WContainerWidget.h>

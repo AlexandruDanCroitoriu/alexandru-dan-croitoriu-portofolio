@@ -1,4 +1,4 @@
-#include "003_Navigation/topics/ComponentsTopic.h"
+#include "002_Components/topics/MonacoTopic.h"
 #include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
@@ -9,11 +9,11 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WPushButton.h>
 
-ComponentsTopic::ComponentsTopic()
+MonacoTopic::MonacoTopic()
 {
 }
 
-std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
+std::unique_ptr<Wt::WWidget> MonacoTopic::monacoEditorDemo()
 {
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
@@ -155,7 +155,7 @@ std::unique_ptr<Wt::WWidget> ComponentsTopic::monacoEditorDemo()
     return container;
 }
 
-std::unique_ptr<Wt::WWidget> ComponentsTopic::createMonacoEditorDemo()
+std::unique_ptr<Wt::WWidget> MonacoTopic::createMonacoEditorDemo()
 {
     return monacoEditorDemo();
 }

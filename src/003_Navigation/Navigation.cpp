@@ -1,12 +1,12 @@
 #include "003_Navigation/Navigation.h"
 #include "003_Navigation/NavigationTopic.h"
-#include "003_Navigation/topics/ComponentsTopic.h"
+#include "002_Components/topics/MonacoTopic.h"
 #include "003_Navigation/topics/CvPortofolioTopic.h"
-#include "003_Navigation/topics/BlogTopic.h"
-#include "003_Navigation/topics/NewPostTopic.h"
-#include "003_Navigation/topics/EditPostTopic.h"
-#include "003_Navigation/topics/PostDetailTopic.h"
-#include "003_Navigation/topics/UserSettingsTopic.h"
+#include "007_Blog/topics/BlogTopic.h"
+#include "007_Blog/topics/NewPostTopic.h"
+#include "007_Blog/topics/EditPostTopic.h"
+#include "007_Blog/topics/PostDetailTopic.h"
+#include "006_Auth/topics/UserSettingsTopic.h"
 #include "003_Navigation/topics/NotFoundTopic.h"
 #include "003_Navigation/topics/NotAuthorizedTopic.h"
 #include "005_Dbo/Session.h"
@@ -165,7 +165,7 @@ void Navigation::setupRoutes()
 {
     // Topics instances captured by value in route lambdas
     auto cvTopic = std::make_shared<CvPortofolioTopic>();
-    auto components = std::make_shared<ComponentsTopic>();
+    auto monacoTopic = std::make_shared<MonacoTopic>();
     auto blogTopic = std::make_shared<BlogTopic>(session_);
     auto userSettings = std::make_shared<UserSettingsTopic>(session_);
     auto notFound = std::make_shared<NotFoundTopic>();
@@ -201,10 +201,20 @@ void Navigation::setupRoutes()
     pathPatterns_.push_back({
         std::regex("^/portfolio/blog/post/([^/]+)/edit$"),
         [this, notAuthorized](const std::smatch& match) -> std::unique_ptr<Wt::WWidget> {
-            dbo::Transaction t(*session_);
-            auto user = session_->user();
-            auto perms = session_->find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
-            bool isAdmin = user && !perms.empty() && user->hasPermission(perms.front());
+            bool isAdmin = false;
+            {
+                dbo::Transaction t(*session_);
+                if (session_->login().loggedIn()) {
+                    auto user = session_->user();
+                    if (user) {
+                        auto perms = session_->find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
+                        if (!perms.empty()) {
+                            isAdmin = user->hasPermission(perms.front());
+                        }
+                    }
+                }
+            }
+            
             if (!isAdmin) {
                 return notAuthorized->createNotAuthorizedPage();
             }
@@ -213,8 +223,8 @@ void Navigation::setupRoutes()
             return editTopic->createEditPostPage();
         }
     });
-    routes_["/components/monaco"] = [components]() {
-        return components->createMonacoEditorDemo();
+    routes_["/components/monaco"] = [monacoTopic]() {
+        return monacoTopic->createMonacoEditorDemo();
     };
     routes_["/account/settings"] = [userSettings]() {
         return userSettings->createSettingsPage();

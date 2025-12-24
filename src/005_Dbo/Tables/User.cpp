@@ -12,8 +12,9 @@ User::User(const std::string& name)
 
 bool User::hasPermission(const Wt::Dbo::ptr<Permission>& permission) const
 {
+  if (!permission) return false;
   for (const auto& perm : permissions_) {
-    if (perm->name_.compare(permission->name_) == 0) {
+    if (perm && perm->name_.compare(permission->name_) == 0) {
       return true;
     }
   }

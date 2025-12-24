@@ -44,13 +44,12 @@ set(SOURCES
     ${SOURCE_DIR}/001_App/App.cpp
     
     ${SOURCE_DIR}/002_Components/MonacoEditor.cpp
+    ${SOURCE_DIR}/002_Components/topics/MonacoTopic.cpp
 
     # Navigation sources
     ${SOURCE_DIR}/003_Navigation/Navigation.cpp
     ${SOURCE_DIR}/003_Navigation/NavigationTopic.cpp
-    ${SOURCE_DIR}/003_Navigation/topics/ComponentsTopic.cpp
     ${SOURCE_DIR}/003_Navigation/topics/CvPortofolioTopic.cpp
-    ${SOURCE_DIR}/003_Navigation/topics/UserSettingsTopic.cpp
     ${SOURCE_DIR}/003_Navigation/topics/NotFoundTopic.cpp
     ${SOURCE_DIR}/003_Navigation/topics/NotAuthorizedTopic.cpp
 
@@ -67,16 +66,17 @@ set(SOURCES
     ${SOURCE_DIR}/006_Auth/AuthWidget.cpp
     ${SOURCE_DIR}/006_Auth/RegistrationView.cpp
     ${SOURCE_DIR}/006_Auth/UserDetailsModel.cpp
+    ${SOURCE_DIR}/006_Auth/topics/UserSettingsTopic.cpp
 
     # Blog views
     ${SOURCE_DIR}/007_Blog/BlogView.cpp
     ${SOURCE_DIR}/007_Blog/PostView.cpp
 
-    # Blog topic
-    ${SOURCE_DIR}/003_Navigation/topics/BlogTopic.cpp
-    ${SOURCE_DIR}/003_Navigation/topics/NewPostTopic.cpp
-    ${SOURCE_DIR}/003_Navigation/topics/EditPostTopic.cpp
-    ${SOURCE_DIR}/003_Navigation/topics/PostDetailTopic.cpp
+    # Blog topics
+    ${SOURCE_DIR}/007_Blog/topics/BlogTopic.cpp
+    ${SOURCE_DIR}/007_Blog/topics/NewPostTopic.cpp
+    ${SOURCE_DIR}/007_Blog/topics/EditPostTopic.cpp
+    ${SOURCE_DIR}/007_Blog/topics/PostDetailTopic.cpp
 
 
 )

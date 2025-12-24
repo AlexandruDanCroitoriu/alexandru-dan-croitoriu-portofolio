@@ -1,4 +1,4 @@
-#include "003_Navigation/topics/BlogTopic.h"
+#include "007_Blog/topics/BlogTopic.h"
 #include "003_Navigation/DeferredWidget.h"
 
 #include "007_Blog/BlogView.h"

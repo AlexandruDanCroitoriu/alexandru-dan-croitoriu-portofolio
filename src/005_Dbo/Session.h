@@ -29,6 +29,8 @@ public:
 
   Wt::Auth::AbstractUserDatabase& users();
   Wt::Auth::Login& login() { return login_; }
+  
+  void restoreLogin();
 
   static const Wt::Auth::AuthService& auth();
   static const Wt::Auth::PasswordService& passwordAuth();

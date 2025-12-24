@@ -6,10 +6,12 @@
 #include "005_Dbo/Tables/Permission.h"
 
 #include <Wt/Auth/PasswordService.h>
+#include <Wt/Auth/AuthModel.h>
 #include <Wt/WApplication.h>
 #include <Wt/WButtonGroup.h>
 #include <Wt/WDialog.h>
 #include <Wt/WRadioButton.h>
+#include <Wt/WCheckBox.h>
 
 AuthWidget::AuthWidget(std::shared_ptr<Session> session)
   : Wt::Auth::AuthWidget(Session::auth(), session->users(), session->login()),
@@ -44,6 +46,7 @@ std::unique_ptr<Wt::WWidget> AuthWidget::createRegistrationView(const Wt::Auth::
 void AuthWidget::createLoginView()
 {
   setTemplateText(tr(loginTemplateId_)); // default wt template
+
   // setTemplateText(tr("Wt.Auth.template.login-v0")); // v0 nothing but the data and some basic structure
   // setTemplateText(tr("Wt.Auth.template.login-v1")); // custom implementation v1
 
@@ -90,6 +93,11 @@ void AuthWidget::createLoginView()
 #ifdef WT_HAS_SAML
   createSamlLoginView();
 #endif // WT_HAS_SAML_
+  
+  // Set remember me checkbox to be checked by default
+  if (auto rememberCheckbox = resolve<Wt::WCheckBox*>(Wt::Auth::AuthModel::RememberMeField)) {
+    rememberCheckbox->setChecked(true);
+  }
 }
 
 Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt::WWidget> contents) 

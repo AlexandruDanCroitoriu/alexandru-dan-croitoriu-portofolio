@@ -45,7 +45,7 @@ services:
       - "traefik.http.routers.app.rule=Host(`test.alexandru-croitoriu.dev`)"
       - "traefik.http.routers.app.entrypoints=websecure"
       - "traefik.http.routers.app.tls=true"
-      - "traefik.http.services.app.loadbalancer.server.port=5678"
+      - "traefik.http.services.app.loadbalancer.server.port=9020"
       # - "traefik.docker.network=bridge"
 volumes:
   postgres_data:

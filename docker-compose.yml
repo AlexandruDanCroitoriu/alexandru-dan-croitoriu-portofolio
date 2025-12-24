@@ -39,7 +39,13 @@ services:
     networks:
       - portfolio_network
     restart: unless-stopped
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`test.alexandru-croitoriu.dev`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=5678"
+      # - "traefik.docker.network=bridge"
 volumes:
   postgres_data:
 

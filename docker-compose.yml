@@ -21,9 +21,10 @@ services:
       - portfolio_network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    image: maxuli/alexandru-dan-croitoriu-portofolio:latest
     container_name: portfolio-app
     depends_on:
       postgres:

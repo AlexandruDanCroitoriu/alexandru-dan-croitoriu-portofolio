@@ -288,7 +288,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
 
       // Redirect back to post detail
       if (!redirectSlug.empty()) {
-        Wt::WApplication::instance()->setInternalPath("/portfolio/blog/post/" + redirectSlug, true);
+        Wt::WApplication::instance()->setInternalPath("/blog/post/" + redirectSlug, true);
       }
     } catch (const std::exception& ex) {
       status->setText(std::string("Error: ") + ex.what());

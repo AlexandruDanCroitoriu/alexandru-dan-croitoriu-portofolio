@@ -49,7 +49,7 @@ std::unique_ptr<Wt::WWidget> PostDetailTopic::createPostDetailPage()
       auto editBtn = container->addNew<Wt::WPushButton>("Edit Post");
       editBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 text-white rounded-md px-3 py-1 mb-2");
       editBtn->clicked().connect([slug = post->slug_]() {
-        Wt::WApplication::instance()->setInternalPath("/portfolio/blog/post/" + slug + "/edit", true);
+        Wt::WApplication::instance()->setInternalPath("/blog/post/" + slug + "/edit", true);
       });
     }
     container->addNew<PostView>(*session_, post, PostView::RenderType::Detail);

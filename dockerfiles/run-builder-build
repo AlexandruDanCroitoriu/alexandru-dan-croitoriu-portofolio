@@ -1,0 +1,18 @@
+FROM alpine:latest
+
+# Runtime deps: match toolchain ABI (libstdc++, libgcc)
+RUN apk add --no-cache \
+	libstdc++ libgcc \
+	boost-libs boost-program_options boost-filesystem boost-thread boost-system boost-regex \
+	postgresql-libs
+
+COPY --from=wt-builder-alexandru-dan-croitoriu-portofolio:latest app/build /app/build 
+COPY --from=wt-builder-alexandru-dan-croitoriu-portofolio:latest /usr/lib/libwt*.so.* /usr/lib/
+COPY ./resources /app/resources
+COPY ./static /app/static
+# COPY ./wt_config_release.xml /app/wt_config_release.xml
+COPY ./wt_config_debug.xml /app/wt_config_release.xml
+
+
+WORKDIR /app/build/release
+CMD ["./alexandru_dan_croitoriu_portofolio", "--docroot", "../../", "-c", "../../wt_config_release.xml", "--http-address", "0.0.0.0", "--http-port", "9020"]

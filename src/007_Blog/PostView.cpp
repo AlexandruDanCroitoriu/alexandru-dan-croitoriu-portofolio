@@ -26,7 +26,7 @@ PostView::PostView(Session& session, const Wt::Dbo::ptr<Post>& post, RenderType 
     titleAnchor->setTextFormat(Wt::TextFormat::UnsafeXHTML);
     titleAnchor->setText(Wt::WString::fromUTF8("<h3 class='text-xl font-semibold text-blue-600 hover:text-blue-800 cursor-pointer'>" + post->title_ + "</h3>"));
     titleAnchor->clicked().connect([slug = post->slug_]() {
-      Wt::WApplication::instance()->setInternalPath("/portfolio/blog/post/" + slug, true);
+      Wt::WApplication::instance()->setInternalPath("/blog/post/" + slug, true);
     });
   } else {
     // Non-clickable title for detail view

@@ -8,6 +8,7 @@
 #include <Wt/WLink.h>
 #include <Wt/WPushButton.h>
 #include <Wt/WDialog.h>
+#include <Wt/WSignal.h>
 
 #include <memory>
 #include <functional>
@@ -43,6 +44,8 @@ private:
         std::function<std::unique_ptr<Wt::WWidget>(const std::smatch&)> factory;
     };
     std::vector<PathPattern> pathPatterns_;
+    // Cache for already created widgets by path
+    std::unordered_map<std::string, Wt::WWidget*> widgetCache_;
     // Paths that require authentication
     std::unordered_map<std::string, bool> authRequiredRoutes_;
     // Keep anchor by path to toggle active styles
@@ -58,6 +61,7 @@ private:
     void openMenu();
     void closeMenu();
     void connectRouting();
+    Wt::Signals::connection internalPathConnection_;
 
     std::shared_ptr<Session> session_;
     Wt::WDialog* authDialog_;

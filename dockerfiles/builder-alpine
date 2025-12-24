@@ -1,0 +1,41 @@
+FROM alpine:latest
+
+RUN apk update
+
+# Basic dependencies
+RUN apk add --no-cache git cmake build-base boost-dev openssl-dev
+
+# for postgres
+RUN apk add --no-cache postgresql-dev
+
+# for compiling tailwind classes
+RUN apk add --no-cache nodejs npm curl
+
+# Build step
+RUN git clone --branch 4.11-release https://github.com/emweb/wt.git wt && \
+    mkdir -p wt/build && \
+    cd wt/build && \
+    cmake ../ \
+        -DENABLE_SQLITE=OF \
+        -DENABLE_POSTGRES=ON \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_LIBWTTEST=OFF && \
+    make && \
+    make install && \
+    cd / && \
+    rm -rf wt
+
+RUN cp /usr/local/lib/libwt*.so.* /usr/lib/ || true
+
+# COPY ./resources /app/resources
+# COPY ./wt_config.xml /app/wt_config.xml
+COPY ./src /app/src
+COPY ./static /app/static
+COPY ./CMakeLists.txt /app/CMakeLists.txt
+
+RUN mkdir -p /app/build/release
+RUN cd /app/static/stylus/tailwind && npm install && npx @tailwindcss/cli -i ./input.css -o ../../theme/tailwindcss/tailwind.minify.css --minify
+WORKDIR /app/build/release
+RUN cmake -DCMAKE_BUILD_TYPE=Release ../../ 
+RUN make

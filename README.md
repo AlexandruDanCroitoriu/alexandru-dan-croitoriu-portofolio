@@ -29,3 +29,7 @@ npm run watch
 # for release, compile the minified css file
 npm run minify
 ```
+
+docker build -f dockerfiles/builder-alpine -t wt-builder-alexandru-dan-croitoriu-portofolio:latest .
+docker build -f dockerfiles/run-builder-build -t alexandru-dan-croitoriu-portofolio:latest .
+docker run --rm -it alexandru-dan-croitoriu-portofolio:latest /bin/sh

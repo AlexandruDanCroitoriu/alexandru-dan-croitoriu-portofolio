@@ -222,7 +222,7 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
     t.commit();
 
     // Redirect to the new post page
-    Wt::WApplication::instance()->setInternalPath("/portfolio/blog/post/" + slug, true);
+        Wt::WApplication::instance()->setInternalPath("/blog/post/" + slug, true);
   });
 
   return container;

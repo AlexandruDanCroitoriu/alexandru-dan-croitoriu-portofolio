@@ -97,9 +97,33 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
-    target_link_libraries(${PROJECT_NAME} wtdbopostgres)
+  add_compile_definitions(WT_DBO_POSTGRES)
+  # Find Postgres Dbo backend library (name differs across distros)
+  find_library(WTDBO_POSTGRES_LIB
+    NAMES wtdbopostgres wtdbo_postgres
+    PATHS /usr/local/lib /usr/lib
+  )
+  if(WTDBO_POSTGRES_LIB)
+    target_link_libraries(${PROJECT_NAME} ${WTDBO_POSTGRES_LIB})
+  else()
+    message(FATAL_ERROR "Wt Dbo Postgres backend library not found (searched for wtdbopostgres/wtdbo_postgres)")
+  endif()
+  # Link libpq if available (some builds require explicit linkage)
+  find_library(POSTGRESQL_LIB NAMES pq PATHS /usr/local/lib /usr/lib)
+  if(POSTGRESQL_LIB)
+    target_link_libraries(${PROJECT_NAME} ${POSTGRESQL_LIB})
+  endif()
 else()
-    target_link_libraries(${PROJECT_NAME} wtdbosqlite3)
+  # Find SQLite Dbo backend library (name differs across distros)
+  find_library(WTDBO_SQLITE_LIB
+    NAMES wtdbosqlite3 wtdbo_sqlite3
+    PATHS /usr/local/lib /usr/lib
+  )
+  if(WTDBO_SQLITE_LIB)
+    target_link_libraries(${PROJECT_NAME} ${WTDBO_SQLITE_LIB})
+  else()
+    message(FATAL_ERROR "Wt Dbo Sqlite backend library not found (searched for wtdbosqlite3/wtdbo_sqlite3)")
+  endif()
 endif()
 
 add_custom_target(run

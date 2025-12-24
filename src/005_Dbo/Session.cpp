@@ -6,8 +6,9 @@
 #include "000_Server/Server.h"
 
 #include <Wt/Dbo/SqlConnection.h>
+#if defined(DEBUG)
 #include <Wt/Dbo/backend/Sqlite3.h>
-#ifdef WT_DBO_POSTGRES
+#else
 #include <Wt/Dbo/backend/Postgres.h>
 #endif
 #include <Wt/Auth/Identity.h>

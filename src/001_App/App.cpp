@@ -30,10 +30,10 @@ App::App(const Wt::WEnvironment& env)
     wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/Utils");
 
     // Load custom Auth system template resources
-    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth");
-    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth-login");
-    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-auth-strings");
-    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/stylus/xml/001_Auth/ovrwt-registration-view");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/001_Auth/ovrwt-auth");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/001_Auth/ovrwt-auth-login");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/001_Auth/ovrwt-auth-strings");
+    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/xml/001_Auth/ovrwt-registration-view");
 
     // Load Tailwind Plus Elements
     // require("/static/theme/tailwindcss/tailwindplus/index.js");

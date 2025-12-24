@@ -81,6 +81,7 @@ void Navigation::setUI()
     currentActiveAnchor_ = nullptr;
     anchorsByPath_.clear();
     routes_.clear();
+    widgetCache_.clear();
 
     sidebar_->clear();
     contentsArea_->clear();
@@ -175,10 +176,10 @@ void Navigation::setupRoutes()
     routes_["/"] = [cvTopic]() {
         return cvTopic->createCvPage();
     };
-    routes_["/portfolio/blog"] = [blogTopic]() {
+    routes_["/blog"] = [blogTopic]() {
         return blogTopic->createBlogPage();
     };
-    routes_["/portfolio/blog/new"] = [this, newPostTopic, notAuthorized]() {
+    routes_["/blog/new"] = [this, newPostTopic, notAuthorized]() {
         // Admin-only route
         // Check BLOG_ADMIN permission
         dbo::Transaction t(*session_);
@@ -191,7 +192,7 @@ void Navigation::setupRoutes()
         return newPostTopic->createNewPostPage();
     };
     pathPatterns_.push_back({
-        std::regex("^/portfolio/blog/post/([^/]+)$"),
+        std::regex("^/blog/post/([^/]+)$"),
         [this](const std::smatch& match) -> std::unique_ptr<Wt::WWidget> {
             std::string slug = match[1].str();
             auto postDetail = std::make_shared<PostDetailTopic>(session_, slug);
@@ -199,7 +200,7 @@ void Navigation::setupRoutes()
         }
     });
     pathPatterns_.push_back({
-        std::regex("^/portfolio/blog/post/([^/]+)/edit$"),
+        std::regex("^/blog/post/([^/]+)/edit$"),
         [this, notAuthorized](const std::smatch& match) -> std::unique_ptr<Wt::WWidget> {
             bool isAdmin = false;
             {
@@ -259,7 +260,7 @@ void Navigation::buildSidebar()
     // Nested under CV/Portfolio
     auto portfolioSection = navList_->addNew<Wt::WContainerWidget>();
     portfolioSection->addStyleClass("flex flex-col space-y-1 pl-4 mt-1");
-    makeAnchor(portfolioSection, "Blog", "/portfolio/blog");
+    makeAnchor(portfolioSection, "Blog", "/blog");
 
     // Section: Components
     auto sectionHeader = navList_->addNew<Wt::WText>("<div class='px-3 pt-3 text-gray-400 text-xs uppercase tracking-wide'>Components</div>");
@@ -272,13 +273,17 @@ void Navigation::buildSidebar()
 void Navigation::connectRouting()
 {
     // React to internal path changes
-    wApp->internalPathChanged().connect([this]() {
+    if (internalPathConnection_.isConnected()) {
+        internalPathConnection_.disconnect();
+    }
+    internalPathConnection_ = wApp->internalPathChanged().connect([this]() {
         navigateTo(wApp->internalPath());
     });
 }
 
 void Navigation::markActive(const std::string& path)
 {
+    std::cout << "\nMarking active path: " << path << "\n";
     if (currentActiveAnchor_) {
         currentActiveAnchor_->removeStyleClass("bg-gray-600", true);
         currentActiveAnchor_->removeStyleClass("text-white", true);
@@ -317,16 +322,37 @@ void Navigation::navigateTo(const std::string& rawPath)
             // Render not-authorized page WITHOUT changing the URL
             auto notAuthIt = routes_.find("/not-authorized");
             if (notAuthIt != routes_.end()) {
-                contentsStack_->clear();
-                contentsStack_->addWidget(notAuthIt->second());
+                // Check cache first
+                auto cacheIt = widgetCache_.find("/not-authorized");
+                Wt::WWidget* widget = nullptr;
+                if (cacheIt != widgetCache_.end()) {
+                    widget = cacheIt->second;
+                } else {
+                    auto newWidget = notAuthIt->second();
+                    widget = newWidget.get();
+                    widgetCache_["/not-authorized"] = widget;
+                    contentsStack_->addWidget(std::move(newWidget));
+                }
+                contentsStack_->setCurrentWidget(widget);
                 markActive("");  // Don't highlight any anchor for 403
             }
             return;
         }
         
-        // Route found and authorized: render it
-        contentsStack_->clear();
-        contentsStack_->addWidget(it->second());
+        // Route found and authorized: check cache or create new widget
+        auto cacheIt = widgetCache_.find(pathWithoutQuery);
+        Wt::WWidget* widget = nullptr;
+        if (cacheIt != widgetCache_.end()) {
+            // Widget already exists in cache, just show it
+            widget = cacheIt->second;
+        } else {
+            // Create new widget and add to cache
+            auto newWidget = it->second();
+            widget = newWidget.get();
+            widgetCache_[pathWithoutQuery] = widget;
+            contentsStack_->addWidget(std::move(newWidget));
+        }
+        contentsStack_->setCurrentWidget(widget);
         markActive(pathWithoutQuery);
         return;
     }
@@ -335,8 +361,20 @@ void Navigation::navigateTo(const std::string& rawPath)
     for (const auto& pattern : pathPatterns_) {
         std::smatch match;
         if (std::regex_match(pathWithoutQuery, match, pattern.pattern)) {
-            contentsStack_->clear();
-            contentsStack_->addWidget(pattern.factory(match));
+            // For pattern-based routes, use full path as cache key
+            auto cacheIt = widgetCache_.find(pathWithoutQuery);
+            Wt::WWidget* widget = nullptr;
+            if (cacheIt != widgetCache_.end()) {
+                // Widget already exists in cache, just show it
+                widget = cacheIt->second;
+            } else {
+                // Create new widget and add to cache
+                auto newWidget = pattern.factory(match);
+                widget = newWidget.get();
+                widgetCache_[pathWithoutQuery] = widget;
+                contentsStack_->addWidget(std::move(newWidget));
+            }
+            contentsStack_->setCurrentWidget(widget);
             markActive("");  // Don't highlight sidebar for dynamic paths
             return;
         }
@@ -346,8 +384,18 @@ void Navigation::navigateTo(const std::string& rawPath)
     *lastUnknownPath_ = path;
     auto notFoundIt = routes_.find("/not-found");
     if (notFoundIt != routes_.end()) {
-        contentsStack_->clear();
-        contentsStack_->addWidget(notFoundIt->second());
+        // Check cache first
+        auto cacheIt = widgetCache_.find("/not-found");
+        Wt::WWidget* widget = nullptr;
+        if (cacheIt != widgetCache_.end()) {
+            widget = cacheIt->second;
+        } else {
+            auto newWidget = notFoundIt->second();
+            widget = newWidget.get();
+            widgetCache_["/not-found"] = widget;
+            contentsStack_->addWidget(std::move(newWidget));
+        }
+        contentsStack_->setCurrentWidget(widget);
         markActive("");  // Don't highlight any anchor for 404
     }
 }

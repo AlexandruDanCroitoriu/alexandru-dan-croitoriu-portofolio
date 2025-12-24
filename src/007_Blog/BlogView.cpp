@@ -41,7 +41,7 @@ void BlogView::renderHeader()
     auto newPostBtn = addNew<Wt::WPushButton>("New Post");
     newPostBtn->addStyleClass("bg-slate-700 hover:bg-slate-800 text-white rounded-md px-3 py-1");
     newPostBtn->clicked().connect([](){
-      Wt::WApplication::instance()->setInternalPath("/portfolio/blog/new", true);
+      Wt::WApplication::instance()->setInternalPath("/blog/new", true);
     });
   }
 
@@ -300,7 +300,7 @@ void BlogView::initializeFiltersFromUrl()
 void BlogView::updateUrlWithFilters()
 {
   auto app = Wt::WApplication::instance();
-  std::string path = "/portfolio/blog";
+  std::string path = "/blog";
   
   // Build query string
   std::vector<std::string> params;

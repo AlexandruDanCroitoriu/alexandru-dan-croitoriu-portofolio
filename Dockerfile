@@ -1,0 +1,71 @@
+# Stage 1: Builder
+FROM alpine:latest AS builder
+
+RUN apk update
+
+# Basic dependencies
+RUN apk add --no-cache git cmake build-base boost-dev openssl-dev
+
+# for postgres
+RUN apk add --no-cache postgresql-dev
+
+# for compiling tailwind classes
+RUN apk add --no-cache nodejs npm curl
+
+# Build Wt library
+RUN git clone --branch 4.11-release https://github.com/emweb/wt.git wt && \
+    mkdir -p wt/build && \
+    cd wt/build && \
+    cmake ../ \
+        -DENABLE_SQLITE=OFF \
+        -DENABLE_POSTGRES=ON \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_LIBWTTEST=OFF && \
+    make && \
+    make install && \
+    cd / && \
+    rm -rf wt
+
+RUN cp /usr/local/lib/libwt*.so.* /usr/lib/ || true
+
+# Copy application source
+COPY ./src /app/src
+COPY ./static /app/static
+COPY ./CMakeLists.txt /app/CMakeLists.txt
+
+# Build Tailwind CSS
+RUN cd /app/static/stylus/tailwind && \
+    npm install && \
+    npx @tailwindcss/cli -i ./input.css -o ../../theme/tailwindcss/tailwind.minify.css --minify
+
+# Build application
+WORKDIR /app/build/release
+RUN cmake -DCMAKE_BUILD_TYPE=Release ../../ 
+RUN make
+
+# Stage 2: Runtime
+FROM alpine:latest
+
+# Runtime deps: match toolchain ABI (libstdc++, libgcc)
+RUN apk add --no-cache \
+    libstdc++ libgcc \
+    boost-libs boost-program_options boost-filesystem boost-thread boost-system boost-regex \
+    postgresql-libs
+
+# Copy built application and libraries from builder
+COPY --from=builder /app/build /app/build 
+COPY --from=builder /usr/lib/libwt*.so.* /usr/lib/
+
+# Copy static resources
+COPY ./resources /app/resources
+COPY ./static/monaco /app/static/monaco
+COPY ./static/xml /app/static/xml
+COPY ./static/favicon.svg /app/static/favicon.svg
+COPY --from=builder /app/static/theme/tailwindcss/tailwind.minify.css /app/static/theme/tailwindcss/tailwind.minify.css
+
+COPY ./wt_config_release.xml /app/wt_config_release.xml
+
+WORKDIR /app/build/release
+
+CMD ["./alexandru_dan_croitoriu_portofolio", "--docroot", "../../", "-c", "../../wt_config_release.xml", "--http-address", "0.0.0.0", "--http-port", "9020"]

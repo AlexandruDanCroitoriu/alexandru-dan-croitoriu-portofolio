@@ -35,7 +35,7 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     
     auto allCvRadio = typeSelector->addNew<Wt::WRadioButton>("Full");
     buttonGroup->addButton(allCvRadio, 0);
-    allCvRadio->addStyleClass("[&>input]:hidde text-white text-sm lg:text-md inline-block cursor-pointer");
+    allCvRadio->addStyleClass("[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer");
     allCvRadio->addStyleClass("[&>input]:[&~span]:p-1");
     allCvRadio->addStyleClass("[&>input]:[&~span]:rounded-md");
     allCvRadio->addStyleClass("[&>input]:[&~span]:bg-gray-400");
@@ -44,7 +44,7 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     codingCvRadio->setChecked(true);
     buttonGroup->addButton(codingCvRadio, 1);
 
-    codingCvRadio->addStyleClass("[&>input]:hidde text-white text-sm lg:text-md inline-block cursor-pointer");
+    codingCvRadio->addStyleClass("[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer");
     codingCvRadio->addStyleClass("[&>input]:[&~span]:p-1");
     codingCvRadio->addStyleClass("[&>input]:[&~span]:rounded-md");
     codingCvRadio->addStyleClass("[&>input]:[&~span]:bg-gray-400");
@@ -67,7 +67,6 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
     
     buttonGroup->checkedChanged().connect([gridContainer, codingCvRadio, allCvRadio](Wt::WRadioButton* selectedRadioButton) {
-        std::cout << "CvPortofolioTopic::cvPage() - Selected radio button changed" << std::endl;
         if (codingCvRadio == selectedRadioButton) {
             gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]");
         } else if (allCvRadio == selectedRadioButton) {

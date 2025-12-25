@@ -15,7 +15,6 @@ public:
         wApp->log("debug") << "DeferredWidget::DeferredWidget(Function f)";
         addStyleClass("deferred-widget h-screen overflow-y-auto"); // used for debugging when checking the doom in the browser
         addStyleClass("[&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-gray-500 [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full"); // custom scrollbar styles
-        std::cout << "\nDeferredWidget created\n";
     }
 
 protected:

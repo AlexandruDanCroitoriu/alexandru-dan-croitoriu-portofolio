@@ -6,7 +6,6 @@
 
 #include <Wt/WContainerWidget.h>
 #include <Wt/WPushButton.h>
-#include <Wt/WComboBox.h>
 #include <Wt/WCheckBox.h>
 
 #include "005_Dbo/Tables/Post.h"
@@ -26,10 +25,10 @@ public:
 private:
   std::shared_ptr<Session> session_;
   Wt::WContainerWidget* postsContainer_ {nullptr};
-  // State filter (admin only)
-  Wt::WComboBox* filterCombo_ {nullptr};
-  Post::State currentFilter_ = Post::State::Published; // Active = Published
-  bool showAllStates_ = false;
+  // State filter (admin only) - now using checkboxes
+  Wt::WContainerWidget* stateFilterContainer_ {nullptr};
+  std::vector<Post::State> selectedStates_;
+  std::vector<Wt::WCheckBox*> stateCheckboxes_;
   // Tag filter (visible to all)
   Wt::WContainerWidget* tagFilterContainer_ {nullptr};
   std::vector<std::string> allTagSlugs_;

@@ -8,7 +8,6 @@
 
 #include <Wt/WText.h>
 #include <Wt/WPushButton.h>
-#include <Wt/WComboBox.h>
 #include <Wt/WCheckBox.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLink.h>
@@ -58,47 +57,57 @@ void BlogView::renderPostsList()
 
   // Security: Non-admin users can only see Published posts
   const bool isAdmin = currentUserIsBlogAdmin();
-  Post::State effectiveFilter = currentFilter_;
-  bool effectiveShowAll = showAllStates_;
+  std::vector<Post::State> effectiveStates = selectedStates_;
   
   if (!isAdmin) {
-    effectiveFilter = Post::State::Published;
-    effectiveShowAll = false;
+    effectiveStates = {Post::State::Published};
+  } else if (effectiveStates.empty()) {
+    // Admin with no states selected: show all states
+    effectiveStates = {Post::State::Published, Post::State::Draft, Post::State::Archived};
   }
-
-  // Determine ordering column based on state
-  std::string orderColumn = (effectiveFilter == Post::State::Published) ? "published_at" : "created_at";
 
   Wt::Dbo::Query<dbo::ptr<Post>> postsQuery;
   
   if (selectedTagSlugs_.empty()) {
-    // No tag filter
-    if (effectiveShowAll) {
-      postsQuery = session_->find<Post>("order by " + orderColumn + " desc");
-    } else {
+    // No tag filter - filter by states only
+    if (effectiveStates.size() == 1) {
       postsQuery = session_->find<Post>(
-                      "where state = ? order by " + orderColumn + " desc")
-                    .bind(effectiveFilter);
+                      "where state = ? order by created_at desc")
+                    .bind(effectiveStates[0]);
+    } else {
+      // Multiple states: use OR condition
+      std::string stateCondition;
+      for (size_t i = 0; i < effectiveStates.size(); ++i) {
+        if (i > 0) stateCondition += " or ";
+        stateCondition += "state = ?";
+      }
+      auto query = session_->query<dbo::ptr<Post>>(
+                      "select p from post p where " + stateCondition + " order by created_at desc");
+      for (const auto& state : effectiveStates) {
+        query.bind(state);
+      }
+      postsQuery = query;
     }
   } else {
-    // Filter by multiple tags (ANY tag match)
+    // Filter by multiple tags AND states
     std::string tagCondition;
     for (size_t i = 0; i < selectedTagSlugs_.size(); ++i) {
       if (i > 0) tagCondition += " or ";
       tagCondition += "t.slug = ?";
     }
 
+    std::string stateCondition;
+    for (size_t i = 0; i < effectiveStates.size(); ++i) {
+      if (i > 0) stateCondition += " or ";
+      stateCondition += "p.state = ?";
+    }
+
     std::string sql =
       "select distinct p from post p "
       "join posts_tags pt on pt.post_id = p.id "
       "join tag t on t.id = pt.tag_id "
-      "where (" + tagCondition + ")";
-    
-    if (!effectiveShowAll) {
-      sql += " and p.state = ?";
-    }
-    
-    sql += " order by p." + orderColumn + " desc";
+      "where (" + tagCondition + ") and (" + stateCondition + ") "
+      "order by p.created_at desc";
 
     auto query = session_->query<dbo::ptr<Post>>(sql);
     
@@ -107,9 +116,9 @@ void BlogView::renderPostsList()
       query.bind(slug);
     }
     
-    // Bind state if filtering by state
-    if (!effectiveShowAll) {
-      query.bind(effectiveFilter);
+    // Bind all states
+    for (const auto& state : effectiveStates) {
+      query.bind(state);
     }
     
     postsQuery = query;
@@ -145,51 +154,58 @@ void BlogView::renderFilter()
 
   // State filter: only visible to admin
   if (isAdmin) {
-    auto stateContainer = filterBar->addNew<Wt::WContainerWidget>();
-    stateContainer->addStyleClass("flex items-center gap-3");
+    auto stateSection = filterBar->addNew<Wt::WContainerWidget>();
+    stateSection->addStyleClass("space-y-2");
 
-    auto stateLabel = stateContainer->addNew<Wt::WText>("State:");
-    stateLabel->addStyleClass("text-sm text-gray-600");
+    auto stateLabel = stateSection->addNew<Wt::WText>("States:");
+    stateLabel->addStyleClass("text-sm text-gray-600 block");
 
-    filterCombo_ = stateContainer->addNew<Wt::WComboBox>();
-    filterCombo_->addStyleClass("bg-gray-50/10 ring-1 ring-gray-50/5 rounded px-2 py-1 text-sm");
+    stateFilterContainer_ = stateSection->addNew<Wt::WContainerWidget>();
+    stateFilterContainer_->addStyleClass("flex flex-wrap gap-2");
 
-    filterCombo_->addItem("All States");
-    filterCombo_->addItem("Active");
-    filterCombo_->addItem("Draft");
-    filterCombo_->addItem("Archived");
-    
-    // Set current index based on initialized filter state
-    int stateIdx = 1;  // Default to Active
-    if (showAllStates_) stateIdx = 0;
-    else if (currentFilter_ == Post::State::Draft) stateIdx = 2;
-    else if (currentFilter_ == Post::State::Archived) stateIdx = 3;
-    filterCombo_->setCurrentIndex(stateIdx);
+    stateCheckboxes_.clear();
 
-    filterCombo_->changed().connect([this]() {
-      const auto idx = filterCombo_->currentIndex();
-      if (idx == 0) {
-        showAllStates_ = true;
-        currentFilter_ = Post::State::Published; // Default, but ignored when showAllStates_ is true
-      } else if (idx == 1) {
-        showAllStates_ = false;
-        currentFilter_ = Post::State::Published; // Active
-      } else if (idx == 2) {
-        showAllStates_ = false;
-        currentFilter_ = Post::State::Draft;
-      } else if (idx == 3) {
-        showAllStates_ = false;
-        currentFilter_ = Post::State::Archived;
-      } else {
-        showAllStates_ = false;
-        currentFilter_ = Post::State::Published; // Fallback
+    // Define available states
+    std::vector<std::pair<Post::State, std::string>> states = {
+      {Post::State::Published, "Active"},
+      {Post::State::Draft, "Draft"},
+      {Post::State::Archived, "Archived"}
+    };
+
+    for (const auto& [state, label] : states) {
+      auto checkbox = stateFilterContainer_->addNew<Wt::WCheckBox>(label);
+      checkbox->addStyleClass("[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer");
+      checkbox->addStyleClass("[&>input]:[&~span]:p-1");
+      checkbox->addStyleClass("[&>input]:[&~span]:rounded-md");
+      checkbox->addStyleClass("[&>input]:[&~span]:bg-gray-400");
+      checkbox->addStyleClass("[&>input]:checked:[&~span]:bg-gray-700");
+
+      stateCheckboxes_.push_back(checkbox);
+      
+      // Check if this state is already selected
+      auto it = std::find(selectedStates_.begin(), selectedStates_.end(), state);
+      if (it != selectedStates_.end()) {
+        checkbox->setChecked(true);
       }
-      updateUrlWithFilters();
-      renderPostsList();
-    });
-  } else {
-    // Non-admins always see Active
-    currentFilter_ = Post::State::Published;
+      
+      checkbox->changed().connect([this, state]() {
+        // Update selectedStates_ based on checkbox states
+        selectedStates_.clear();
+        std::vector<std::pair<Post::State, std::string>> states = {
+          {Post::State::Published, "Active"},
+          {Post::State::Draft, "Draft"},
+          {Post::State::Archived, "Archived"}
+        };
+        
+        for (size_t i = 0; i < stateCheckboxes_.size(); ++i) {
+          if (stateCheckboxes_[i]->isChecked()) {
+            selectedStates_.push_back(states[i].first);
+          }
+        }
+        updateUrlWithFilters();
+        renderPostsList();
+      });
+    }
   }
 
   // Tag filter: visible to all
@@ -210,8 +226,12 @@ void BlogView::renderFilter()
     auto tags = session_->find<Tag>("order by name asc").resultList();
     for (const dbo::ptr<Tag>& tag : tags) {
       auto checkbox = tagFilterContainer_->addNew<Wt::WCheckBox>(tag->name_);
-      checkbox->addStyleClass("text-sm text-gray-700");
-      
+      checkbox->addStyleClass("[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer");
+      checkbox->addStyleClass("[&>input]:[&~span]:p-1");
+      checkbox->addStyleClass("[&>input]:[&~span]:rounded-md");
+      checkbox->addStyleClass("[&>input]:[&~span]:bg-gray-400");
+      checkbox->addStyleClass("[&>input]:checked:[&~span]:bg-gray-700");
+
       allTagSlugs_.push_back(tag->slug_);
       tagCheckboxes_.push_back(checkbox);
       
@@ -243,7 +263,7 @@ void BlogView::initializeFiltersFromUrl()
   std::string internalPath = app->internalPath();
   
   // Parse query parameters from internal path
-  std::string stateValue;
+  std::vector<std::string> stateValues;
   std::vector<std::string> tagValues;
   
   size_t queryPos = internalPath.find('?');
@@ -264,7 +284,7 @@ void BlogView::initializeFiltersFromUrl()
         std::string value = param.substr(eqPos + 1);
         
         if (key == "state") {
-          stateValue = value;
+          stateValues.push_back(value);
         } else if (key == "tag") {
           tagValues.push_back(value);
         }
@@ -278,24 +298,22 @@ void BlogView::initializeFiltersFromUrl()
   // Apply state filter (only for admin users)
   const bool isAdmin = currentUserIsBlogAdmin();
   
-  if (!stateValue.empty() && isAdmin) {
-    if (stateValue == "all") {
-      showAllStates_ = true;
-      currentFilter_ = Post::State::Published; // Default, but ignored
-    } else if (stateValue == "draft") {
-      showAllStates_ = false;
-      currentFilter_ = Post::State::Draft;
-    } else if (stateValue == "archived") {
-      showAllStates_ = false;
-      currentFilter_ = Post::State::Archived;
-    } else {
-      showAllStates_ = false;
-      currentFilter_ = Post::State::Published; // "active" or default
+  selectedStates_.clear();
+  if (isAdmin && !stateValues.empty()) {
+    for (const auto& stateValue : stateValues) {
+      if (stateValue == "active") {
+        selectedStates_.push_back(Post::State::Published);
+      } else if (stateValue == "draft") {
+        selectedStates_.push_back(Post::State::Draft);
+      } else if (stateValue == "archived") {
+        selectedStates_.push_back(Post::State::Archived);
+      }
     }
-  } else {
-    // Non-admins or no state param: always show only Published
-    showAllStates_ = false;
-    currentFilter_ = Post::State::Published;
+  }
+  
+  // For non-admins, enforce Published state
+  if (!isAdmin) {
+    selectedStates_ = {Post::State::Published};
   }
   
   // Apply tag filter
@@ -311,16 +329,16 @@ void BlogView::updateUrlWithFilters()
   // Build query string
   std::vector<std::string> params;
   
-  // Add state parameter (only if admin and not default)
+  // Add state parameters (for admin, if selected)
   if (currentUserIsBlogAdmin()) {
-    if (showAllStates_) {
-      params.push_back("state=all");
-    } else if (currentFilter_ == Post::State::Draft) {
-      params.push_back("state=draft");
-    } else if (currentFilter_ == Post::State::Archived) {
-      params.push_back("state=archived");
-    } else if (currentFilter_ == Post::State::Published) {
-      params.push_back("state=active");
+    for (const auto& state : selectedStates_) {
+      if (state == Post::State::Published) {
+        params.push_back("state=active");
+      } else if (state == Post::State::Draft) {
+        params.push_back("state=draft");
+      } else if (state == Post::State::Archived) {
+        params.push_back("state=archived");
+      }
     }
   }
   

@@ -20,7 +20,8 @@ namespace dbo = Wt::Dbo;
 
 BlogView::BlogView(std::shared_ptr<Session> session)
   : session_(std::move(session))
-{
+{  
+  wApp->log("debug") << "BlogView::BlogView(std::shared_ptr<Session> session)";  
   addStyleClass("w-full max-w-4xl mx-auto space-y-4 p-6");
   
   // Initialize filters from URL query parameters first
@@ -34,6 +35,7 @@ BlogView::BlogView(std::shared_ptr<Session> session)
 
 void BlogView::renderHeader()
 {
+  wApp->log("debug") << "BlogView::renderHeader()";
   auto title = addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Blog</h2>"));
   title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 
@@ -50,6 +52,7 @@ void BlogView::renderHeader()
 
 void BlogView::renderPostsList()
 {
+  wApp->log("debug") << "BlogView::renderPostsList()";
   dbo::Transaction t(*session_);
   postsContainer_->clear();
 
@@ -120,6 +123,7 @@ void BlogView::renderPostsList()
 
 bool BlogView::currentUserIsBlogAdmin()
 {
+  wApp->log("debug") << "BlogView::currentUserIsBlogAdmin()";
   if (!session_->login().loggedIn()) return false;
   dbo::Transaction t(*session_);
   auto user = session_->user();
@@ -234,6 +238,7 @@ void BlogView::renderFilter()
 
 void BlogView::initializeFiltersFromUrl()
 {
+  wApp->log("debug") << "BlogView::initializeFiltersFromUrl()";
   auto app = Wt::WApplication::instance();
   std::string internalPath = app->internalPath();
   
@@ -299,6 +304,7 @@ void BlogView::initializeFiltersFromUrl()
 
 void BlogView::updateUrlWithFilters()
 {
+  wApp->log("debug") << "BlogView::updateUrlWithFilters()";
   auto app = Wt::WApplication::instance();
   std::string path = "/blog";
   

@@ -9,6 +9,7 @@
 
 CvPortofolioTopic::CvPortofolioTopic()
 {
+    wApp->log("debug") << "CvPortofolioTopic::CvPortofolioTopic()";
 }
 
 std::unique_ptr<Wt::WWidget> CvPortofolioTopic::createCvPage()
@@ -18,6 +19,7 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::createCvPage()
 
 std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
 {
+    wApp->log("debug") << "CvPortofolioTopic::cvPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
 

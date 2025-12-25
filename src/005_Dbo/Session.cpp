@@ -22,6 +22,7 @@
 
 Session::Session(const std::string &sqliteDb)
 {
+  Wt::log("debug") << "Session::Session()";
   std::unique_ptr<Wt::Dbo::SqlConnection> connection;
 
   #ifdef DEBUG
@@ -110,11 +111,13 @@ Session::Session(const std::string &sqliteDb)
 
 Wt::Auth::AbstractUserDatabase& Session::users()
 {
+  Wt::log("debug") << "Session::users()";
   return *users_;
 }
 
 dbo::ptr<User> Session::user() const
 {
+  Wt::log("debug") << "Session::user()";
   if (login_.loggedIn()) {
     dbo::ptr<AuthInfo> authInfo = users_->find(login_.user());
     return authInfo->user();
@@ -124,6 +127,7 @@ dbo::ptr<User> Session::user() const
 
 dbo::ptr<User> Session::user(const Wt::Auth::User& authUser)
 {
+  Wt::log("debug") << "Session::user(const Wt::Auth::User& authUser)";
   dbo::ptr<AuthInfo> authInfo = users_->find(authUser);
 
   dbo::ptr<User> user = authInfo->user();
@@ -159,6 +163,7 @@ std::vector<const Wt::Auth::OAuthService *> Session::oAuth()
 Wt::Dbo::ptr<User> addUser(Wt::Dbo::Session& session, UserDatabase& users, const std::string& loginName,
              const std::string& email, const std::string& password)
 {
+  Wt::log("debug") << "addUser(Wt::Dbo::Session& session, UserDatabase& users, const std::string& loginName, const std::string& email, const std::string& password)";
   Wt::Dbo::Transaction t(session);
   auto user = session.addNew<User>(loginName);
   auto authUser = users.registerNew();
@@ -176,6 +181,7 @@ Wt::Dbo::ptr<User> addUser(Wt::Dbo::Session& session, UserDatabase& users, const
 
 void Session::createInitialData()
 {
+  Wt::log("debug") << "Session::createInitialData()";
   // Ensure STYLUS and BLOG_ADMIN permissions exist
   {
     Wt::Dbo::Transaction t(*this);
@@ -366,6 +372,7 @@ void Session::createInitialData()
 
 void Session::restoreLogin()
 {
+  Wt::log("debug") << "Session::restoreLogin()";
   // Try to restore login from remember-me token if present
   // This is called when a new session starts, to restore login from auth token cookie
   if (!login_.loggedIn()) {

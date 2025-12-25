@@ -1,4 +1,5 @@
 #include "007_Blog/topics/NewPostTopic.h"
+#include "007_Blog/BlogUtils.h"
 #include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
@@ -23,26 +24,18 @@ namespace dbo = Wt::Dbo;
 NewPostTopic::NewPostTopic(std::shared_ptr<Session> session)
   : session_(std::move(session))
 {
+  wApp->log("debug") << "NewPostTopic::NewPostTopic(std::shared_ptr<Session> session)";
 }
 
 std::unique_ptr<Wt::WWidget> NewPostTopic::createNewPostPage()
 {
+  wApp->log("debug") << "NewPostTopic::createNewPostPage()";
   return deferCreate([this]() { return newPostPage(); });
-}
-
-static bool isBlogAdmin(Session& session)
-{
-  if (!session.login().loggedIn()) return false;
-  dbo::Transaction t(session);
-  auto user = session.user();
-  if (!user) return false;
-  auto perms = session.find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
-  if (perms.empty()) return false;
-  return user->hasPermission(perms.front());
 }
 
 std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
 {
+  wApp->log("debug") << "NewPostTopic::newPostPage()";
   auto container = std::make_unique<Wt::WContainerWidget>();
   container->addStyleClass("w-full max-w-4xl mx-auto space-y-4 p-6");
 

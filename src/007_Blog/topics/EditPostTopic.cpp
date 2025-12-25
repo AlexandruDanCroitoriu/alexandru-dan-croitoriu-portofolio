@@ -1,4 +1,5 @@
 #include "007_Blog/topics/EditPostTopic.h"
+#include "007_Blog/BlogUtils.h"
 #include "003_Navigation/DeferredWidget.h"
 #include "002_Components/MonacoEditor.h"
 
@@ -21,19 +22,9 @@
 
 namespace dbo = Wt::Dbo;
 
-static bool isBlogAdmin(Session& session)
-{
-  if (!session.login().loggedIn()) return false;
-  dbo::Transaction t(session);
-  auto user = session.user();
-  if (!user) return false;
-  auto perms = session.find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
-  if (perms.empty()) return false;
-  return user->hasPermission(perms.front());
-}
-
 static std::string slugify(const std::string& value)
 {
+  wApp->log("debug") << "slugify(const std::string& value)";
   std::string slug = value;
   for (char& c : slug) {
     const unsigned char uc = static_cast<unsigned char>(c);
@@ -46,10 +37,12 @@ static std::string slugify(const std::string& value)
 EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string& slug)
   : session_(std::move(session)), slug_(slug)
 {
+  wApp->log("debug") << "EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string& slug)";
 }
 
 std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
 {
+  wApp->log("debug") << "EditPostTopic::createEditPostPage()";
   // Capture session and slug by value to avoid dangling references in deferred execution
   auto session = session_;
   auto slug = slug_;
@@ -61,6 +54,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
 
 std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
 {
+  wApp->log("debug") << "EditPostTopic::editPage()";
   auto container = std::make_unique<Wt::WContainerWidget>();
   container->addStyleClass("w-full max-w-4xl mx-auto space-y-4 p-6");
 

@@ -11,7 +11,7 @@
 App::App(const Wt::WEnvironment& env)
     : Wt::WApplication(env)
 {
-    Wt::log("debug") << "App::App() - application starting";
+    Wt::log("debug") << "App::App(const Wt::WEnvironment& env)";
     
     // Initialize database session
     session_ = std::make_shared<Session>("portfolio.db");
@@ -52,7 +52,7 @@ App::App(const Wt::WEnvironment& env)
 
 void App::createApp()
 {
-    Wt::log("debug") << "App::createApp() - creating application UI";
+    Wt::log("debug") << "App::createApp()";
 
     // root()->addNew<Wt::WPushButton>("Hello World");
     // root()->addNew<Wt::WTemplate>(Wt::WString::tr("favicon.svg"));

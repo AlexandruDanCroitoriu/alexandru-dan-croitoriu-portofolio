@@ -28,6 +28,7 @@ public:
   ViewState getCurrentView() const { return currentView_; }
 
 protected:
+  // Override to show dialog in our own way
   Wt::WDialog *showDialog(const Wt::WString& title, std::unique_ptr<Wt::WWidget> contents) override;
 
 private:

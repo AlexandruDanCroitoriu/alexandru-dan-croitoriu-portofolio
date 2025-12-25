@@ -26,6 +26,7 @@ Server::Server(int argc, char **argv)
       argc_(argc),
       argv_(argv)
 {
+    Wt::log("debug") << "Server::Server(int argc, char **argv)";
     setServerConfiguration(argc_, argv_, WTHTTP_CONFIGURATION);
     configureAuth();
 
@@ -41,17 +42,16 @@ Server::Server(int argc, char **argv)
 
 int Server::run()
 {
-    Wt::log("info") << "Server::run() - attempting to start server...";
+    Wt::log("debug") << "Server::run()";
    
     try {
         bool started = start();
-        Wt::log("info") << "Server::start() returned: " << (started ? "true" : "false");
         
         if (started) {
-            Wt::log("info") << "Server started successfully, waiting for shutdown signal...";
+            Wt::log("debug") << "Server started successfully, waiting for shutdown signal...";
             int sig = WServer::waitForShutdown();
             
-            Wt::log("info") << "Shutdown (signal = " << sig << ")";
+            Wt::log("debug") << "Shutdown (signal = " << sig << ")";
             stop();
 
             if (sig == SIGHUP)
@@ -72,6 +72,7 @@ int Server::run()
 
 void Server::configureAuth()
 {
+    Wt::log("debug") << "Server::configureAuth()";
     authService.setAuthTokensEnabled(true, "logincookie");
     authService.setEmailVerificationEnabled(false);
     authService.setEmailVerificationRequired(false);

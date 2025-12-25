@@ -10,6 +10,7 @@
 
 PostView::PostView(Session& session, const Wt::Dbo::ptr<Post>& post, RenderType type)
 {
+  wApp->log("debug") << "PostView::PostView(Session& session, const Wt::Dbo::ptr<Post>& post, RenderType type)";
   addStyleClass("bg-white rounded-lg shadow-md p-4 mb-4");
 
   // Header container with title on left and state/tags on right

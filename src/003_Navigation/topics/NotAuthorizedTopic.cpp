@@ -4,18 +4,22 @@
 #include <Wt/WText.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLink.h>
+#include <Wt/WApplication.h>
 
 NotAuthorizedTopic::NotAuthorizedTopic()
 {
+    wApp->log("debug") << "NotAuthorizedTopic::NotAuthorizedTopic()";
 }
 
 std::unique_ptr<Wt::WWidget> NotAuthorizedTopic::createNotAuthorizedPage()
 {
+    wApp->log("debug") << "NotAuthorizedTopic::createNotAuthorizedPage()";
     return notAuthorizedPage();
 }
 
 std::unique_ptr<Wt::WWidget> NotAuthorizedTopic::notAuthorizedPage()
 {
+    wApp->log("debug") << "NotAuthorizedTopic::notAuthorizedPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("w-full max-w-3xl mx-auto p-8");
 

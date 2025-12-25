@@ -14,11 +14,13 @@ UserDetailsModel::UserDetailsModel(std::shared_ptr<Session> session)
   : WFormModel(),
     session_(session)
 {
+  wApp->log("debug") << "UserDetailsModel::UserDetailsModel(std::shared_ptr<Session> session)";
   // addField(FavouritePetField, Wt::WString::tr("Auth:favourite-pet-info"));
 }
 
 void UserDetailsModel::save(const Wt::Auth::User& authUser)
 {
+  wApp->log("debug") << "UserDetailsModel::save(const Wt::Auth::User& authUser)";
   Wt::Dbo::ptr<User> user = session_->user(authUser);
   // user.modify()->favouritePet_ = valueText(FavouritePetField).toUTF8();
   user.modify()->name_ = authUser.identity(Wt::Auth::Identity::LoginName).toUTF8();

@@ -11,10 +11,12 @@
 
 MonacoTopic::MonacoTopic()
 {
+    wApp->log("debug") << "MonacoTopic::MonacoTopic()";
 }
 
 std::unique_ptr<Wt::WWidget> MonacoTopic::monacoEditorDemo()
 {
+    wApp->log("debug") << "MonacoTopic::monacoEditorDemo()";
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
 
@@ -157,5 +159,6 @@ std::unique_ptr<Wt::WWidget> MonacoTopic::monacoEditorDemo()
 
 std::unique_ptr<Wt::WWidget> MonacoTopic::createMonacoEditorDemo()
 {
+    wApp->log("debug") << "MonacoTopic::createMonacoEditorDemo()";
     return  deferCreate([this]() { return monacoEditorDemo(); } );
 }

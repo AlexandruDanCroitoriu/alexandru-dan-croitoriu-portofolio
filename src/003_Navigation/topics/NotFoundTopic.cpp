@@ -4,18 +4,22 @@
 #include <Wt/WText.h>
 #include <Wt/WAnchor.h>
 #include <Wt/WLink.h>
+#include <Wt/WApplication.h>
 
 NotFoundTopic::NotFoundTopic()
 {
+    wApp->log("debug") << "NotFoundTopic::NotFoundTopic()";
 }
 
 std::unique_ptr<Wt::WWidget> NotFoundTopic::createNotFoundPage(const std::string& attemptedPath)
 {
+    wApp->log("debug") << "NotFoundTopic::createNotFoundPage(const std::string& attemptedPath)";
     return notFoundPage(attemptedPath);
 }
 
 std::unique_ptr<Wt::WWidget> NotFoundTopic::notFoundPage(const std::string& attemptedPath)
 {
+    wApp->log("debug") << "NotFoundTopic::notFoundPage(const std::string& attemptedPath)";
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("w-full max-w-3xl mx-auto p-8");
 

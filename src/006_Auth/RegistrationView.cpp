@@ -9,6 +9,7 @@ RegistrationView::RegistrationView(std::shared_ptr<Session> session, Wt::Auth::A
   : Wt::Auth::RegistrationWidget(authWidget),
     session_(session)
 { 
+  wApp->log("debug") << "RegistrationView::RegistrationView(std::shared_ptr<Session> session, Wt::Auth::AuthWidget *authWidget)";
   setTemplateText(tr("template.registration-v1")); // custom implementation v1
   detailsModel_ = std::make_unique<UserDetailsModel>(session_);
 
@@ -17,6 +18,7 @@ RegistrationView::RegistrationView(std::shared_ptr<Session> session, Wt::Auth::A
 
 void RegistrationView::render(Wt::WFlags<Wt::RenderFlag> flags)
 {
+  wApp->log("debug") << "RegistrationView::render(Wt::WFlags<Wt::RenderFlag> flags)";
   // Call base implementation first to render all widgets
   Wt::Auth::RegistrationWidget::render(flags);
   
@@ -34,6 +36,7 @@ void RegistrationView::render(Wt::WFlags<Wt::RenderFlag> flags)
 
 std::unique_ptr<Wt::WWidget> RegistrationView::createFormWidget(Wt::WFormModel::Field field)
 {
+  wApp->log("debug") << "RegistrationView::createFormWidget(Wt::WFormModel::Field field)";
   // if (field == UserDetailsModel::FavouritePetField)
   //   return std::make_unique<Wt::WLineEdit>();
   // else
@@ -42,6 +45,7 @@ std::unique_ptr<Wt::WWidget> RegistrationView::createFormWidget(Wt::WFormModel::
 
 bool RegistrationView::validate()
 {
+  wApp->log("debug") << "RegistrationView::validate()";
   bool result = Wt::Auth::RegistrationWidget::validate();
 
   updateModel(detailsModel_.get());
@@ -54,6 +58,7 @@ bool RegistrationView::validate()
 
 void RegistrationView::registerUserDetails(Wt::Auth::User& user)
 {
+  wApp->log("debug") << "RegistrationView::registerUserDetails(Wt::Auth::User& user)";
   detailsModel_->save(user);
 
 }

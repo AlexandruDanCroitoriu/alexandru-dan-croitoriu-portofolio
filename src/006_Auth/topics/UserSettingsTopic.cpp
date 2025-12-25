@@ -1,17 +1,27 @@
 #include "006_Auth/topics/UserSettingsTopic.h"
+#include "003_Navigation/DeferredWidget.h"
 #include "005_Dbo/Session.h"
 
 #include <Wt/WContainerWidget.h>
 #include <Wt/WText.h>
 #include <Wt/WMenu.h>
+#include <Wt/WApplication.h>
 
 UserSettingsTopic::UserSettingsTopic(std::shared_ptr<Session> session)
     : session_(session)
 {
+    wApp->log("debug") << "UserSettingsTopic::UserSettingsTopic()";
 }
 
 std::unique_ptr<Wt::WWidget> UserSettingsTopic::createSettingsPage()
 {
+    wApp->log("debug") << "UserSettingsTopic::createSettingsPage()";
+    return deferCreate([this]() { return settingsPage(); });
+}
+
+std::unique_ptr<Wt::WWidget> UserSettingsTopic::settingsPage()
+{
+    wApp->log("debug") << "UserSettingsTopic::settingsPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
     container->addStyleClass("p-8 bg-gray-100 min-h-screen");
     

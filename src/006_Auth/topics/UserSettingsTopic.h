@@ -12,5 +12,6 @@ public:
     std::unique_ptr<Wt::WWidget> createSettingsPage();
 
 private:
+    std::unique_ptr<Wt::WWidget> settingsPage();
     std::shared_ptr<Session> session_;
 };

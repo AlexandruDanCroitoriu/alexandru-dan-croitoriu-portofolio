@@ -10,6 +10,7 @@ MonacoEditor::MonacoEditor(std::string language)
       current_text_(""),
       unsaved_text_("")
 {
+    wApp->log("debug") << "MonacoEditor::MonacoEditor(std::string language):" << language;
     setLayoutSizeAware(true);
     setMinimumSize(Wt::WLength(1, Wt::LengthUnit::Pixel), Wt::WLength(1, Wt::LengthUnit::Pixel));
 
@@ -91,6 +92,7 @@ MonacoEditor::MonacoEditor(std::string language)
 
 void MonacoEditor::layoutSizeChanged(int width, int height)
 {
+    wApp->log("debug") << "MonacoEditor::layoutSizeChanged(int width, int height): " << width << "x" << height;
     resetLayout();
     if(width > 1){
         width_changed_.emit(Wt::WString(std::to_string(width)));
@@ -100,17 +102,20 @@ void MonacoEditor::layoutSizeChanged(int width, int height)
 
 void MonacoEditor::editorTextChanged(std::string text)
 {
+    wApp->log("debug") << "MonacoEditor::editorTextChanged(std::string text): text---\n" << text << "\n---";
     unsaved_text_ = text;
     available_save_.emit();
 }
 
 void MonacoEditor::textSaved()
 {
+    wApp->log("debug") << "MonacoEditor::textSaved()";
     current_text_ = unsaved_text_;
     available_save_.emit();
 }
 
 void MonacoEditor::setReadOnly(bool readOnly) {
+    wApp->log("debug") << "MonacoEditor::setReadOnly(bool readOnly): " << (readOnly ? "true" : "false");
     // Try repeatedly until the editor instance is ready to ensure the flag flips.
     doJavaScript(R"(
         (function(){
@@ -131,6 +136,7 @@ void MonacoEditor::setReadOnly(bool readOnly) {
 
 bool MonacoEditor::unsavedChanges()
 {
+    wApp->log("debug") << "MonacoEditor::unsavedChanges()";
     if (current_text_.compare(unsaved_text_) == 0)
     {
         return false;
@@ -140,6 +146,7 @@ bool MonacoEditor::unsavedChanges()
 
 void MonacoEditor::setEditorText(std::string resourcePath)
 {
+    wApp->log("debug") << "MonacoEditor::setEditorText(std::string resourcePath): " << resourcePath;
     resetLayout();
     auto resourcePathUrl = resourcePath + "?v=" + Wt::WRandom::generateId();
     doJavaScript(
@@ -178,11 +185,13 @@ void MonacoEditor::setEditorText(std::string resourcePath)
 
 void MonacoEditor::resetLayout()
 {
+    wApp->log("debug") << "MonacoEditor::resetLayout()";
     doJavaScript("setTimeout(function() { window." + editor_js_var_name_ + ".layout() }, 200);");
 }
 
 void MonacoEditor::setContent(const std::string& content)
 {
+    wApp->log("debug") << "MonacoEditor::setContent(const std::string& content): " << content;
     // Set content directly via JavaScript without using the resource system
     // This avoids resource path conflicts when editing the same post multiple times
     std::string escapedContent = content;
@@ -229,6 +238,7 @@ void MonacoEditor::setContent(const std::string& content)
 
 void MonacoEditor::setDarkTheme(bool dark)
 {
+    wApp->log("debug") << "MonacoEditor::setDarkTheme(bool dark): " << (dark ? "true" : "false");
     wApp->doJavaScript(R"(
         (function() {
             var interval = setInterval(function() {
@@ -244,6 +254,7 @@ void MonacoEditor::setDarkTheme(bool dark)
 
 std::string MonacoEditor::getFileText(std::string filePath)
 {
+    wApp->log("debug") << "MonacoEditor::getFileText(std::string filePath): " << filePath;
     std::ifstream file(filePath);
     if (!file.is_open())
     {
@@ -259,6 +270,7 @@ std::string MonacoEditor::getFileText(std::string filePath)
 
 void MonacoEditor::saveFile()
 {
+    wApp->log("debug") << "MonacoEditor::saveFile()";
     // Save the unsaved text to the file system
     if (unsaved_text_.empty())
     {
@@ -278,6 +290,7 @@ void MonacoEditor::saveFile()
 
 void MonacoEditor::toggleLineWrap()
 {
+    wApp->log("debug") << "MonacoEditor::toggleLineWrap()";
     doJavaScript(R"(
         setTimeout(function() {
             if (window.)" + editor_js_var_name_ + R"() {
@@ -290,6 +303,7 @@ void MonacoEditor::toggleLineWrap()
 }
 void MonacoEditor::toggleMinimap()
 {
+    wApp->log("debug") << "MonacoEditor::toggleMinimap()";
     doJavaScript(R"(
         setTimeout(function() {
             if (window.)" + editor_js_var_name_ + R"() {

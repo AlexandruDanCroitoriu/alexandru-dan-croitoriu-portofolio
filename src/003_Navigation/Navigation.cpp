@@ -22,6 +22,7 @@
 Navigation::Navigation(std::shared_ptr<Session> session)
     : session_(session), menuOpen_(false), currentActiveAnchor_(nullptr), previousPath_("/")
 {
+    wApp->log("debug") << "Navigation::Navigation(std::shared_ptr<Session> session)";
     lastUnknownPath_ = std::make_shared<std::string>("");
     // Apply main container styling
     addStyleClass("flex flex-row h-screen bg-gray-100");
@@ -95,6 +96,7 @@ Navigation::Navigation(std::shared_ptr<Session> session)
 
 void Navigation::setUI()
 {
+    wApp->log("debug") << "Navigation::setUI()";
     currentActiveAnchor_ = nullptr;
     anchorsByPath_.clear();
     routes_.clear();
@@ -154,6 +156,7 @@ void Navigation::setUI()
 
 void Navigation::toggleMenu()
 {
+    wApp->log("debug") << "Navigation::toggleMenu()";
     if (menuOpen_) {
         closeMenu();
     } else {
@@ -163,6 +166,7 @@ void Navigation::toggleMenu()
 
 void Navigation::openMenu()
 {
+    wApp->log("debug") << "Navigation::openMenu()";
     if (menuOpen_) return;
     
     sidebar_->removeStyleClass("-translate-x-full");
@@ -175,6 +179,7 @@ void Navigation::openMenu()
 
 void Navigation::closeMenu()
 {
+    wApp->log("debug") << "Navigation::closeMenu()";
     if (!menuOpen_) return;
     
     sidebar_->addStyleClass("-translate-x-full");
@@ -187,6 +192,7 @@ void Navigation::closeMenu()
 
 void Navigation::setupRoutes()
 {
+    wApp->log("debug") << "Navigation::setupRoutes()";
     // Topics instances captured by value in route lambdas
     auto cvTopic = std::make_shared<CvPortofolioTopic>();
     auto monacoTopic = std::make_shared<MonacoTopic>();
@@ -266,6 +272,7 @@ void Navigation::setupRoutes()
 
 void Navigation::buildSidebar()
 {
+    wApp->log("debug") << "Navigation::buildSidebar()";
     auto makeAnchor = [this](Wt::WContainerWidget* parent,
                              const std::string& label,
                              const std::string& path) {
@@ -295,6 +302,7 @@ void Navigation::buildSidebar()
 
 void Navigation::connectRouting()
 {
+    wApp->log("debug") << "Navigation::connectRouting()";
     // React to internal path changes
     if (internalPathConnection_.isConnected()) {
         internalPathConnection_.disconnect();
@@ -306,6 +314,7 @@ void Navigation::connectRouting()
 
 void Navigation::syncAuthDialogWithPath(const std::string& path)
 {
+    wApp->log("debug") << "Navigation::syncAuthDialogWithPath(const std::string& path): " << path;
     // Synchronize auth dialog visibility and view based on current path
     if (path == "/account/login") {
         if (authWidget_ && authWidget_->getCurrentView() != AuthWidget::ViewState::Login) {
@@ -326,6 +335,7 @@ void Navigation::syncAuthDialogWithPath(const std::string& path)
 
 void Navigation::markActive(const std::string& path)
 {
+    wApp->log("debug") << "Navigation::markActive(const std::string& path): " << path;
     std::cout << "\nMarking active path: " << path << "\n";
     
     auto it = anchorsByPath_.find(path);
@@ -352,6 +362,7 @@ void Navigation::markActive(const std::string& path)
 
 void Navigation::navigateTo(const std::string& rawPath)
 {
+    wApp->log("debug") << "Navigation::navigateTo(const std::string& rawPath): " << rawPath;
     std::string path = rawPath;
     if (path.empty()) path = "/";
     
@@ -463,6 +474,7 @@ void Navigation::navigateTo(const std::string& rawPath)
 
 void Navigation::authChanged()
 {
+    wApp->log("debug") << "Navigation::authChanged()";
     std::cout << "\n\n Auth changed, logged in: " << session_->login().loggedIn() << "\n\n";
     // Rebuild UI without changing internal path; let the current path be handled by navigateTo()
     setUI();

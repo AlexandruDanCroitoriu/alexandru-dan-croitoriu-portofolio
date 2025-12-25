@@ -1,5 +1,6 @@
 #include "007_Blog/topics/PostDetailTopic.h"
 #include "007_Blog/topics/EditPostTopic.h"
+#include "007_Blog/BlogUtils.h"
 
 #include "005_Dbo/Session.h"
 #include "005_Dbo/Tables/Post.h"
@@ -14,24 +15,15 @@
 
 namespace dbo = Wt::Dbo;
 
-static bool isBlogAdmin(Session& session)
-{
-  if (!session.login().loggedIn()) return false;
-  dbo::Transaction t(session);
-  auto user = session.user();
-  if (!user) return false;
-  auto perms = session.find<Permission>().where("name = ?").bind("BLOG_ADMIN").resultList();
-  if (perms.empty()) return false;
-  return user->hasPermission(perms.front());
-}
-
 PostDetailTopic::PostDetailTopic(std::shared_ptr<Session> session, const std::string& slug)
   : session_(std::move(session)), slug_(slug)
 {
+    wApp->log("debug") << "PostDetailTopic::PostDetailTopic(std::shared_ptr<Session> session, const std::string& slug)";
 }
 
 std::unique_ptr<Wt::WWidget> PostDetailTopic::createPostDetailPage()
 {
+  wApp->log("debug") << "PostDetailTopic::createPostDetailPage()";
   auto container = std::make_unique<Wt::WContainerWidget>();
   container->addStyleClass("w-full max-w-4xl mx-auto p-6");
 

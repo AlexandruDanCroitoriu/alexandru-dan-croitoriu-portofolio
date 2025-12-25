@@ -19,6 +19,7 @@ AuthWidget::AuthWidget(std::shared_ptr<Session> session)
   : Wt::Auth::AuthWidget(Session::auth(), session->users(), session->login()),
     session_(session), loginTemplateId_("Wt.Auth.template.login-v1")
 { 
+  wApp->log("debug") << "AuthWidget::AuthWidget()";
   // Disable internal path routing; Navigation drives dialog via its own paths
   setInternalBasePath("");
 
@@ -36,6 +37,7 @@ AuthWidget::AuthWidget(std::shared_ptr<Session> session)
 
 std::unique_ptr<Wt::WWidget> AuthWidget::createRegistrationView(const Wt::Auth::Identity& id)
 {
+  wApp->log("debug") << "AuthWidget::createRegistrationView(const Wt::Auth::Identity& id)";
   auto registrationView = std::make_unique<RegistrationView>(session_, this);
   std::unique_ptr<Wt::Auth::RegistrationModel> registrationModel = createRegistrationModel();
 
@@ -48,6 +50,7 @@ std::unique_ptr<Wt::WWidget> AuthWidget::createRegistrationView(const Wt::Auth::
 
 void AuthWidget::createLoginView()
 {
+  wApp->log("debug") << "AuthWidget::createLoginView()";
   setTemplateText(tr(loginTemplateId_)); // default wt template
 
   // setTemplateText(tr("Wt.Auth.template.login-v0")); // v0 nothing but the data and some basic structure
@@ -115,6 +118,7 @@ void AuthWidget::createLoginView()
 
 Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt::WWidget> contents) 
 {
+  wApp->log("debug") << "AuthWidget::showDialog()";
   if (contents) {
     dialog_ = std::make_unique<Wt::WDialog>(title);
     dialog_->contents()->addWidget(std::move(contents));
@@ -150,6 +154,7 @@ Wt::WDialog *AuthWidget::showDialog(const Wt::WString& title, std::unique_ptr<Wt
 
 void AuthWidget::showRegistrationView()
 {
+  wApp->log("debug") << "AuthWidget::showRegistrationView()";
   // Switch to registration flow; base provides registerNewUser()
     currentView_ = ViewState::Registration;
   this->registerNewUser();
@@ -157,6 +162,7 @@ void AuthWidget::showRegistrationView()
 
 void AuthWidget::showLoginView()
 {
+  wApp->log("debug") << "AuthWidget::showLoginView()";
   // Switch back to login view by resetting the model
     currentView_ = ViewState::Login;
   model()->reset();
@@ -164,6 +170,7 @@ void AuthWidget::showLoginView()
 
 void AuthWidget::hideInternalDialog()
 {
+  wApp->log("debug") << "AuthWidget::hideInternalDialog()";
   if (dialog_) {
     dialog_->hide();
     dialog_.reset();

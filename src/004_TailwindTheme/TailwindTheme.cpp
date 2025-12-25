@@ -45,21 +45,24 @@ namespace {
 
 TailwindTheme::TailwindTheme()
 {
-    wApp->log("debug") << "Tailwind Theme constructor";
+    // wApp->log("debug") << "TailwindTheme::TailwindTheme()";
 }
 
 std::string TailwindTheme::name() const
 {
+    // wApp->log("debug") << "TailwindTheme::name()";
     return "tailwindcss";
 }
 
 std::string TailwindTheme::resourcesUrl() const
 {
+    // wApp->log("debug") << "TailwindTheme::resourcesUrl()";
     return "static/theme/" + name() + "/";
 }
 
 std::vector<Wt::WLinkedCssStyleSheet> TailwindTheme::styleSheets() const
 {
+    // wApp->log("debug") << "TailwindTheme::styleSheets()";
     std::vector<Wt::WLinkedCssStyleSheet> result;
     const std::string themeDir = resourcesUrl();
 
@@ -74,6 +77,7 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindTheme::styleSheets() const
 
 void TailwindTheme::init(Wt::WApplication *app) const
 {
+    // wApp->log("debug") << "TailwindTheme::init(Wt::WApplication *app) ";
     //   app->builtinLocalizedStrings().useBuiltin(Wt::skeletons::BootstrapTheme_xml);
     //   app->builtinLocalizedStrings().useBuiltin(Wt::skeletons::Bootstrap5Theme_xml);
     //   app->require(resourcesUrl() + "bootstrap.bundle.min.js");
@@ -109,6 +113,7 @@ void TailwindTheme::init(Wt::WApplication *app) const
 
 void TailwindTheme::apply(Wt::WWidget *widget, Wt::WWidget *child, int widgetRole) const
 {
+    // wApp->log("debug") << "TailwindTheme::apply(Wt::WWidget *widget, Wt::WWidget *child, int widgetRole)";
     if (!widget->isThemeStyleEnabled())
         return;
 
@@ -245,6 +250,7 @@ void TailwindTheme::apply(Wt::WWidget *widget, Wt::WWidget *child, int widgetRol
 
 void TailwindTheme::apply(Wt::WWidget *widget, Wt::DomElement &element, int elementRole) const
 {
+    // wApp->log("debug") << "TailwindTheme::apply(Wt::WWidget *widget, Wt::DomElement &element, int elementRole)";
     bool creating = element.mode() == Wt::DomElement::Mode::Create;
 
     if (!widget->isThemeStyleEnabled())
@@ -557,28 +563,32 @@ void TailwindTheme::apply(Wt::WWidget *widget, Wt::DomElement &element, int elem
 
 std::string TailwindTheme::disabledClass() const
 {
-  return "disabled";
+    // wApp->log("debug") << "TailwindTheme::disabledClass()";
+    return "disabled";
 }
 
 std::string TailwindTheme::activeClass() const
 {
-  return "active";
+    // wApp->log("debug") << "TailwindTheme::activeClass()";
+    return "active";
 }
 
 std::string TailwindTheme::utilityCssClass(int utilityCssClassRole) const
 {
-  switch (utilityCssClassRole) {
-  case Wt::ToolTipInner:
-    return "tooltip-inner";
-  case Wt::ToolTipOuter:
-    return "tooltip fade top in position-absolute";
-  default:
-    return "";
-  }
+    // wApp->log("debug") << "TailwindTheme::utilityCssClass(int utilityCssClassRole)";
+    switch (utilityCssClassRole) {
+    case Wt::ToolTipInner:
+        return "tooltip-inner";
+    case Wt::ToolTipOuter:
+        return "tooltip fade top in position-absolute";
+    default:
+        return "";
+    }
 }
 
 bool TailwindTheme::canStyleAnchorAsButton() const
 {
+    // wApp->log("debug") << "TailwindTheme::canStyleAnchorAsButton()";
   return true;
 }
 
@@ -586,6 +596,7 @@ void TailwindTheme::applyValidationStyle(Wt::WWidget *widget,
                                             const Wt::WValidator::Result& validation,
                                             Wt::WFlags<Wt::ValidationStyleFlag> styles) const
 {
+    // wApp->log("debug") << "TailwindTheme::applyValidationStyle(Wt::WWidget *widget, const Wt::WValidator::Result& validation, Wt::WFlags<Wt::ValidationStyleFlag> styles)";
   Wt::WApplication *app = Wt::WApplication::instance();
 
   if (app->environment().ajax()) {
@@ -613,11 +624,13 @@ void TailwindTheme::applyValidationStyle(Wt::WWidget *widget,
 bool TailwindTheme::canBorderBoxElement(const Wt::DomElement& element) const
 {
   // Irrelevant, is used for old IE versions
+    // wApp->log("debug") << "TailwindTheme::canBorderBoxElement(const Wt::DomElement& element)";
   return true;
 }
 
 Wt::Side TailwindTheme::panelCollapseIconSide() const
 {
+    // wApp->log("debug") << "TailwindTheme::panelCollapseIconSide()";
   return Wt::Side::Right;
 }
 
@@ -627,6 +640,7 @@ Wt::Side TailwindTheme::panelCollapseIconSide() const
 // PRIVATE
 std::string TailwindTheme::classBtn(const Wt::WWidget *widget)
 {
+    // wApp->log("debug") << "TailwindTheme::classBtn(const Wt::WWidget *widget)";
   auto button = dynamic_cast<const Wt::WPushButton *>(widget);
   return (hasButtonStyleClass(widget)
           || (button && button->isDefault())) ? "btn" : "rounded-md px-2.5 py-1.5 text-sm font-semibold text-white ring-1 ring-inset cursor-pointer";
@@ -635,6 +649,7 @@ std::string TailwindTheme::classBtn(const Wt::WWidget *widget)
 
 bool TailwindTheme::hasButtonStyleClass(const Wt::WWidget *widget)
 {
+    // wApp->log("debug") << "TailwindTheme::hasButtonStyleClass(const Wt::WWidget *widget)";
 #ifndef WT_TARGET_JAVA
   int size = sizeof(btnClasses)/sizeof(std::string);
 #else
@@ -658,6 +673,7 @@ bool TailwindTheme::hasButtonStyleClass(const Wt::WWidget *widget)
 
 bool TailwindTheme::hasNavbarExpandClass(const Wt::WNavigationBar *navigationBar)
 {
+    // wApp->log("debug") << "TailwindTheme::hasNavbarExpandClass(const Wt::WNavigationBar *navigationBar)";
   const auto classesStr = navigationBar->styleClass().toUTF8();
   std::vector<std::string> classes;
   boost::split(classes, classesStr, boost::is_any_of(" "));

@@ -23,7 +23,6 @@ std::unique_ptr<Wt::WWidget> UserSettingsTopic::settingsPage()
 {
     wApp->log("debug") << "UserSettingsTopic::settingsPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
-    container->addStyleClass("p-8 bg-gray-100 min-h-screen");
     
     auto title = container->addNew<Wt::WText>("<h1 class='text-3xl font-bold mb-6 text-gray-900'>User Settings</h1>");
     title->setTextFormat(Wt::TextFormat::XHTML);

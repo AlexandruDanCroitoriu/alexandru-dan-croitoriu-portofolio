@@ -53,24 +53,48 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
 
     auto gridContainer = container->addNew<Wt::WContainerWidget>();
 
-    std::string gridCellStyle = "bg-green-300 rounded-md shadow-md w-60 h-60";
+    std::string gridCellStyle = "opacity-0 transition-opacity duration-700 ease-in-out ";
+    gridCellStyle += "bg-green-300 rounded-md shadow-md w-full h-60 ";
+    Wt::WString jsFunc =
+    R"(
+    const observer = new IntersectionObserver((entries)=>{
+        entries.forEach((entry)=>{
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const elementTop = entry.boundingClientRect.top;
+            
+            // Element is at bottom of screen if its top is in lower half of viewport
+            const isAtBottom = elementTop >= viewportHeight * 0.5;
+            
+            if(entry.isIntersecting){
+                // If element is visible and NOT at bottom (i.e., at top), add class immediately
+                // If element is visible and at bottom (entering from scroll), add class
+                if(!isAtBottom || isAtBottom){
+                    entry.target.classList.add("!opacity-100");
+                }
+            } else if(isAtBottom) {
+                // Only remove class when leaving from bottom area
+                entry.target.classList.remove("!opacity-100");
+            }
+        });
+    }, { 
+        threshold: 0.1
+    });
+    )";
 
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
-    gridContainer->addNew<Wt::WContainerWidget>()->addStyleClass(gridCellStyle);
+    for ( int i = 0; i < 10; ++i )
+    {
+        auto block = gridContainer->addNew<Wt::WContainerWidget>();
+        block->addStyleClass(gridCellStyle);
+        jsFunc += "observer.observe(document.getElementById('" + block->id() + "'));";
+    }
+
+    gridContainer->doJavaScript(jsFunc.toUTF8());
     
     buttonGroup->checkedChanged().connect([gridContainer, codingCvRadio, allCvRadio](Wt::WRadioButton* selectedRadioButton) {
         if (codingCvRadio == selectedRadioButton) {
-            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]");
+            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 1fr)]");
         } else if (allCvRadio == selectedRadioButton) {
-            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit,minmax(400px,1fr))]");
+            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 2fr)]");
         }else {
             wApp->log("error") << "CvPortofolioTopic::cvPage() - Unknown radio button selected";
         }

@@ -25,7 +25,7 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     wApp->log("debug") << "Navigation::Navigation(std::shared_ptr<Session> session)";
     lastUnknownPath_ = std::make_shared<std::string>("");
     // Apply main container styling
-    addStyleClass("flex flex-row h-screen bg-gray-100");
+    addStyleClass("flex flex-row h-[100svh] bg-gray-100");
 
     // Create sidebar
     sidebar_ = addNew<Wt::WContainerWidget>();
@@ -33,7 +33,7 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     // Keep sidebar fixed on all breakpoints so it doesn't scroll with page
     sidebar_->addStyleClass("fixed inset-y-0 left-0 z-50");
     // Ensure the sidebar keeps viewport height and scrolls independently
-    sidebar_->addStyleClass("h-screen overflow-y-auto");
+    sidebar_->addStyleClass("h-[100svh] overflow-y-auto");
     sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
     sidebar_->addStyleClass("-translate-x-full md:translate-x-0"); // Hidden on mobile by default
 
@@ -113,7 +113,7 @@ void Navigation::setUI()
 
      // Create logo/title area using WTemplate
     auto logoArea = sidebar_->addNew<Wt::WTemplate>();
-    logoArea->addStyleClass("relative h-fit flex items-center pb-4 shrink-0 border-b border-gray-700 cursor-pointer");
+    logoArea->addStyleClass("h-fit flex items-center pb-4 shrink-0 border-b border-gray-700 cursor-pointer");
     logoArea->setTemplateText(
         "<div class=\"\">${tr:favicon.svg class=\"\"}</div>"
         "<div class=\"mx-auto\">"

@@ -12,7 +12,8 @@
 #include <Wt/WText.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WPushButton.h>
-#include <Wt/WComboBox.h>
+#include <Wt/WButtonGroup.h>
+#include <Wt/WRadioButton.h>
 #include <Wt/WCheckBox.h>
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
@@ -116,24 +117,42 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   // State selection
   auto stateLabel = container->addNew<Wt::WText>("State:");
   stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
-  auto stateCombo = container->addNew<Wt::WComboBox>();
-  stateCombo->addItem("Draft");
-  stateCombo->addItem("Published");
-  stateCombo->addItem("Archived");
-  stateCombo->setCurrentIndex(stateIdx);
-  stateCombo->addStyleClass("rounded-md border border-gray-300 p-2");
+  
+  auto stateGroup = std::make_shared<Wt::WButtonGroup>();
+  auto stateContainer = container->addNew<Wt::WContainerWidget>();
+  stateContainer->addStyleClass("space-x-2 mt-2");
+  
+  auto draftRadio = stateContainer->addNew<Wt::WRadioButton>("Draft");
+  stateGroup->addButton(draftRadio, 0);
+  auto publishedRadio = stateContainer->addNew<Wt::WRadioButton>("Published");
+  stateGroup->addButton(publishedRadio, 1);
+  auto archivedRadio = stateContainer->addNew<Wt::WRadioButton>("Archived");
+  stateGroup->addButton(archivedRadio, 2);
+  
+  std::string radioStyles = "";
+  radioStyles += "[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer ";
+  radioStyles += "[&>input]:[&~span]:p-1 ";
+  radioStyles += "[&>input]:[&~span]:rounded-md ";
+  radioStyles += "[&>input]:[&~span]:bg-gray-400 ";
+  radioStyles += "[&>input]:checked:[&~span]:bg-gray-700 ";
+
+  draftRadio->addStyleClass(radioStyles);
+  publishedRadio->addStyleClass(radioStyles);
+  archivedRadio->addStyleClass(radioStyles);
+
+  stateGroup->setCheckedButton(stateGroup->button(stateIdx));
 
   // Tag selection (existing tags)
   auto tagLabel = container->addNew<Wt::WText>("Tags:");
   tagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
   
   auto tagContainer = container->addNew<Wt::WContainerWidget>();
-  tagContainer->addStyleClass("space-y-2 p-3 bg-gray-50 rounded-md");
+  tagContainer->addStyleClass("space-x-2 p-3 bg-gray-50 rounded-md");
 
   auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox*>>();
   auto tagSlugs = std::make_shared<std::vector<std::string>>();
 
-  auto refreshTags = [this, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string>& pre) {
+  auto refreshTags = [this, radioStyles, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string>& pre) {
     tagContainer->clear();
     tagCheckboxes->clear();
     tagSlugs->clear();
@@ -142,7 +161,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
     auto tags = session_->find<Tag>("order by name asc").resultList();
     for (const dbo::ptr<Tag>& tag : tags) {
       auto cb = tagContainer->addNew<Wt::WCheckBox>(tag->name_);
-      cb->addStyleClass("mr-4");
+      cb->addStyleClass(radioStyles);
       const bool checked = std::find(pre.begin(), pre.end(), tag->slug_) != pre.end();
       cb->setChecked(checked);
       tagCheckboxes->push_back(cb);
@@ -203,8 +222,8 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   auto sessionPtr = session_;
   auto postSlug = slug_;
   
-  saveBtn->clicked().connect([sessionPtr, postSlug, titleEdit, briefEdit, bodyEdit, stateCombo, tagCheckboxes, tagSlugs, status]() {
-    if (!sessionPtr || !titleEdit || !briefEdit || !bodyEdit || !stateCombo || !tagCheckboxes || !tagSlugs || !status) {
+  saveBtn->clicked().connect([sessionPtr, postSlug, titleEdit, briefEdit, bodyEdit, stateGroup, tagCheckboxes, tagSlugs, status]() {
+    if (!sessionPtr || !titleEdit || !briefEdit || !bodyEdit || !stateGroup || !tagCheckboxes || !tagSlugs || !status) {
       if (status) status->setText("Widget error");
       return;
     }
@@ -244,7 +263,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
           redirectSlug = slugify(postTitle);
           p->slug_ = redirectSlug;
 
-          int stateIdx = stateCombo->currentIndex();
+          int stateIdx = stateGroup->checkedId();
           if (stateIdx == 1) {
             p->state_ = Post::State::Published;
             p->publishedAt_ = Wt::WDateTime::currentDateTime();

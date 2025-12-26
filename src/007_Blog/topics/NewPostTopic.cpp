@@ -47,29 +47,26 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
     container->addNew<Wt::WText>("Only the admin can create new posts.");
     return container;
   }
+  auto titleWrapper = container->addNew<Wt::WContainerWidget>();
+  titleWrapper->setStyleClass("flex items-center justify-between flex-wrap");
 
-  auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Create New Post</h2>"));
+  auto title = titleWrapper->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Create New Post</h2>"));
   title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+
+  auto createBtn = titleWrapper->addNew<Wt::WPushButton>("Create");
+
 
   auto titleEdit = container->addNew<Wt::WLineEdit>();
   titleEdit->setPlaceholderText("Post title");
   titleEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
 
-  auto briefEdit = container->addNew<MonacoEditor>("html");
-  briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
-  briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
-
-  auto bodyEdit = container->addNew<MonacoEditor>("html");
-  bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
-  bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
-
   // State selection
-  auto stateLabel = container->addNew<Wt::WText>("State:");
-  stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
-  
   auto stateGroup = std::make_shared<Wt::WButtonGroup>();
   auto stateContainer = container->addNew<Wt::WContainerWidget>();
-  stateContainer->addStyleClass("space-x-2 mt-2");
+  stateContainer->addStyleClass("space-x-2 mt-2 flex items-center");
+
+  auto stateLabel = stateContainer->addNew<Wt::WText>("State:");
+  stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
   
   auto draftRadio = stateContainer->addNew<Wt::WRadioButton>("Draft");
   stateGroup->addButton(draftRadio, 0);
@@ -92,11 +89,10 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
   stateGroup->setCheckedButton(stateGroup->button(0)); // Default to Draft
 
   // Tag selection (existing tags)
-  auto tagLabel = container->addNew<Wt::WText>("Tags:");
-  tagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
-  
+  auto tagContainerWrapper = container->addNew<Wt::WContainerWidget>();
+
   auto tagContainer = container->addNew<Wt::WContainerWidget>();
-  tagContainer->addStyleClass("space-x-2 p-3 bg-gray-50 rounded-md");
+  tagContainer->addStyleClass("space-x-1 px-2 rounded-md");
 
   auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox*>>();
   auto tagSlugs = std::make_shared<std::vector<std::string>>();
@@ -122,9 +118,9 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
   refreshTags({});
 
   // New tag input: enter to add and re-render
-  auto newTagLabel = container->addNew<Wt::WText>("Add new tag:");
+  auto newTagLabel = tagContainerWrapper->addNew<Wt::WText>("Add new tag:");
   newTagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
-  auto newTagEdit = container->addNew<Wt::WLineEdit>();
+  auto newTagEdit = tagContainerWrapper->addNew<Wt::WLineEdit>();
   newTagEdit->setPlaceholderText("Type tag name and press Enter");
   newTagEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
   newTagEdit->enterPressed().connect([this, newTagEdit, refreshTags, tagCheckboxes, tagSlugs]() {
@@ -167,10 +163,20 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
     // Re-render checkboxes with new selection
     refreshTags(selected);
     newTagEdit->setText("");
+
+    
   });
 
-  auto createBtn = container->addNew<Wt::WPushButton>("Create");
-  createBtn->addStyleClass("bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1 mt-4");
+  auto briefEdit = container->addNew<MonacoEditor>("html");
+  briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
+
+  auto bodyEdit = container->addNew<MonacoEditor>("html");
+  bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
+
+
+  createBtn->addStyleClass("bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded");
 
   auto status = container->addNew<Wt::WText>("");
   status->addStyleClass("mt-2");

@@ -1,6 +1,7 @@
 #include "007_Blog/topics/PostDetailTopic.h"
 #include "007_Blog/topics/EditPostTopic.h"
 #include "007_Blog/BlogUtils.h"
+#include "003_Navigation/topics/NotAuthorizedTopic.h"
 
 #include "005_Dbo/Session.h"
 #include "005_Dbo/Tables/Post.h"
@@ -36,6 +37,11 @@ std::unique_ptr<Wt::WWidget> PostDetailTopic::createPostDetailPage()
     notFound->setTextFormat(Wt::TextFormat::UnsafeXHTML);
   } else {
     auto post = posts.front();
+    // Guard: only admins can view Draft or Archived posts
+    if (!isBlogAdmin(*session_) && (post->state_ == Post::State::Draft || post->state_ == Post::State::Archived)) {
+      NotAuthorizedTopic notAuth;
+      return notAuth.createNotAuthorizedPage();
+    }
     // Admin edit button
     if (isBlogAdmin(*session_)) {
       auto editBtn = container->addNew<Wt::WPushButton>("Edit Post");

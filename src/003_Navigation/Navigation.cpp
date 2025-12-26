@@ -317,11 +317,22 @@ void Navigation::syncAuthDialogWithPath(const std::string& path)
     wApp->log("debug") << "Navigation::syncAuthDialogWithPath(const std::string& path): " << path;
     // Synchronize auth dialog visibility and view based on current path
     if (path == "/account/login") {
-        if (authWidget_ && authWidget_->getCurrentView() != AuthWidget::ViewState::Login) {
-            authWidget_->showLoginView();
-        }
-        if (authDialog_->isHidden()) {
-            authDialog_->show();
+        // If already logged in, redirect back to previous path instead of showing dialog
+        if (session_ && session_->login().loggedIn()) {
+            std::string target = previousPath_.empty() ? "/" : previousPath_;
+            if (target == "/account/login") {
+                target = "/";
+            }
+            if (wApp->internalPath() != target) {
+                wApp->setInternalPath(target, true);
+            }
+        } else {
+            if (authWidget_ && authWidget_->getCurrentView() != AuthWidget::ViewState::Login) {
+                authWidget_->showLoginView();
+            }
+            if (authDialog_->isHidden()) {
+                authDialog_->show();
+            }
         }
     } else {
         if (authWidget_) {
@@ -376,8 +387,17 @@ void Navigation::navigateTo(const std::string& rawPath)
     // Synchronize auth dialog state with the current path
     syncAuthDialogWithPath(pathWithoutQuery);
     
-    // If on auth paths, just update dialog without changing content
+    // If on auth login path: show dialog for guests, redirect for logged-in users
     if (pathWithoutQuery == "/account/login") {
+        if (session_ && session_->login().loggedIn()) {
+            std::string target = previousPath_.empty() ? "/" : previousPath_;
+            if (target == "/account/login") {
+                target = "/";
+            }
+            if (path != target) {
+                wApp->setInternalPath(target, true);
+            }
+        }
         return;
     }
     

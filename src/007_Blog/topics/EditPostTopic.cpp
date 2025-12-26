@@ -23,20 +23,23 @@
 
 namespace dbo = Wt::Dbo;
 
-static std::string slugify(const std::string& value)
+static std::string slugify(const std::string &value)
 {
   wApp->log("debug") << "slugify(const std::string& value)";
   std::string slug = value;
-  for (char& c : slug) {
+  for (char &c : slug)
+  {
     const unsigned char uc = static_cast<unsigned char>(c);
-    if (std::isspace(uc)) c = '-';
-    else c = static_cast<char>(std::tolower(uc));
+    if (std::isspace(uc))
+      c = '-';
+    else
+      c = static_cast<char>(std::tolower(uc));
   }
   return slug;
 }
 
-EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string& slug)
-  : session_(std::move(session)), slug_(slug)
+EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string &slug)
+    : session_(std::move(session)), slug_(slug)
 {
   wApp->log("debug") << "EditPostTopic::EditPostTopic(std::shared_ptr<Session> session, const std::string& slug)";
 }
@@ -47,10 +50,10 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
   // Capture session and slug by value to avoid dangling references in deferred execution
   auto session = session_;
   auto slug = slug_;
-  return deferCreate([session, slug]() {
+  return deferCreate([session, slug]()
+                     {
     EditPostTopic topic(session, slug);
-    return topic.editPage();
-  });
+    return topic.editPage(); });
 }
 
 std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
@@ -60,7 +63,8 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   container->addStyleClass("w-full max-w-4xl mx-auto space-y-4 p-6");
 
   // Access guard
-  if (!isBlogAdmin(*session_)) {
+  if (!isBlogAdmin(*session_))
+  {
     auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Not Authorized</h2>"));
     title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
     container->addNew<Wt::WText>("Only the admin can edit posts.");
@@ -73,11 +77,12 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   std::string postBody;
   int stateIdx = 0;
   std::vector<std::string> prechecked;
-  
+
   {
     dbo::Transaction t(*session_);
     auto posts = session_->find<Post>("where slug = ?").bind(slug_).resultList();
-    if (posts.empty()) {
+    if (posts.empty())
+    {
       auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-2xl font-bold text-red-700'>Post not found</h2>"));
       title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
       return container;
@@ -88,47 +93,46 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
     postTitle = post->title_;
     postBrief = post->briefSrc_;
     postBody = post->bodySrc_;
-    
-    if (post->state_ == Post::State::Published) stateIdx = 1;
-    else if (post->state_ == Post::State::Archived) stateIdx = 2;
-    
+
+    if (post->state_ == Post::State::Published)
+      stateIdx = 1;
+    else if (post->state_ == Post::State::Archived)
+      stateIdx = 2;
+
     // Collect current post tags for pre-check
-    for (const auto& tag : post->tags_) {
+    for (const auto &tag : post->tags_)
+    {
       prechecked.push_back(tag->slug_);
     }
   } // Transaction ends here, post pointer is no longer valid
 
-  auto title = container->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Edit Post</h2>"));
+  auto titleWrapper = container->addNew<Wt::WContainerWidget>();
+  titleWrapper->setStyleClass("flex items-center justify-between flex-wrap");
+
+  auto title = titleWrapper->addNew<Wt::WText>(Wt::WString::fromUTF8("<h2 class='text-3xl font-bold text-gray-800'>Edit Post</h2>"));
   title->setTextFormat(Wt::TextFormat::UnsafeXHTML);
+
+  auto saveBtn = titleWrapper->addNew<Wt::WPushButton>("Save");
 
   auto titleEdit = container->addNew<Wt::WLineEdit>(postTitle);
   titleEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
 
-  auto briefEdit = container->addNew<MonacoEditor>("html");
-  briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
-  briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
-  briefEdit->setContent(postBrief);
   
-  auto bodyEdit = container->addNew<MonacoEditor>("html");
-  bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
-  bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
-  bodyEdit->setContent(postBody);
-
   // State selection
-  auto stateLabel = container->addNew<Wt::WText>("State:");
-  stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
-  
   auto stateGroup = std::make_shared<Wt::WButtonGroup>();
   auto stateContainer = container->addNew<Wt::WContainerWidget>();
-  stateContainer->addStyleClass("space-x-2 mt-2");
-  
+  stateContainer->addStyleClass("space-x-2 mt-2 flex items-center");
+
+  auto stateLabel = stateContainer->addNew<Wt::WText>("State:");
+  stateLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-2");
+
   auto draftRadio = stateContainer->addNew<Wt::WRadioButton>("Draft");
   stateGroup->addButton(draftRadio, 0);
   auto publishedRadio = stateContainer->addNew<Wt::WRadioButton>("Published");
   stateGroup->addButton(publishedRadio, 1);
   auto archivedRadio = stateContainer->addNew<Wt::WRadioButton>("Archived");
   stateGroup->addButton(archivedRadio, 2);
-  
+
   std::string radioStyles = "";
   radioStyles += "[&>input]:hidden text-white text-sm lg:text-md inline-block cursor-pointer ";
   radioStyles += "[&>input]:[&~span]:p-1 ";
@@ -143,23 +147,24 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   stateGroup->setCheckedButton(stateGroup->button(stateIdx));
 
   // Tag selection (existing tags)
-  auto tagLabel = container->addNew<Wt::WText>("Tags:");
-  tagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
-  
-  auto tagContainer = container->addNew<Wt::WContainerWidget>();
-  tagContainer->addStyleClass("space-x-2 p-3 bg-gray-50 rounded-md");
+  auto tagContainerWrapper = container->addNew<Wt::WContainerWidget>();
 
-  auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox*>>();
+  auto tagContainer = container->addNew<Wt::WContainerWidget>();
+  tagContainer->addStyleClass("space-x-1 px-2 rounded-md");
+  
+  auto tagCheckboxes = std::make_shared<std::vector<Wt::WCheckBox *>>();
   auto tagSlugs = std::make_shared<std::vector<std::string>>();
 
-  auto refreshTags = [this, radioStyles, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string>& pre) {
+  auto refreshTags = [this, radioStyles, tagContainer, tagCheckboxes, tagSlugs](const std::vector<std::string> &pre)
+  {
     tagContainer->clear();
     tagCheckboxes->clear();
     tagSlugs->clear();
 
     dbo::Transaction t(*session_);
     auto tags = session_->find<Tag>("order by name asc").resultList();
-    for (const dbo::ptr<Tag>& tag : tags) {
+    for (const dbo::ptr<Tag> &tag : tags)
+    {
       auto cb = tagContainer->addNew<Wt::WCheckBox>(tag->name_);
       cb->addStyleClass(radioStyles);
       const bool checked = std::find(pre.begin(), pre.end(), tag->slug_) != pre.end();
@@ -172,12 +177,13 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   refreshTags(prechecked);
 
   // New tag input
-  auto newTagLabel = container->addNew<Wt::WText>("Add new tag:");
+  auto newTagLabel = tagContainerWrapper->addNew<Wt::WText>("Add new tag:");
   newTagLabel->addStyleClass("text-sm font-semibold text-gray-700 mt-4");
-  auto newTagEdit = container->addNew<Wt::WLineEdit>();
+  auto newTagEdit = tagContainerWrapper->addNew<Wt::WLineEdit>();
   newTagEdit->setPlaceholderText("Type tag name and press Enter");
   newTagEdit->addStyleClass("w-full rounded-md border border-gray-300 p-2");
-  newTagEdit->enterPressed().connect([this, newTagEdit, refreshTags, tagCheckboxes, tagSlugs]() {
+  newTagEdit->enterPressed().connect([this, newTagEdit, refreshTags, tagCheckboxes, tagSlugs]()
+                                     {
     std::string tagName = newTagEdit->text().toUTF8();
     tagName.erase(0, tagName.find_first_not_of(" \t\n\r"));
     if (!tagName.empty())
@@ -209,20 +215,29 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
     }
 
     refreshTags(selected);
-    newTagEdit->setText("");
-  });
+    newTagEdit->setText(""); });
 
-  auto saveBtn = container->addNew<Wt::WPushButton>("Save");
-  saveBtn->addStyleClass("bg-blue-600 hover:bg-blue-700 text-white rounded-md px-3 py-1 mt-4");
+  saveBtn->addStyleClass("bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded");
 
   auto status = container->addNew<Wt::WText>("");
   status->addStyleClass("mt-2");
 
+  auto briefEdit = container->addNew<MonacoEditor>("html");
+  briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
+  briefEdit->setContent(postBrief);
+
+  auto bodyEdit = container->addNew<MonacoEditor>("html");
+  bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
+  bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
+  bodyEdit->setContent(postBody);
+
   // Capture session as shared_ptr and slug as value to avoid dangling references
   auto sessionPtr = session_;
   auto postSlug = slug_;
-  
-  saveBtn->clicked().connect([sessionPtr, postSlug, titleEdit, briefEdit, bodyEdit, stateGroup, tagCheckboxes, tagSlugs, status]() {
+
+  saveBtn->clicked().connect([sessionPtr, postSlug, titleEdit, briefEdit, bodyEdit, stateGroup, tagCheckboxes, tagSlugs, status]()
+                             {
     if (!sessionPtr || !titleEdit || !briefEdit || !bodyEdit || !stateGroup || !tagCheckboxes || !tagSlugs || !status) {
       if (status) status->setText("Widget error");
       return;
@@ -307,8 +322,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
       status->setText(std::string("Error: ") + ex.what());
     } catch (...) {
       status->setText("Unknown error saving post");
-    }
-  });
+    } });
 
   return container;
 }

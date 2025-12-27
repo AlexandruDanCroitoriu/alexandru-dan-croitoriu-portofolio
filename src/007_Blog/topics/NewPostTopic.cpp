@@ -206,8 +206,8 @@ std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()
     std::string slug = postTitle;
     for (char& c : slug) { if (c == ' ') c = '-'; else c = std::tolower(c); }
     p->slug_ = slug;
-    p->briefSrc_ = brief; p->briefHtml_ = brief;
-    p->bodySrc_ = body;   p->bodyHtml_ = body;
+    p->briefXml_ = brief;
+    p->bodyXml_ = body;
     p->author_ = session_->user();
     
     // Set state based on radio button selection

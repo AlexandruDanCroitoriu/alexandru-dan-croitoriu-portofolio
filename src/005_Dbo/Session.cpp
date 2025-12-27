@@ -300,10 +300,8 @@ void Session::createInitialData()
         std::string slug = title;
         for (char& c : slug) { if (c == ' ') c = '-'; else c = std::tolower(c); }
         p->slug_ = slug;
-        p->briefSrc_ = briefHtml; // storing same content for now
-        p->briefHtml_ = briefHtml;
-        p->bodySrc_ = bodyHtml;
-        p->bodyHtml_ = bodyHtml;
+        p->briefXml_ = briefHtml;
+        p->bodyXml_ = bodyHtml;
         p->author_ = adminUser;
         p->state_ = Post::State::Published;
         p->publishedAt_ = now;

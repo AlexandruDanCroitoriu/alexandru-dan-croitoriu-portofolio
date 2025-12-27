@@ -91,8 +91,8 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
 
     // Copy all data we need while transaction is active
     postTitle = post->title_;
-    postBrief = post->briefSrc_;
-    postBody = post->bodySrc_;
+    postBrief = post->briefXml_;
+    postBody = post->bodyXml_;
 
     if (post->state_ == Post::State::Published)
       stateIdx = 1;
@@ -222,12 +222,12 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
   auto status = container->addNew<Wt::WText>("");
   status->addStyleClass("mt-2");
 
-  auto briefEdit = container->addNew<MonacoEditor>("html");
+  auto briefEdit = container->addNew<MonacoEditor>("xml");
   briefEdit->addStyleClass("w-full rounded-md border border-gray-300");
   briefEdit->setHeight(Wt::WLength(200, Wt::LengthUnit::Pixel));
   briefEdit->setContent(postBrief);
 
-  auto bodyEdit = container->addNew<MonacoEditor>("html");
+  auto bodyEdit = container->addNew<MonacoEditor>("xml");
   bodyEdit->addStyleClass("w-full rounded-md border border-gray-300");
   bodyEdit->setHeight(Wt::WLength(500, Wt::LengthUnit::Pixel));
   bodyEdit->setContent(postBody);
@@ -269,10 +269,8 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::editPage()
         {
           auto p = posts.front().modify();
           p->title_ = postTitle;
-          p->briefSrc_ = briefEdit->getUnsavedText();
-          p->briefHtml_ = p->briefSrc_;
-          p->bodySrc_ = bodyEdit->getUnsavedText();
-          p->bodyHtml_ = p->bodySrc_;
+          p->briefXml_ = briefEdit->getUnsavedText();
+          p->bodyXml_ = bodyEdit->getUnsavedText();
 
           // Recompute slug from title to keep URL in sync
           redirectSlug = slugify(postTitle);

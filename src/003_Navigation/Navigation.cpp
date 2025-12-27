@@ -10,6 +10,8 @@
 #include "003_Navigation/topics/NotFoundTopic.h"
 #include "003_Navigation/topics/NotAuthorizedTopic.h"
 #include "005_Dbo/Session.h"
+#include "005_Dbo/Tables/Permission.h"
+#include "008_Stylus/Stylus.h"
 
 #include <Wt/WText.h>
 #include <Wt/WAnimation.h>
@@ -20,7 +22,7 @@
 #include <Wt/WPushButton.h>
 
 Navigation::Navigation(std::shared_ptr<Session> session)
-    : session_(session), menuOpen_(false), currentActiveAnchor_(nullptr), previousPath_("/")
+    : session_(session), menuOpen_(false), currentActiveAnchor_(nullptr), previousPath_("/"), stylus_(nullptr)
 {
     wApp->log("debug") << "Navigation::Navigation(std::shared_ptr<Session> session)";
     lastUnknownPath_ = std::make_shared<std::string>("");
@@ -496,6 +498,29 @@ void Navigation::authChanged()
 {
     wApp->log("debug") << "Navigation::authChanged()";
     std::cout << "\n\n Auth changed, logged in: " << session_->login().loggedIn() << "\n\n";
+    
+    // Handle Stylus initialization/cleanup
+    bool hasStylePermission = false;
+    if (session_->login().loggedIn()) {
+        dbo::Transaction t(*session_);
+        auto user = session_->user();
+        auto perms = session_->find<Permission>().where("name = ?").bind("STYLUS").resultList();
+        if (!perms.empty() && user && user->hasPermission(perms.front())) {
+            hasStylePermission = true;
+        }
+    }
+    
+    // Create Stylus if needed and not already created
+    if (hasStylePermission && !stylus_) {
+        stylus_ = wApp->root()->addNew<Stylus::Stylus>(*session_);
+        stylus_->hide();
+    }
+    // Hide Stylus if user lost permission
+    else if (!hasStylePermission && stylus_) {
+        stylus_->removeFromParent();
+        stylus_ = nullptr;
+    }
+    
     // Rebuild UI without changing internal path; let the current path be handled by navigateTo()
     setUI();
 

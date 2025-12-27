@@ -31,7 +31,7 @@ npm run minify
 ```
 
 
-Build and run with docker:
+### Build and run with docker:
 ```bash
 docker build -f dockerfiles/builder-alpine -t wt-builder-alexandru-dan-croitoriu-portofolio:latest .
 
@@ -43,12 +43,12 @@ docker-compose up
 ```
 
 
-Build docker image and push to docker hub:
+### Build docker image and push to docker hub:
 ```bash 
 docker build \
   -t maxuli/alexandru-dan-croitoriu-portofolio:latest \
   -f dockerfiles/full_dockerfile . \
   --build-arg CACHE_BUST=$(date +%s)
-  
+
 docker push maxuli/alexandru-dan-croitoriu-portofolio:latest
 ```

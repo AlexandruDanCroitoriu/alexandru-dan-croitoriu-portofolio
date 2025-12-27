@@ -36,6 +36,14 @@ set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/)
 # )
 # FetchContent_MakeAvailable(tinyxml2)
 
+# Find tinyxml2 library
+find_library(TINYXML2_LIB tinyxml2 PATHS /usr/lib /usr/local/lib)
+if(TINYXML2_LIB)
+  message(STATUS "Found tinyxml2: ${TINYXML2_LIB}")
+else()
+  message(FATAL_ERROR "tinyxml2 library not found")
+endif()
+
 
 
 set(SOURCES
@@ -78,6 +86,9 @@ set(SOURCES
     ${SOURCE_DIR}/007_Blog/topics/EditPostTopic.cpp
     ${SOURCE_DIR}/007_Blog/topics/PostDetailTopic.cpp
 
+    # Stylus
+    ${SOURCE_DIR}/008_Stylus/Stylus.cpp
+    ${SOURCE_DIR}/008_Stylus/StylusState.cpp
 
 )
 
@@ -89,7 +100,7 @@ target_link_libraries(${PROJECT_NAME}
     wthttp
     wt
     wtdbo
-    # tinyxml2::tinyxml2
+    ${TINYXML2_LIB}
     # boost_regex
     # cpr::cpr
     # nlohmann_json::nlohmann_json

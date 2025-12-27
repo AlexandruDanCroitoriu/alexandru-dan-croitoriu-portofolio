@@ -64,7 +64,7 @@ PostView::PostView(Session& session, const Wt::Dbo::ptr<Post>& post, RenderType 
   }
 
   // Body content
-  const std::string& html = (type == RenderType::Brief) ? post->briefHtml_ : post->bodyHtml_;
-  auto body = addNew<Wt::WText>(Wt::WString::fromUTF8("<div class='prose max-w-none'>" + html + "</div>"));
+  const std::string& xml = (type == RenderType::Brief) ? post->briefXml_ : post->bodyXml_;
+  auto body = addNew<Wt::WText>(Wt::WString::fromUTF8("<div class='prose max-w-none'>" + xml + "</div>"));
   body->setTextFormat(Wt::TextFormat::UnsafeXHTML);
 }

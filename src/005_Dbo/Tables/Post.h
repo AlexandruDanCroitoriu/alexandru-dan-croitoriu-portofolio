@@ -19,11 +19,9 @@ public:
   std::string title_;
   std::string slug_;
 
-  std::string briefSrc_;
-  std::string briefHtml_;
+  std::string briefXml_;
 
-  std::string bodySrc_;
-  std::string bodyHtml_;
+  std::string bodyXml_;
 
   Wt::Dbo::ptr<User> author_;
   State state_;
@@ -42,11 +40,9 @@ public:
     Wt::Dbo::field(a, title_, "title");
     Wt::Dbo::field(a, slug_, "slug");
 
-    Wt::Dbo::field(a, briefSrc_, "brief_src");
-    Wt::Dbo::field(a, briefHtml_, "brief_html");
+    Wt::Dbo::field(a, briefXml_, "brief_xml");
 
-    Wt::Dbo::field(a, bodySrc_, "body_src");
-    Wt::Dbo::field(a, bodyHtml_, "body_html");
+    Wt::Dbo::field(a, bodyXml_, "body_xml");
 
     Wt::Dbo::belongsTo(a, author_, "author");
     Wt::Dbo::field(a, state_, "state");

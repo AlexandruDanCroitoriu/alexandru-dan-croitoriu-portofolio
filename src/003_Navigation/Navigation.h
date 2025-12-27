@@ -20,6 +20,10 @@
 class NavigationTopic;
 class Session;
 
+namespace Stylus {
+class Stylus;
+}
+
 class Navigation : public Wt::WContainerWidget
 {
 public:
@@ -69,5 +73,6 @@ private:
     AuthWidget* authWidget_;
     Wt::WContainerWidget* authWrapper_;
     std::string previousPath_;
+    Stylus::Stylus* stylus_;
     void authChanged();
 };

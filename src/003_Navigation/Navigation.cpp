@@ -513,9 +513,8 @@ void Navigation::authChanged()
     // Create Stylus if needed and not already created
     if (hasStylePermission && !stylus_) {
         stylus_ = wApp->root()->addNew<Stylus::Stylus>(*session_);
-        stylus_->hide();
     }
-    // Hide Stylus if user lost permission
+    // remove Stylus if user lost permission
     else if (!hasStylePermission && stylus_) {
         stylus_->removeFromParent();
         stylus_ = nullptr;

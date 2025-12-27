@@ -15,6 +15,12 @@ Stylus::Stylus(Session& session)
     initializeDialog();
     setupKeyboardShortcuts();
     setupContent();
+
+    if(stylus_state_.stylusNode_->Attribute("open") && 
+       std::string(stylus_state_.stylusNode_->Attribute("open")).compare("true") == 0) {
+        std::cout << "\n\nOpening Stylus dialog as per saved state." << std::endl;
+        show();
+    }
 }
 
 void Stylus::initializeDialog()
@@ -33,8 +39,6 @@ void Stylus::initializeDialog()
     setMinimumSize(Wt::WLength(100, Wt::LengthUnit::ViewportWidth), 
                    Wt::WLength(100, Wt::LengthUnit::ViewportHeight));
     setLayoutSizeAware(true);
-
-    wApp->messageResourceBundle().use(wApp->docRoot() + "/static/0_stylus/xml/002_Stylus/stylus_svg");
 }
 
 void Stylus::setupKeyboardShortcuts()
@@ -68,7 +72,7 @@ void Stylus::setupContent()
     menu_ = navbar_wrapper_->addNew<Wt::WMenu>(content_stack_);
     
     menu_->setStyleClass("flex flex-col items-center h-full");
-    navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid");
+    navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid border-gray-600");
 
     std::unique_ptr<Wt::WContainerWidget> xml_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> css_files_wrapper = std::make_unique<Wt::WContainerWidget>();
@@ -115,9 +119,12 @@ void Stylus::keyWentDown(Wt::WKeyEvent e)
         if (e.key() == Wt::Key::Q) {
             if (isHidden()) {
                 show();
+                stylus_state_.stylusNode_->SetAttribute("open", "true");
             } else {
                 hide();
+                stylus_state_.stylusNode_->SetAttribute("open", "false");
             }
+            stylus_state_.doc_->SaveFile(stylus_state_.stateFilePath_.c_str());
         } else if (e.key() == Wt::Key::Key_1) {
             menu_->select(0);
         } else if (e.key() == Wt::Key::Key_2) {

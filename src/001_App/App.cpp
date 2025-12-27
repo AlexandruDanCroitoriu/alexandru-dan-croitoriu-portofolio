@@ -14,7 +14,7 @@ App::App(const Wt::WEnvironment& env)
     Wt::log("debug") << "App::App(const Wt::WEnvironment& env)";
     
     // Initialize database session
-    session_ = std::make_shared<Session>("portfolio.db");
+    session_ = std::make_shared<Session>("../portfolio.db");
     
     // Restore login from remember-me token if available
     session_->restoreLogin();

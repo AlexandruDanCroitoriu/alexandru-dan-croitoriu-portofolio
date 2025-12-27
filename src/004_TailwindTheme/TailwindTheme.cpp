@@ -71,7 +71,13 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindTheme::styleSheets() const
 #else
     result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "tailwind.minify.css")));
 #endif
+    
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("resources/themes/default/wt.css")));
+    if (wApp->environment().agentIsIElt(9))
+      result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie.css")));
 
+    if (wApp->environment().agent() == Wt::UserAgent::IE6)
+      result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie6.css")));
     return result;
 }
 

@@ -3,6 +3,7 @@
 #include <Wt/WApplication.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WAnchor.h>
+#include "008_Stylus/TemplatesManager/TemplateFoldersTreeView.h"
 
 namespace Stylus {
 
@@ -28,7 +29,7 @@ void Stylus::initializeDialog()
     wApp->log("debug") << "Stylus::initializeDialog()";
     setOffsets(0, Wt::Side::Top | Wt::Side::Bottom | Wt::Side::Left | Wt::Side::Right);
     titleBar()->children()[0]->removeFromParent();
-    setStyleClass("!border-0 overflow-auto bg-gray-800 text-white");
+    setStyleClass("!border-0 overflow-auto !bg-gray-800 text-white");
     titleBar()->hide();
     titleBar()->setStyleClass("p-0 flex items-center overflow-x-visible h-[40px]");
     contents()->setStyleClass("h-[100vh] overflow-y-auto overflow-x-visible flex");
@@ -80,6 +81,8 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> tailwind_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> images_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
+
+    xml_files_wrapper->addNew<TemplateFoldersTreeView>(session_);
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();

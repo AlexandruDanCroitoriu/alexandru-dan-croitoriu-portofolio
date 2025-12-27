@@ -56,7 +56,7 @@ Navigation::Navigation(std::shared_ptr<Session> session)
             authDialog_->hide();
         }
     });
-    authDialog_->setStyleClass("absolute bg-gray-900 rounded-md [&>div]:h-full");
+    authDialog_->setStyleClass("absolute !bg-gray-900 rounded-md [&>div]:h-full");
     authDialog_->addStyleClass("top-0 left-0 right-0 bottom-0");
     // authDialog_->addStyleClass("sm:top-5 sm:left-5 sm:right-5 sm:bottom-5"); // Centered on small+ screens
     authDialog_->contents()->setStyleClass("p-4 h-full flex justify-center");

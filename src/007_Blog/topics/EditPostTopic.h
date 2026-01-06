@@ -5,6 +5,7 @@
 #include <string>
 
 class Session;
+class BlogSession;
 
 class EditPostTopic
 {
@@ -15,5 +16,6 @@ public:
 private:
   std::unique_ptr<Wt::WWidget> editPage();
   std::shared_ptr<Session> session_;
+  std::shared_ptr<BlogSession> blogSession_;
   std::string slug_;
 };

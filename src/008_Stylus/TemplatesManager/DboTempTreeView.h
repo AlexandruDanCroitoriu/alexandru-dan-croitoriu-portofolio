@@ -5,17 +5,17 @@
 #include <Wt/WSignal.h>
 #include <Wt/Dbo/ptr.h>
 
-class Session;
+class StylusSession;
 class TemplateFile;
 class MessageTemplate;
 
 namespace Stylus
 {
 
-class TemplateFoldersTreeView : public Wt::WContainerWidget
+class DboTempTreeView : public Wt::WContainerWidget
 {
 public:
-    TemplateFoldersTreeView(Session& session);
+    DboTempTreeView(StylusSession& session);
 
     void refresh();
 
@@ -23,7 +23,7 @@ public:
     Wt::Signal<Wt::Dbo::ptr<MessageTemplate>>& template_selected() { return template_selected_; }
 
 private:
-    Session& session_;
+    StylusSession& session_;
     Wt::WTree* tree_;
 
     Wt::Signal<Wt::Dbo::ptr<TemplateFile>> file_selected_;

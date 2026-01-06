@@ -1,11 +1,11 @@
-#include "008_Stylus/TemplatesManager/TemplateFoldersTreeView.h"
+#include "008_Stylus/TemplatesManager/DboTempTreeView.h"
 #include "008_Stylus/TemplatesManager/FolderNode.h"
 #include "008_Stylus/TemplatesManager/FileNode.h"
 #include "008_Stylus/TemplatesManager/TemplateNode.h"
-#include "005_Dbo/Session.h"
-#include "005_Dbo/Tables/TemplateFolder.h"
-#include "005_Dbo/Tables/TemplateFile.h"
-#include "005_Dbo/Tables/MessageTemplate.h"
+#include "008_Stylus/StylusSession.h"
+#include "008_Stylus/Tables/TemplateFolder.h"
+#include "008_Stylus/Tables/TemplateFile.h"
+#include "008_Stylus/Tables/MessageTemplate.h"
 
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
@@ -13,31 +13,33 @@
 namespace Stylus
 {
 
-TemplateFoldersTreeView::TemplateFoldersTreeView(Session& session)
+DboTempTreeView::DboTempTreeView(StylusSession& session)
     : session_(session)
 {
-    wApp->log("debug") << "TemplateFoldersTreeView::TemplateFoldersTreeView";
+    wApp->log("debug") << "DboTempTreeView::DboTempTreeView";
     setStyleClass("w-full ");
 
     tree_ = addWidget(std::make_unique<Wt::WTree>());
+    // tree_->addStyleClass("relative top-[-15px] -left-[18px]");
+    tree_->addStyleClass("relative -left-[18px]");
     tree_->setSelectionMode(Wt::SelectionMode::Single);
 
     populateTree();
 }
 
-void TemplateFoldersTreeView::refresh()
+void DboTempTreeView::refresh()
 {
-    wApp->log("debug") << "TemplateFoldersTreeView::refresh";
+    wApp->log("debug") << "DboTempTreeView::refresh";
     populateTree();
 }
 
-void TemplateFoldersTreeView::populateTree()
+void DboTempTreeView::populateTree()
 {
-    wApp->log("debug") << "TemplateFoldersTreeView::populateTree";
-    auto root_node = std::make_unique<FolderNode>("Templates");
+    wApp->log("debug") << "DboTempTreeView::populateTree";
+    auto root_node = std::make_unique<Wt::WTreeNode>("DBO Root");
     auto root_ptr = root_node.get();
     tree_->setTreeRoot(std::move(root_node));
-    tree_->treeRoot()->setSelectable(false);
+    tree_->treeRoot()->setSelectable(true);
     tree_->treeRoot()->expand();
 
     Wt::Dbo::Transaction t(session_);
@@ -45,17 +47,16 @@ void TemplateFoldersTreeView::populateTree()
 
     for (auto folder : folders)
     {
-        auto folder_node = std::make_unique<FolderNode>(folder->folderName_, folder);
+        auto folder_node = std::make_unique<FolderNode>(session_, folder);
         auto folder_ptr = folder_node.get();
         root_ptr->addChildNode(std::move(folder_node));
-        folder_ptr->expand();
 
         for (auto file : folder->files_)
         {
-            auto file_node = std::make_unique<FileNode>(file->fileName_, file);
+            auto file_node = std::make_unique<FileNode>(session_, file);
             auto file_ptr = file_node.get();
             folder_ptr->addChildNode(std::move(file_node));
-            file_ptr->expand();
+
             // Add templates under the file
             for (auto tmpl : file->templates_)
             {

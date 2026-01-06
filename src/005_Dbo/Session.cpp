@@ -3,9 +3,6 @@
 #include "005_Dbo/Tables/Post.h"
 #include "005_Dbo/Tables/Comment.h"
 #include "005_Dbo/Tables/Tag.h"
-#include "005_Dbo/Tables/MessageTemplate.h"
-#include "005_Dbo/Tables/TemplateFile.h"
-#include "005_Dbo/Tables/TemplateFolder.h"
 #include "000_Server/Server.h"
 
 #include <Wt/Dbo/SqlConnection.h>
@@ -92,9 +89,6 @@ Session::Session(const std::string &sqliteDb)
   mapClass<Post>("post");
   mapClass<Comment>("comment");
   mapClass<Tag>("tag");
-  mapClass<MessageTemplate>("message_template");
-  mapClass<TemplateFile>("template_file");
-  mapClass<TemplateFolder>("template_folder");
   mapClass<AuthInfo>("auth_info");
   mapClass<AuthInfo::AuthIdentityType>("auth_identity");
   mapClass<AuthInfo::AuthTokenType>("auth_token");
@@ -369,54 +363,6 @@ void Session::createInitialData()
       addComment(p3, bob,   "Smart pointers FTW!", c31);
 
       Wt::log("info") << "Seeded initial blog posts, tags, and comments.";
-    }
-
-    t.commit();
-  }
-
-  // Seed template folders, files, and templates for Stylus if no files exist
-  {
-    Wt::Dbo::Transaction t(*this);
-
-    auto existingFiles = find<TemplateFile>().resultList();
-    auto foldersResult = find<TemplateFolder>().resultList();
-    std::vector<Wt::Dbo::ptr<TemplateFolder>> folders;
-    folders.reserve(foldersResult.size());
-    for (auto f : foldersResult) {
-      folders.push_back(f);
-    }
-
-    if (existingFiles.empty()) {
-      std::vector<std::string> colors = {"red", "green", "blue"};
-      int templateIndex = 1;
-
-      // Ensure at least three folders exist
-      while (folders.size() < 3) {
-        auto folder = add(std::make_unique<TemplateFolder>());
-        folder.modify()->folderName_ = "Folder " + std::to_string(static_cast<int>(folders.size()) + 1);
-        folders.push_back(folder);
-      }
-
-      for (std::size_t folderIdx = 0; folderIdx < 3 && folderIdx < folders.size(); ++folderIdx) {
-        auto folder = folders.at(folderIdx);
-
-        for (int fileIdx = 0; fileIdx < 3; ++fileIdx) {
-          auto file = add(std::make_unique<TemplateFile>());
-          file.modify()->fileName_ = "file-" + std::to_string(static_cast<int>(folderIdx) + 1) + "-" + std::to_string(fileIdx + 1) + ".xml";
-          file.modify()->folder_ = folder;
-
-          for (int tmplIdx = 0; tmplIdx < 3; ++tmplIdx) {
-            auto messageTemplate = add(std::make_unique<MessageTemplate>());
-            messageTemplate.modify()->messageId_ = "tmpl-" + std::to_string(static_cast<int>(folderIdx) + 1) + "-" + std::to_string(fileIdx + 1) + "-" + std::to_string(tmplIdx + 1);
-
-            const std::string& color = colors[(static_cast<int>(folderIdx) + fileIdx + tmplIdx) % colors.size()];
-            messageTemplate.modify()->templateXml_ = "<div class=\"bg-" + color + "-500 p-12\">example template " + std::to_string(templateIndex++) + "</div>";
-            messageTemplate.modify()->file_ = file;
-          }
-        }
-      }
-
-      Wt::log("info") << "Seeded initial template folders, files, and templates.";
     }
 
     t.commit();

@@ -11,7 +11,7 @@ class TemplateFile : public Wt::Dbo::Dbo<TemplateFile>
 {
 public:
   std::string fileName_;
-
+  bool expanded_ = true;
   Wt::Dbo::ptr<TemplateFolder> folder_;
   Wt::Dbo::collection< Wt::Dbo::ptr<MessageTemplate> > templates_;
 
@@ -19,6 +19,7 @@ public:
   void persist(Action& a)
   {
     Wt::Dbo::field(a, fileName_, "file_name");
+    Wt::Dbo::field(a, expanded_, "expanded");
     Wt::Dbo::belongsTo(a, folder_, "folder");
     Wt::Dbo::hasMany(a, templates_, Wt::Dbo::ManyToOne, "file");
   }

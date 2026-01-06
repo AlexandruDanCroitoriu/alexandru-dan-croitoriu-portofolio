@@ -1,8 +1,10 @@
 #pragma once
 
 #include <Wt/WTheme.h>
+#include "004_TailwindTheme/TailwindThemeBase.h"
 
-class TailwindTheme : public Wt::WTheme
+// class TailwindTheme : public Wt::WTheme
+class TailwindTheme : public TailwindThemeBase
 {
 public:
     /*! \brief Constructor.

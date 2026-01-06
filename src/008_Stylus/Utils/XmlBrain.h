@@ -8,7 +8,7 @@
 #include <Wt/Dbo/ptr.h>
 #include <Wt/WSignal.h>
 
-class Session;
+class StylusSession;
 class MessageTemplate;
 
 namespace Stylus
@@ -17,7 +17,7 @@ namespace Stylus
     class XmlBrain
     {
         public:
-            XmlBrain(Session& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate = Wt::Dbo::ptr<MessageTemplate>());
+            XmlBrain(StylusSession& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate = Wt::Dbo::ptr<MessageTemplate>());
             
             std::shared_ptr<tinyxml2::XMLDocument> doc_;
             std::string filePath_;
@@ -26,7 +26,7 @@ namespace Stylus
             Wt::Signal<tinyxml2::XMLElement*, bool> xmlNodeSelected_;
             
             tinyxml2::XMLElement* selectedNode_;
-            Session& session_;
+            StylusSession& session_;
         private:
     };
 }

@@ -62,6 +62,7 @@ set(SOURCES
     ${SOURCE_DIR}/003_Navigation/topics/NotAuthorizedTopic.cpp
 
     ${SOURCE_DIR}/004_TailwindTheme/TailwindTheme.cpp
+    ${SOURCE_DIR}/004_TailwindTheme/TailwindThemeBase.cpp
       
     ${SOURCE_DIR}/005_Dbo/Session.cpp
     ${SOURCE_DIR}/005_Dbo/Tables/User.cpp
@@ -69,9 +70,6 @@ set(SOURCES
     ${SOURCE_DIR}/005_Dbo/Tables/Post.cpp
     ${SOURCE_DIR}/005_Dbo/Tables/Comment.cpp
     ${SOURCE_DIR}/005_Dbo/Tables/Tag.cpp
-    ${SOURCE_DIR}/005_Dbo/Tables/MessageTemplate.cpp
-    ${SOURCE_DIR}/005_Dbo/Tables/TemplateFile.cpp
-    ${SOURCE_DIR}/005_Dbo/Tables/TemplateFolder.cpp
 
     
     ${SOURCE_DIR}/006_Auth/AuthWidget.cpp
@@ -92,11 +90,16 @@ set(SOURCES
     # Stylus
     ${SOURCE_DIR}/008_Stylus/Stylus.cpp
     ${SOURCE_DIR}/008_Stylus/StylusState.cpp
+    ${SOURCE_DIR}/008_Stylus/StylusSession.cpp
+    ${SOURCE_DIR}/008_Stylus/Tables/MessageTemplate.cpp
+    ${SOURCE_DIR}/008_Stylus/Tables/TemplateFile.cpp
+    ${SOURCE_DIR}/008_Stylus/Tables/TemplateFolder.cpp
     ${SOURCE_DIR}/008_Stylus/Utils/XmlBrain.cpp
+    ${SOURCE_DIR}/008_Stylus/Utils/FilesManager.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FolderNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FileNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplateNode.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplateFoldersTreeView.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/DboTempTreeView.cpp
 
 )
 

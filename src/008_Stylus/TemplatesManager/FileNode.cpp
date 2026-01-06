@@ -6,14 +6,18 @@
 #include <Wt/WText.h>
 #include <Wt/WPoint.h>
 
+#include "008_Stylus/StylusSession.h"
+#include "008_Stylus/Tables/TemplateFile.h"
+
 namespace Stylus
 {
 
-FileNode::FileNode(const std::string& name, Wt::Dbo::ptr<TemplateFile> file)
-    : Wt::WTreeNode(name),
-      file_(file)
+FileNode::FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file)
+    : Wt::WTreeNode(file ? "New File" : file->fileName_),
+      file_(file),
+    session_(session)
 {
-    wApp->log("debug") << "FileNode::FileNode(" << name << ")";
+    wApp->log("debug") << "FileNode::FileNode(" << file_->fileName_ << ")";
     label_wrapper_ = labelArea();
     label_wrapper_->addStyleClass("flex items-center cursor-pointer mr-[3px]");
     setSelectable(true);
@@ -23,6 +27,38 @@ FileNode::FileNode(const std::string& name, Wt::Dbo::ptr<TemplateFile> file)
         if (event.button() == Wt::MouseButton::Right)
         {
             showPopup(event);
+        }
+    });
+    
+    setLabelIcon(std::make_unique<Wt::WIconPair>("./static/file.gif", "./static/file.gif"));
+
+    if (file_ && file_->expanded_)
+        expand();
+
+    selected().connect(this, [=](bool selected)
+    {
+        if (selected)
+        {
+            wApp->log("debug") << "FolderNode selected: " << file_->fileName_;
+        }
+    });
+
+    expanded().connect(this, [=]()
+    {
+        if (file_)
+        {
+            Wt::Dbo::Transaction t(session_);
+            file_.modify()->expanded_ = true;
+            t.commit();
+        }
+    });
+    collapsed().connect(this, [=]()
+    {
+        if (file_)
+        {
+            Wt::Dbo::Transaction t(session_);
+            file_.modify()->expanded_ = false;
+            t.commit();
         }
     });
 }

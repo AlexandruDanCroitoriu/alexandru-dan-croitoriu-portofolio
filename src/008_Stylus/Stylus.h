@@ -5,15 +5,16 @@
 #include <Wt/WMenuItem.h>
 #include <Wt/WContainerWidget.h>
 #include <Wt/WStackedWidget.h>
-#include "005_Dbo/Session.h"
+#include "008_Stylus/StylusSession.h"
 #include "008_Stylus/StylusState.h"
+#include <memory>
 
 namespace Stylus {
 
 class Stylus : public Wt::WDialog
 {
 public:
-    Stylus(Session& session);
+    Stylus();
 
 private:
     void initializeDialog();
@@ -21,7 +22,7 @@ private:
     void setupKeyboardShortcuts();
     void keyWentDown(Wt::WKeyEvent e);
 
-    Session& session_;
+    std::shared_ptr<StylusSession> session_;
 
     Wt::WContainerWidget* navbar_wrapper_;
     Wt::WMenu* menu_;

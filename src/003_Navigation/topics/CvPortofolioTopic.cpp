@@ -85,7 +85,9 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     {
         auto block = gridContainer->addNew<Wt::WContainerWidget>();
         block->addStyleClass(gridCellStyle);
-        jsFunc += "observer.observe(document.getElementById('" + block->id() + "'));";
+        // jsFunc += "observer.observe(document.getElementById('" + block->id() + "'));";
+        jsFunc += "observer.observe(" + block->jsRef() + ");";
+        // jsFunc += "console.log(" + block->jsRef() + ");";
     }
 
     gridContainer->doJavaScript(jsFunc.toUTF8());

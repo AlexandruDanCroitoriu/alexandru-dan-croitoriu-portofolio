@@ -2,6 +2,7 @@
 
 #include <Wt/WPushButton.h>
 #include "004_TailwindTheme/TailwindTheme.h"
+#include "004_TailwindTheme/TailwindThemeBase.h"
 #include "003_Navigation/Navigation.h"
 
 #include <Wt/WTemplate.h>
@@ -14,7 +15,7 @@ App::App(const Wt::WEnvironment& env)
     Wt::log("debug") << "App::App(const Wt::WEnvironment& env)";
     
     // Initialize database session
-    session_ = std::make_shared<Session>("../portfolio.db");
+    session_ = std::make_shared<Session>("../../dbo/portofolio.db");
     
     // Restore login from remember-me token if available
     session_->restoreLogin();
@@ -40,11 +41,13 @@ App::App(const Wt::WEnvironment& env)
     // require("/static/theme/tailwindcss/tailwindplus/index.js");
     
     // Load Tailwind CSS style sheet
-
+    
     // setCssTheme("polished");
     // setCssTheme("");
     
-    setTheme(std::make_shared<TailwindTheme>());
+    // wApp->useStyleSheet("static/theme/tailwindcss/tailwind.css?v=" + Wt::WRandom::generateId());
+    setTheme(std::make_shared<TailwindThemeBase>());
+    // setTheme(std::make_shared<TailwindTheme>());
 
     createApp();
 }

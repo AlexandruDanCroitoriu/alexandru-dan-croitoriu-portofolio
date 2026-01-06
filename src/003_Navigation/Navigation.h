@@ -66,6 +66,8 @@ private:
     void openMenu();
     void closeMenu();
     void connectRouting();
+    void setStyleV1();
+    void setStyleV2();
     Wt::Signals::connection internalPathConnection_;
 
     std::shared_ptr<Session> session_;

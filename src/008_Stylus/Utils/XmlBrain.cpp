@@ -1,14 +1,14 @@
 #include "008_Stylus/Utils/XmlBrain.h"
-#include "005_Dbo/Session.h"
-#include "005_Dbo/Tables/MessageTemplate.h"
-#include "005_Dbo/Tables/TemplateFile.h"
+#include "008_Stylus/StylusSession.h"
+#include "008_Stylus/Tables/MessageTemplate.h"
+#include "008_Stylus/Tables/TemplateFile.h"
 
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
 
 namespace Stylus
 {
-    XmlBrain::XmlBrain(Session& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
+    XmlBrain::XmlBrain(StylusSession& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
         : session_(session),
           doc_(std::make_shared<tinyxml2::XMLDocument>()),
           selectedNode_(nullptr),

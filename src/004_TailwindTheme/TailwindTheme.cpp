@@ -65,19 +65,22 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindTheme::styleSheets() const
     // wApp->log("debug") << "TailwindTheme::styleSheets()";
     std::vector<Wt::WLinkedCssStyleSheet> result;
     const std::string themeDir = resourcesUrl();
+    
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("resources/themes/default/wt.css")));
 
+    if (wApp->environment().agentIsIElt(9))
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie.css")));
+    
+    if (wApp->environment().agent() == Wt::UserAgent::IE6)
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie6.css")));
+    
 #ifdef DEBUG
     result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "tailwind.css?v=" + Wt::WRandom::generateId())));
 #else
     result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "tailwind.minify.css")));
 #endif
     
-    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("resources/themes/default/wt.css")));
-    if (wApp->environment().agentIsIElt(9))
-      result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie.css")));
-
-    if (wApp->environment().agent() == Wt::UserAgent::IE6)
-      result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie6.css")));
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("resources/form.css")));
     return result;
 }
 

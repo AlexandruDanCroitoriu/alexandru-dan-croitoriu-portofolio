@@ -12,6 +12,7 @@
 #include "005_Dbo/Session.h"
 #include "005_Dbo/Tables/Permission.h"
 #include "008_Stylus/Stylus.h"
+#include "001_App/App.h"
 
 #include <Wt/WText.h>
 #include <Wt/WAnimation.h>
@@ -26,23 +27,12 @@ Navigation::Navigation(std::shared_ptr<Session> session)
 {
     wApp->log("debug") << "Navigation::Navigation(std::shared_ptr<Session> session)";
     lastUnknownPath_ = std::make_shared<std::string>("");
-    // Apply main container styling
-    addStyleClass("flex flex-row h-[100svh] bg-gray-100");
-
+    
     // Create sidebar
     sidebar_ = addNew<Wt::WContainerWidget>();
-    sidebar_->addStyleClass("w-64 p-2 bg-gray-800 text-white flex flex-col transition-all duration-300");
-    // Keep sidebar fixed on all breakpoints so it doesn't scroll with page
-    sidebar_->addStyleClass("fixed inset-y-0 left-0 z-50");
-    // Ensure the sidebar keeps viewport height and scrolls independently
-    sidebar_->addStyleClass("h-[100svh] overflow-y-auto");
-    sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
-    sidebar_->addStyleClass("-translate-x-full md:translate-x-0"); // Hidden on mobile by default
-
+    
     // Create main content area container
     contentsArea_ = addNew<Wt::WContainerWidget>();
-    // Add left margin on medium+ screens to account for fixed 16rem sidebar
-    contentsArea_->addStyleClass("flex-1 flex flex-col w-full md:ml-64");
 
     authDialog_ = wApp->root()->addNew<Wt::WDialog>("");
     authDialog_->keyWentDown().connect([=](Wt::WKeyEvent e) {
@@ -58,7 +48,6 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     });
     authDialog_->setStyleClass("absolute !bg-gray-900 rounded-md [&>div]:h-full");
     authDialog_->addStyleClass("top-0 left-0 right-0 bottom-0");
-    // authDialog_->addStyleClass("sm:top-5 sm:left-5 sm:right-5 sm:bottom-5"); // Centered on small+ screens
     authDialog_->contents()->setStyleClass("p-4 h-full flex justify-center");
 
     auto authWrapper = authDialog_->contents()->addNew<Wt::WContainerWidget>();
@@ -74,7 +63,6 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     });
 
     authWidget_ = authWrapper->addWidget(std::make_unique<AuthWidget>(session_));
-    // authWidget_->addStyleClass("bg-gray-700 text-white p-4 rounded-md shadow-lg w-full max-w-sm mt-20 h-fit");
     authWidget_->keyWentDown().connect([=](Wt::WKeyEvent e) {
         wApp->globalKeyWentDown().emit(e); // Emit the global key event
     });
@@ -86,14 +74,15 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     });
     // Create overlay for mobile
     contentsCover_ = addNew<Wt::WContainerWidget>();
-    contentsCover_->addStyleClass("fixed inset-0 bg-black/40 hidden z-40");
     contentsCover_->clicked().connect(this, &Navigation::closeMenu);
+    
+    // Apply all styles
+    setStyleV1();
+    // setStyleV2();
     
     session_->login().changed().connect(this, &Navigation::authChanged);
     authWidget_->processEnvironment();
     session_->login().changed().emit();
-    // authDialog_->show();
-    
 }
 
 void Navigation::setUI()
@@ -155,6 +144,49 @@ void Navigation::setUI()
     navigateTo(path);
 }
 
+
+void Navigation::setStyleV1()
+{
+    wApp->log("debug") << "Navigation::setStyleV2()";
+     
+    // Apply main container styling
+    addStyleClass("flex flex-row h-[100svh] bg-gray-100");
+
+    // Sidebar styling
+    sidebar_->addStyleClass("w-64 p-2 bg-gray-800 text-white flex flex-col transition-all duration-300");
+    sidebar_->addStyleClass("fixed inset-y-0 left-0 z-50");
+    sidebar_->addStyleClass("h-[100svh] overflow-y-auto");
+    sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
+    sidebar_->addStyleClass("-translate-x-full md:translate-x-0");
+
+    // Main content area styling
+    contentsArea_->addStyleClass("flex-1 flex flex-col w-full md:ml-64");
+
+    // Mobile overlay styling
+    contentsCover_->addStyleClass("fixed inset-0 bg-black/40 hidden z-40"); 
+}
+
+void Navigation::setStyleV2()
+{
+    wApp->log("debug") << "Navigation::setStyleV1()";
+   
+    wApp->root()->addStyleClass("flex justify-center bg-gray-400");
+    // Apply main container styling
+    addStyleClass("relative h-[100svh] grid grid-cols-[256px_1280px] grid-rows-1 gap-4 p-4");
+
+    // Sidebar styling
+    sidebar_->addStyleClass("col-span-1 w-64 p-2 bg-gray-800 text-white flex flex-col transition-all duration-300 rounded-xl shadow-xl");
+    // sidebar_->addStyleClass("fixed left-0 z-50");
+    // sidebar_->addStyleClass("h-[100svh] overflow-y-auto");
+    // sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
+    // sidebar_->addStyleClass("-translate-x-full md:translate-x-0");
+
+    // Main content area styling
+    contentsArea_->addStyleClass("flex flex-col col-span-1 bg-gray-100 rounded-xl shadow-xl");
+
+    // Mobile overlay styling
+    // contentsCover_->addStyleClass("fixed inset-0 bg-black/40 hidden z-40");
+}
 
 void Navigation::toggleMenu()
 {
@@ -501,6 +533,8 @@ void Navigation::authChanged()
     
     // Handle Stylus initialization/cleanup
     bool hasStylePermission = false;
+#ifdef NDEBUG
+    // Production: check permission
     if (session_->login().loggedIn()) {
         dbo::Transaction t(*session_);
         auto user = session_->user();
@@ -509,10 +543,14 @@ void Navigation::authChanged()
             hasStylePermission = true;
         }
     }
+#else
+    // Debug: always allow Stylus
+    hasStylePermission = true;
+#endif
     
     // Create Stylus if needed and not already created
     if (hasStylePermission && !stylus_) {
-        stylus_ = wApp->root()->addNew<Stylus::Stylus>(*session_);
+        stylus_ = wApp->root()->addNew<Stylus::Stylus>();
     }
     // remove Stylus if user lost permission
     else if (!hasStylePermission && stylus_) {

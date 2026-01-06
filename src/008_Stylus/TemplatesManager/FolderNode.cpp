@@ -7,17 +7,22 @@
 #include <Wt/WIconPair.h>
 #include <Wt/WPoint.h>
 
+#include "008_Stylus/StylusSession.h"
+#include "008_Stylus/Tables/TemplateFolder.h"
+
 namespace Stylus
 {
 
-FolderNode::FolderNode(const std::string& name, Wt::Dbo::ptr<TemplateFolder> folder)
-    : Wt::WTreeNode(name),
-      folder_(folder)
+FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> folder)
+    : Wt::WTreeNode(folder_ ? "error" : folder->folderName_),
+      folder_(folder),
+    session_(session)
 {
-    wApp->log("debug") << "FolderNode::FolderNode(" << name << ")";
+    wApp->log("debug") << "FolderNode::FolderNode(" << folder->folderName_ << ")";
+    setStyleClass("[&>.Wt-selected]:bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
     label_wrapper_ = labelArea();
     label_wrapper_->addStyleClass("flex items-center cursor-pointer mr-[3px]");
-    setSelectable(false);
+    setSelectable(true);
 
     label_wrapper_->mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)
     {
@@ -26,6 +31,37 @@ FolderNode::FolderNode(const std::string& name, Wt::Dbo::ptr<TemplateFolder> fol
             showPopup(event);
         }
     });
+
+    selected().connect(this, [=](bool selected)
+    {
+        if (selected)
+        {
+            wApp->log("debug") << "FolderNode selected: " << folder->folderName_;
+        }
+    });
+
+    expanded().connect(this, [=]()
+    {
+        if (folder_)
+        {
+            Wt::Dbo::Transaction t(session_);
+            folder_.modify()->expanded_ = true;
+            t.commit();
+        }
+    });
+
+    collapsed().connect(this, [=]()
+    {
+        if (folder_)
+        {
+            Wt::Dbo::Transaction t(session_);
+            folder_.modify()->expanded_ = false;
+            t.commit();
+        }
+    });
+
+    if(folder_ && folder_->expanded_)
+        expand();
 
     setLabelIcon(std::make_unique<Wt::WIconPair>("./static/stylus/yellow-folder-closed.png",
                                                  "./static/stylus/yellow-folder-open.png"));

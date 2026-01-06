@@ -3,13 +3,13 @@
 #include <Wt/WApplication.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WAnchor.h>
-#include "008_Stylus/TemplatesManager/TemplateFoldersTreeView.h"
+#include "008_Stylus/TemplatesManager/DboTempTreeView.h"
 
 namespace Stylus {
 
-Stylus::Stylus(Session& session)
+Stylus::Stylus()
     : Wt::WDialog(),
-      session_(session),
+      session_(std::make_shared<StylusSession>("../../dbo/stylus.db")),
       stylus_state_()
 {
     wApp->log("debug") << "Stylus::Stylus(Session& session)";
@@ -19,7 +19,7 @@ Stylus::Stylus(Session& session)
 
     if(stylus_state_.stylusNode_->Attribute("open") && 
        std::string(stylus_state_.stylusNode_->Attribute("open")).compare("true") == 0) {
-        std::cout << "\n\nOpening Stylus dialog as per saved state." << std::endl;
+        // std::cout << "\n\nOpening Stylus dialog as per saved state." << std::endl;
         show();
     }
 }
@@ -82,7 +82,7 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> images_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
 
-    xml_files_wrapper->addNew<TemplateFoldersTreeView>(session_);
+    xml_files_wrapper->addNew<DboTempTreeView>(*session_);
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();

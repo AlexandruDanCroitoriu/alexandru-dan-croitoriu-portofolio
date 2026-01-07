@@ -30,6 +30,8 @@ private:
     Wt::Signal<Wt::Dbo::ptr<MessageTemplate>> template_selected_;
 
     void populateTree();
+
+
 };
 
 }

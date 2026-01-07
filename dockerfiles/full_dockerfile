@@ -9,6 +9,9 @@ RUN apk add --no-cache git cmake build-base boost-dev openssl-dev
 # for postgres
 RUN apk add --no-cache postgresql-dev
 
+# for sqlite
+RUN apk add --no-cache sqlite-dev
+
 # for compiling tailwind classes
 RUN apk add --no-cache nodejs npm curl
 
@@ -17,7 +20,7 @@ RUN git clone --branch 4.11-release https://github.com/emweb/wt.git wt && \
     mkdir -p wt/build && \
     cd wt/build && \
     cmake ../ \
-        -DENABLE_SQLITE=OFF \
+        -DENABLE_SQLITE=ON \
         -DENABLE_POSTGRES=ON \
         -DBUILD_EXAMPLES=OFF \
         -DBUILD_TESTS=OFF \
@@ -66,9 +69,10 @@ COPY --from=builder /usr/lib/libwt*.so.* /usr/lib/
 
 # Copy static resources
 COPY ./resources /app/resources
+COPY ./dbo /app/dbo
 COPY ./static/monaco /app/static/monaco
 COPY ./static/xml /app/static/xml
-COPY ./static/favicon.svg /app/static/favicon.svg
+COPY ./static/icons /app/static/icons
 COPY --from=builder /app/static/theme/tailwindcss/tailwind.minify.css /app/static/theme/tailwindcss/tailwind.minify.css
 
 COPY ./wt_config_release.xml /app/wt_config_release.xml

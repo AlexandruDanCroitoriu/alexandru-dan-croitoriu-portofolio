@@ -1,4 +1,5 @@
 #include "008_Stylus/TemplatesManager/DboTempTreeView.h"
+#include "008_Stylus/TemplatesManager/RootNode.h"
 #include "008_Stylus/TemplatesManager/FolderNode.h"
 #include "008_Stylus/TemplatesManager/FileNode.h"
 #include "008_Stylus/TemplatesManager/TemplateNode.h"
@@ -9,6 +10,10 @@
 
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
+#include <Wt/WPoint.h>
+#include <Wt/WPopupMenu.h>
+#include <Wt/WText.h>
+#include <Wt/WDialog.h>
 
 namespace Stylus
 {
@@ -20,10 +25,8 @@ DboTempTreeView::DboTempTreeView(StylusSession& session)
     setStyleClass("w-full ");
 
     tree_ = addWidget(std::make_unique<Wt::WTree>());
-    // tree_->addStyleClass("relative top-[-15px] -left-[18px]");
     tree_->addStyleClass("relative -left-[18px]");
     tree_->setSelectionMode(Wt::SelectionMode::Single);
-
     populateTree();
 }
 
@@ -36,11 +39,11 @@ void DboTempTreeView::refresh()
 void DboTempTreeView::populateTree()
 {
     wApp->log("debug") << "DboTempTreeView::populateTree";
-    auto root_node = std::make_unique<Wt::WTreeNode>("DBO Root");
+    auto root_node = std::make_unique<RootNode>(session_);
     auto root_ptr = root_node.get();
+    root_ptr->setLoadPolicy(Wt::ContentLoading::Eager);
+
     tree_->setTreeRoot(std::move(root_node));
-    tree_->treeRoot()->setSelectable(true);
-    tree_->treeRoot()->expand();
 
     Wt::Dbo::Transaction t(session_);
     auto folders = session_.find<TemplateFolder>().resultList();
@@ -50,6 +53,20 @@ void DboTempTreeView::populateTree()
         auto folder_node = std::make_unique<FolderNode>(session_, folder);
         auto folder_ptr = folder_node.get();
         root_ptr->addChildNode(std::move(folder_node));
+
+        // When a folder is re-expanded, re-open any child files that were previously expanded.
+        folder_ptr->expanded().connect([folder_ptr]() {
+            for (auto child : folder_ptr->childNodes())
+            {
+                if (auto file_child = dynamic_cast<FileNode*>(child))
+                {
+                    if (file_child->file_ && file_child->file_->expanded_)
+                    {
+                        file_child->expand();
+                    }
+                }
+            }
+        });
 
         for (auto file : folder->files_)
         {
@@ -85,5 +102,6 @@ void DboTempTreeView::populateTree()
 
     t.commit();
 }
+
 
 }

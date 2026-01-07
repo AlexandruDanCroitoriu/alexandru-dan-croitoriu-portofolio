@@ -42,9 +42,8 @@ Navigation::Navigation(std::shared_ptr<Session> session)
     authDialog_->setClosable(false);
     authDialog_->setModal(true);
     authDialog_->escapePressed().connect([this]() {
-        if (authDialog_ != nullptr) {
-            authDialog_->hide();
-        }
+        authDialog_->hide();
+        wApp->setInternalPath(previousPath_.empty() ? "/" : previousPath_, true);
     });
     authDialog_->setStyleClass("absolute !bg-gray-900 rounded-md [&>div]:h-full");
     authDialog_->addStyleClass("top-0 left-0 right-0 bottom-0");

@@ -51,48 +51,34 @@ void StylusSession::createInitialData()
   auto existingFolders = find<TemplateFolder>().resultList();
 
   if (existingFolders.empty()) {
-    // Create default templates folder
-    auto defaultFolder = add(std::make_unique<TemplateFolder>());
-    auto f = defaultFolder.modify();
-    f->folderName_ = "Default Templates";
-    f->expanded_ = true;
+    // Create 3 default folders with files and templates
+    for (int i = 1; i <= 3; ++i) {
+      auto folder = add(std::make_unique<TemplateFolder>());
+      auto f = folder.modify();
+      f->folderName_ = "Templates Folder " + std::to_string(i);
+      f->expanded_ = true;
 
-    // Create sample template files
-    auto emailFile = add(std::make_unique<TemplateFile>());
-    auto ef = emailFile.modify();
-    ef->fileName_ = "email_template.xml";
-    ef->folder_ = defaultFolder;
-    ef->expanded_ = true;
+      // Create 3 template files per folder
+      for (int j = 1; j <= 3; ++j) {
+        auto tempFile = add(std::make_unique<TemplateFile>());
+        auto tf = tempFile.modify();
+        tf->fileName_ = "file-" + std::to_string(i) + "-" + std::to_string(j);
+        tf->folder_ = folder;
+        tf->expanded_ = true;
 
-    auto htmlFile = add(std::make_unique<TemplateFile>());
-    auto hf = htmlFile.modify();
-    hf->fileName_ = "html_template.xml";
-    hf->folder_ = defaultFolder;
-    hf->expanded_ = true;
-
-    // Create sample message templates
-    auto welcomeMsg = add(std::make_unique<MessageTemplate>());
-    auto wm = welcomeMsg.modify();
-    wm->messageId_ = "welcome";
-    wm->templateXml_ = R"(<?xml version="1.0" encoding="UTF-8"?>
-<message>
-  <subject>Welcome to the System</subject>
-  <body>Hello {name},</body>
-</message>)";
-    wm->file_ = emailFile;
-
-    auto notificationMsg = add(std::make_unique<MessageTemplate>());
-    auto nm = notificationMsg.modify();
-    nm->messageId_ = "notification";
-    nm->templateXml_ = R"(<?xml version="1.0" encoding="UTF-8"?>
-<message>
-  <subject>System Notification</subject>
-  <body>{content}</body>
-</message>)";
-    nm->file_ = emailFile;
+        // Create 3 message templates per file
+        for (int k = 1; k <= 3; ++k) {
+          auto messageTemp = add(std::make_unique<MessageTemplate>());
+          auto mt = messageTemp.modify();
+          mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
+          mt->templateXml_ = "<div>Template " + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k) + "</div>";
+          mt->file_ = tempFile;
+        }
+      }
+    }
 
     Wt::log("info") << "Created initial Stylus templates and folders.";
+    t.commit();
   }
 
-  t.commit();
 }

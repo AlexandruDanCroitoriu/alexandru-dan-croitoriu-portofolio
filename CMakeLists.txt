@@ -29,19 +29,21 @@ set(RLIB --docroot ../../ -c ${WT_CONFIG_FILE} --http-address 0.0.0.0 --http-por
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/)
 
 
-# FetchContent_Declare(
-#     tinyxml2
-#     GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
-#     GIT_TAG 10.0.0  # Use latest stable version
-# )
-# FetchContent_MakeAvailable(tinyxml2)
+include(FetchContent)
 
-# Find tinyxml2 library
-find_library(TINYXML2_LIB tinyxml2 PATHS /usr/lib /usr/local/lib)
-if(TINYXML2_LIB)
-  message(STATUS "Found tinyxml2: ${TINYXML2_LIB}")
+# Try to use a system tinyxml2; if unavailable, fetch it from source.
+find_package(tinyxml2 CONFIG QUIET)
+if(tinyxml2_FOUND)
+  set(TINYXML2_TARGET tinyxml2::tinyxml2)
 else()
-  message(FATAL_ERROR "tinyxml2 library not found")
+  message(STATUS "tinyxml2 not found locally; fetching via FetchContent")
+  FetchContent_Declare(
+    tinyxml2
+    GIT_REPOSITORY https://github.com/leethomason/tinyxml2.git
+    GIT_TAG 10.0.0
+  )
+  FetchContent_MakeAvailable(tinyxml2)
+  set(TINYXML2_TARGET tinyxml2)
 endif()
 
 
@@ -96,6 +98,7 @@ set(SOURCES
     ${SOURCE_DIR}/008_Stylus/Tables/TemplateFolder.cpp
     ${SOURCE_DIR}/008_Stylus/Utils/XmlBrain.cpp
     ${SOURCE_DIR}/008_Stylus/Utils/FilesManager.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/RootNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FolderNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FileNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplateNode.cpp
@@ -111,13 +114,15 @@ target_link_libraries(${PROJECT_NAME}
     wthttp
     wt
     wtdbo
-    ${TINYXML2_LIB}
+    wtdbosqlite3
+  ${TINYXML2_TARGET}
     # boost_regex
     # cpr::cpr
     # nlohmann_json::nlohmann_json
     # whisper
 )
 
+# Additionally, for Release builds, also link Postgres backend
 if(CMAKE_BUILD_TYPE MATCHES Release)
   add_compile_definitions(WT_DBO_POSTGRES)
   # Find Postgres Dbo backend library (name differs across distros)
@@ -134,17 +139,6 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
   find_library(POSTGRESQL_LIB NAMES pq PATHS /usr/local/lib /usr/lib)
   if(POSTGRESQL_LIB)
     target_link_libraries(${PROJECT_NAME} ${POSTGRESQL_LIB})
-  endif()
-else()
-  # Find SQLite Dbo backend library (name differs across distros)
-  find_library(WTDBO_SQLITE_LIB
-    NAMES wtdbosqlite3 wtdbo_sqlite3
-    PATHS /usr/local/lib /usr/lib
-  )
-  if(WTDBO_SQLITE_LIB)
-    target_link_libraries(${PROJECT_NAME} ${WTDBO_SQLITE_LIB})
-  else()
-    message(FATAL_ERROR "Wt Dbo Sqlite backend library not found (searched for wtdbosqlite3/wtdbo_sqlite3)")
   endif()
 endif()
 

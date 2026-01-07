@@ -38,6 +38,7 @@ docker build -f dockerfiles/builder-alpine -t wt-builder-alexandru-dan-croitoriu
 docker build -f dockerfiles/run-builder-build -t maxuli/alexandru-dan-croitoriu-portofolio:latest .
 
 # To run the container interactively:
+docker run --rm -it wt-builder-alexandru-dan-croitoriu-portofolio:latest /bin/sh
 docker run --rm -it alexandru-dan-croitoriu-portofolio:latest /bin/sh
 docker-compose up
 ```

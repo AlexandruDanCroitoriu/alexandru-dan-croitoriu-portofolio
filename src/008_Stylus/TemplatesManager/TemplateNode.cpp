@@ -14,8 +14,9 @@ TemplateNode::TemplateNode(const std::string& name, Wt::Dbo::ptr<MessageTemplate
       messageTemplate_(messageTemplate)
 {
     wApp->log("debug") << "TemplateNode::TemplateNode(" << name << ")";
+    addStyleClass("[&>.Wt-selected]:!bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
     label_wrapper_ = labelArea();
-    label_wrapper_->addStyleClass("flex items-center cursor-pointer mr-[3px]");
+    label_wrapper_->addStyleClass("flex items-center cursor-pointer");
     setSelectable(true);
 
     label_wrapper_->mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)

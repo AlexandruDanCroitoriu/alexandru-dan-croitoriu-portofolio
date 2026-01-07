@@ -19,8 +19,18 @@ FileNode::FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file)
 {
     wApp->log("debug") << "FileNode::FileNode(" << file_->fileName_ << ")";
     label_wrapper_ = labelArea();
-    label_wrapper_->addStyleClass("flex items-center cursor-pointer mr-[3px]");
+    addStyleClass("[&>.Wt-selected]:!bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
+
+    label_wrapper_->addStyleClass("flex items-center cursor-pointer ");
     setSelectable(true);
+
+    label_wrapper_->doubleClicked().connect(this, [=]() 
+    {
+        if(isExpanded())
+            collapsed().emit(Wt::WMouseEvent());
+        else
+            expanded().emit(Wt::WMouseEvent());
+    });
 
     label_wrapper_->mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)
     {
@@ -30,7 +40,7 @@ FileNode::FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file)
         }
     });
     
-    setLabelIcon(std::make_unique<Wt::WIconPair>("./static/file.gif", "./static/file.gif"));
+    setLabelIcon(std::make_unique<Wt::WIconPair>("./static/icons/file-closed.svg", "./static/icons/file-open.svg"));
 
     if (file_ && file_->expanded_)
         expand();
@@ -52,6 +62,7 @@ FileNode::FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file)
             t.commit();
         }
     });
+
     collapsed().connect(this, [=]()
     {
         if (file_)
@@ -60,6 +71,7 @@ FileNode::FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file)
             file_.modify()->expanded_ = false;
             t.commit();
         }
+        std::cout << "\n\nFileNode::collapsed()\n\n";
     });
 }
 
@@ -68,15 +80,17 @@ void FileNode::createNewTemplateDialog()
     wApp->log("debug") << "FileNode::createNewTemplateDialog";
     auto dialog = Wt::WApplication::instance()->root()->addChild(std::make_unique<Wt::WDialog>("Create template"));
     dialog->setModal(true);
+    dialog->rejectWhenEscapePressed();
     dialog->contents()->addWidget(std::make_unique<Wt::WText>("Template creation is not implemented yet."));
     dialog->show();
 }
 
 void FileNode::createRenameFileDialog()
 {
-    wApp->log("debug") << "FileNode::createRenameFileDialog";
+    wApp->log("debug") << "FileNode::createRenameFileDialog()";
     auto dialog = Wt::WApplication::instance()->root()->addChild(std::make_unique<Wt::WDialog>("Rename file"));
     dialog->setModal(true);
+    dialog->rejectWhenEscapePressed();
     dialog->contents()->addWidget(std::make_unique<Wt::WText>("File rename is not implemented yet."));
     dialog->show();
 }
@@ -89,10 +103,11 @@ void FileNode::deleteFileMessageBox()
 
 void FileNode::showPopup(const Wt::WMouseEvent& event)
 {
-    wApp->log("debug") << "FileNode::showPopup";
+    wApp->log("debug") << "FileNode::showPopup(const Wt::WMouseEvent& event)";
     if (!popup_)
     {
         popup_ = std::make_unique<Wt::WPopupMenu>();
+        // popup_->setStyleClass("rounded-md");
         popup_->addItem("New template")->triggered().connect(this, &FileNode::createNewTemplateDialog);
         popup_->addSeparator();
         popup_->addItem("Rename file")->triggered().connect(this, &FileNode::createRenameFileDialog);

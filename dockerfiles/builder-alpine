@@ -8,6 +8,9 @@ RUN apk add --no-cache git cmake build-base boost-dev openssl-dev
 # for postgres
 RUN apk add --no-cache postgresql-dev
 
+# for sqlite
+RUN apk add --no-cache sqlite-dev
+
 # for compiling tailwind classes
 RUN apk add --no-cache nodejs npm curl
 

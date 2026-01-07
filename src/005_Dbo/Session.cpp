@@ -6,11 +6,9 @@
 #include "000_Server/Server.h"
 
 #include <Wt/Dbo/SqlConnection.h>
-#if defined(DEBUG)
 #include <Wt/Dbo/backend/Sqlite3.h>
-#else
 #include <Wt/Dbo/backend/Postgres.h>
-#endif
+
 #include <Wt/Auth/Identity.h>
 #include <Wt/Auth/PasswordService.h>
 
@@ -26,57 +24,57 @@ Session::Session(const std::string &sqliteDb)
   Wt::log("debug") << "Session::Session()";
   std::unique_ptr<Wt::Dbo::SqlConnection> connection;
 
-  #ifdef DEBUG
+  // #ifdef DEBUG
   // Debug mode - use SQLite
   auto sqliteConnection = std::make_unique<Wt::Dbo::backend::Sqlite3>(sqliteDb);
   sqliteConnection->setProperty("show-queries", "true");
   Wt::log("info") << "Using SQLite database in debug mode";
   connection = std::move(sqliteConnection);
-  #else
+  // #else
   // Production mode - check if PostgreSQL is available
-  #ifdef WT_DBO_POSTGRES
-  // PostgreSQL is enabled - use it for production
-  const char *postgresHost = std::getenv("POSTGRES_HOST");
-  if (!postgresHost) {
-    throw std::runtime_error("POSTGRES_HOST environment variable is not set");
-  }
+  // #ifdef WT_DBO_POSTGRES
+  // // PostgreSQL is enabled - use it for production
+  // const char *postgresHost = std::getenv("POSTGRES_HOST");
+  // if (!postgresHost) {
+  //   throw std::runtime_error("POSTGRES_HOST environment variable is not set");
+  // }
 
-  const char *postgresPort = std::getenv("POSTGRES_PORT");
-  if (!postgresPort) {
-    throw std::runtime_error("POSTGRES_PORT environment variable is not set");
-  }
+  // const char *postgresPort = std::getenv("POSTGRES_PORT");
+  // if (!postgresPort) {
+  //   throw std::runtime_error("POSTGRES_PORT environment variable is not set");
+  // }
 
-  const char *postgresDatabase = std::getenv("POSTGRES_DBNAME");
-  if (!postgresDatabase) {
-    throw std::runtime_error("POSTGRES_DBNAME environment variable is not set");
-  }
+  // const char *postgresDatabase = std::getenv("POSTGRES_DBNAME");
+  // if (!postgresDatabase) {
+  //   throw std::runtime_error("POSTGRES_DBNAME environment variable is not set");
+  // }
 
-  const char *postgresUser = std::getenv("POSTGRES_USER");
-  if (!postgresUser) {
-    throw std::runtime_error("POSTGRES_USER environment variable is not set");
-  }
+  // const char *postgresUser = std::getenv("POSTGRES_USER");
+  // if (!postgresUser) {
+  //   throw std::runtime_error("POSTGRES_USER environment variable is not set");
+  // }
 
-  const char *postgresPassword = std::getenv("POSTGRES_PASSWORD");
-  if (!postgresPassword) {
-    throw std::runtime_error("POSTGRES_PASSWORD environment variable is not set");
-  }
+  // const char *postgresPassword = std::getenv("POSTGRES_PASSWORD");
+  // if (!postgresPassword) {
+  //   throw std::runtime_error("POSTGRES_PASSWORD environment variable is not set");
+  // }
 
-  std::string postgresConnectionString = "host=" + std::string(postgresHost) +
-                  " port=" + std::string(postgresPort) +
-                  " dbname=" + std::string(postgresDatabase) +
-                  " user=" + std::string(postgresUser) +
-                  " password=" + std::string(postgresPassword);
+  // std::string postgresConnectionString = "host=" + std::string(postgresHost) +
+  //                 " port=" + std::string(postgresPort) +
+  //                 " dbname=" + std::string(postgresDatabase) +
+  //                 " user=" + std::string(postgresUser) +
+  //                 " password=" + std::string(postgresPassword);
 
-  auto postgresConnection = std::make_unique<Wt::Dbo::backend::Postgres>(postgresConnectionString.c_str());
-  Wt::log("info") << "Using PostgreSQL database in production mode";
-  connection = std::move(postgresConnection);
-  #else
+  // auto postgresConnection = std::make_unique<Wt::Dbo::backend::Postgres>(postgresConnectionString.c_str());
+  // Wt::log("info") << "Using PostgreSQL database in production mode";
+  // connection = std::move(postgresConnection);
+  // #else
   // PostgreSQL not available - use SQLite for production
-  auto sqliteConnection = std::make_unique<Wt::Dbo::backend::Sqlite3>(sqliteDb);
-  Wt::log("info") << "Using SQLite database in production mode (PostgreSQL not available)";
-  connection = std::move(sqliteConnection);
-  #endif
-  #endif
+  // auto sqliteConnection = std::make_unique<Wt::Dbo::backend::Sqlite3>(sqliteDb);
+  // Wt::log("info") << "Using SQLite database in production mode (PostgreSQL not available)";
+  // connection = std::move(sqliteConnection);
+  // #endif
+  // #endif
 
   if (!connection) {
     throw std::runtime_error("Database connection was not initialised");

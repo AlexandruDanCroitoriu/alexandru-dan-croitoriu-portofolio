@@ -19,9 +19,9 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
     session_(session)
 {
     wApp->log("debug") << "FolderNode::FolderNode(" << folder->folderName_ << ")";
-    setStyleClass("[&>.Wt-selected]:bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
+    addStyleClass("[&>.Wt-selected]:!bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
     label_wrapper_ = labelArea();
-    label_wrapper_->addStyleClass("flex items-center cursor-pointer mr-[3px]");
+    label_wrapper_->addStyleClass("flex items-center cursor-pointer ");
     setSelectable(true);
 
     label_wrapper_->mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)
@@ -29,6 +29,15 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
         if (event.button() == Wt::MouseButton::Right)
         {
             showPopup(event);
+        }
+    });
+
+    label_wrapper_->doubleClicked().connect(this, [=]() 
+    {
+        if(isExpanded()){
+            collapsed().emit(Wt::WMouseEvent());
+        }else{
+            expanded().emit(Wt::WMouseEvent());
         }
     });
 
@@ -63,8 +72,8 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
     if(folder_ && folder_->expanded_)
         expand();
 
-    setLabelIcon(std::make_unique<Wt::WIconPair>("./static/stylus/yellow-folder-closed.png",
-                                                 "./static/stylus/yellow-folder-open.png"));
+    setLabelIcon(std::make_unique<Wt::WIconPair>("./static/icons/folder-closed.png",
+                                                 "./static/icons/folder-open.png"));
 }
 
 void FolderNode::createNewFolderDialog()
@@ -72,6 +81,7 @@ void FolderNode::createNewFolderDialog()
     wApp->log("debug") << "FolderNode::createNewFolderDialog";
     auto dialog = Wt::WApplication::instance()->root()->addChild(std::make_unique<Wt::WDialog>("Create folder"));
     dialog->setModal(true);
+    dialog->rejectWhenEscapePressed();
     dialog->contents()->addWidget(std::make_unique<Wt::WText>("Folder creation is not implemented yet."));
     dialog->show();
 }
@@ -81,6 +91,7 @@ void FolderNode::createRenameFolderDialog()
     wApp->log("debug") << "FolderNode::createRenameFolderDialog";
     auto dialog = Wt::WApplication::instance()->root()->addChild(std::make_unique<Wt::WDialog>("Rename folder"));
     dialog->setModal(true);
+    dialog->rejectWhenEscapePressed();
     dialog->contents()->addWidget(std::make_unique<Wt::WText>("Folder rename is not implemented yet."));
     dialog->show();
 }
@@ -96,6 +107,7 @@ void FolderNode::createNewFileDialog()
     wApp->log("debug") << "FolderNode::createNewFileDialog";
     auto dialog = Wt::WApplication::instance()->root()->addChild(std::make_unique<Wt::WDialog>("Create file"));
     dialog->setModal(true);
+    dialog->rejectWhenEscapePressed();
     dialog->contents()->addWidget(std::make_unique<Wt::WText>("File creation is not implemented yet."));
     dialog->show();
 }
@@ -106,6 +118,7 @@ void FolderNode::showPopup(const Wt::WMouseEvent& event)
     if (!popup_)
     {
         popup_ = std::make_unique<Wt::WPopupMenu>();
+        popup_->setStyleClass("rounded-md");
         popup_->addItem("New folder")->triggered().connect(this, &FolderNode::createNewFolderDialog);
         popup_->addItem("Rename folder")->triggered().connect(this, &FolderNode::createRenameFolderDialog);
         popup_->addItem("Delete folder")->triggered().connect(this, &FolderNode::createRemoveFolderMessageBox);

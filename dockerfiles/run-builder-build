@@ -5,13 +5,18 @@ RUN apk add --no-cache \
 	libstdc++ libgcc \
 	boost-libs boost-program_options boost-filesystem boost-thread boost-system boost-regex \
 	postgresql-libs
-
+	
+# Copy built application and libraries from builder
 COPY --from=wt-builder-alexandru-dan-croitoriu-portofolio:latest app/build /app/build 
 COPY --from=wt-builder-alexandru-dan-croitoriu-portofolio:latest /usr/lib/libwt*.so.* /usr/lib/
+
+# Copy static resources
 COPY ./resources /app/resources
-COPY ./static /app/static
-# COPY ./wt_config_release.xml /app/wt_config_release.xml
-COPY ./wt_config_debug.xml /app/wt_config_release.xml
+COPY ./dbo /app/dbo
+COPY ./static/monaco /app/static/monaco
+COPY ./static/xml /app/static/xml
+COPY ./static/icons /app/static/icons
+COPY --from=builder /app/static/theme/tailwindcss/tailwind.minify.css /app/static/theme/tailwindcss/tailwind.minify.css
 
 
 WORKDIR /app/build/release

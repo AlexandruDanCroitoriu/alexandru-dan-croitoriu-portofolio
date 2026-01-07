@@ -23,6 +23,7 @@
 #include <Wt/WSuggestionPopup.h>
 #include <Wt/WTabWidget.h>
 #include <Wt/WTimeEdit.h>
+#include <Wt/WLineEdit.h>
 
 #include "Wt/DomElement.h"
 #include <Wt/WRandom.h>
@@ -56,8 +57,12 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindThemeBase::styleSheets() const
     if (app->environment().agent() == Wt::UserAgent::IE6)
       result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie6.css")));
   }
-    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.css?v=" + Wt::WRandom::generateId())));
 
+#ifdef DEBUG
+  result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.css?v=" + Wt::WRandom::generateId())));
+#else
+  result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.minify.css?v=" + Wt::WRandom::generateId())));
+#endif
 
   return result;
 }
@@ -240,6 +245,12 @@ void TailwindThemeBase::apply(Wt::WWidget *widget, Wt::DomElement& element, int 
 
   case Wt::DomElementType::INPUT:
     {
+      Wt::WLineEdit *lineEdit = dynamic_cast<Wt::WLineEdit *>(widget);
+      if (lineEdit) {
+        element.addPropertyWord(Wt::Property::Class, "shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline");
+        return;
+      }
+
       Wt::WAbstractSpinBox *spinBox = dynamic_cast<Wt::WAbstractSpinBox *>(widget);
       if (spinBox) {
         element.addPropertyWord(Wt::Property::Class, "Wt-spinbox");

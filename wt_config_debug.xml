@@ -94,7 +94,7 @@
 
     <properties>
       <property name="resourcesURL">resources/</property>
-      <property name="favicon">${RUNDIR}/../../static/favicon.svg</property>
+      <property name="favicon">${RUNDIR}/../../static/icons/favicon.svg</property>
     </properties>
 
   </application-settings>

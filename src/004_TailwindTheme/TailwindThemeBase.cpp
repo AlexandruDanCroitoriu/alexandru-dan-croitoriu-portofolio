@@ -166,7 +166,7 @@ void TailwindThemeBase::apply(Wt::WWidget *widget, Wt::DomElement& element, int 
   switch (element.type()) {
   case Wt::DomElementType::BUTTON:
     if (creating) {
-      element.addPropertyWord(Wt::Property::Class, "rounded-md px-2.5 py-1.5 text-sm font-semibold text-white ring-1 ring-inset cursor-pointer");
+      element.addPropertyWord(Wt::Property::Class, "rounded-md px-2.5 py-1.5 text-sm font-semibold ring-1 ring-inset cursor-pointer");
       Wt::WPushButton *b = dynamic_cast<Wt::WPushButton *>(widget);
       if (b) {
         if (b->isDefault())

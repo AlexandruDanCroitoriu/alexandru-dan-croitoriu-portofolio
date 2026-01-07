@@ -11,6 +11,7 @@ class TemplateFile : public Wt::Dbo::Dbo<TemplateFile>
 {
 public:
   std::string fileName_;
+  int order;
   bool expanded_ = true;
   Wt::Dbo::ptr<TemplateFolder> folder_;
   Wt::Dbo::collection< Wt::Dbo::ptr<MessageTemplate> > templates_;

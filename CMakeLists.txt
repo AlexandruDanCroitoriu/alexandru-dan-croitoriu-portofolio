@@ -97,7 +97,6 @@ set(SOURCES
     ${SOURCE_DIR}/008_Stylus/Tables/TemplateFile.cpp
     ${SOURCE_DIR}/008_Stylus/Tables/TemplateFolder.cpp
     ${SOURCE_DIR}/008_Stylus/Utils/XmlBrain.cpp
-    ${SOURCE_DIR}/008_Stylus/Utils/FilesManager.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/RootNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FolderNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FileNode.cpp

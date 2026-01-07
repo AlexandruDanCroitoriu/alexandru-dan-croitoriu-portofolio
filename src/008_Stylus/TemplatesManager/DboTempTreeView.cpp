@@ -22,19 +22,14 @@ DboTempTreeView::DboTempTreeView(StylusSession& session)
     : session_(session)
 {
     wApp->log("debug") << "DboTempTreeView::DboTempTreeView";
-    setStyleClass("w-full ");
+    setStyleClass("h-[100svh] border-r border-gray-600 overflow-auto max-w-sm min-w-[240px]");
 
     tree_ = addWidget(std::make_unique<Wt::WTree>());
-    tree_->addStyleClass("relative -left-[18px]");
+    tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)]");
     tree_->setSelectionMode(Wt::SelectionMode::Single);
     populateTree();
 }
 
-void DboTempTreeView::refresh()
-{
-    wApp->log("debug") << "DboTempTreeView::refresh";
-    populateTree();
-}
 
 void DboTempTreeView::populateTree()
 {
@@ -42,16 +37,17 @@ void DboTempTreeView::populateTree()
     auto root_node = std::make_unique<RootNode>(session_);
     auto root_ptr = root_node.get();
     root_ptr->setLoadPolicy(Wt::ContentLoading::Eager);
-
+    root_ptr->changed().connect(this, &DboTempTreeView::populateTree);
     tree_->setTreeRoot(std::move(root_node));
 
     Wt::Dbo::Transaction t(session_);
-    auto folders = session_.find<TemplateFolder>().resultList();
+    auto folders = session_.find<TemplateFolder>().orderBy("order_index").resultList();
 
     for (auto folder : folders)
     {
         auto folder_node = std::make_unique<FolderNode>(session_, folder);
         auto folder_ptr = folder_node.get();
+        folder_node->changed().connect(this, &DboTempTreeView::populateTree);
         root_ptr->addChildNode(std::move(folder_node));
 
         // When a folder is re-expanded, re-open any child files that were previously expanded.
@@ -72,15 +68,16 @@ void DboTempTreeView::populateTree()
         {
             auto file_node = std::make_unique<FileNode>(session_, file);
             auto file_ptr = file_node.get();
+            file_ptr->changed().connect(this, &DboTempTreeView::populateTree);
             folder_ptr->addChildNode(std::move(file_node));
 
             // Add templates under the file
             for (auto tmpl : file->templates_)
             {
-                auto template_node = std::make_unique<TemplateNode>(tmpl->messageId_, tmpl);
+                auto template_node = std::make_unique<TemplateNode>(session_, tmpl);
                 auto template_ptr = template_node.get();
                 file_ptr->addChildNode(std::move(template_node));
-
+                template_ptr->changed().connect(this, &DboTempTreeView::populateTree);
                 template_ptr->selected().connect(this, [=](bool selected)
                 {
                     if (selected)

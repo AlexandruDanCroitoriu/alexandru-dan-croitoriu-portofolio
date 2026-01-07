@@ -57,6 +57,7 @@ void StylusSession::createInitialData()
       auto f = folder.modify();
       f->folderName_ = "Templates Folder " + std::to_string(i);
       f->expanded_ = true;
+      f->order = getNextFolderOrder();  // Use helper method for consistent ordering
 
       // Create 3 template files per folder
       for (int j = 1; j <= 3; ++j) {
@@ -81,4 +82,22 @@ void StylusSession::createInitialData()
     t.commit();
   }
 
+}
+
+int StylusSession::getNextFolderOrder()
+{
+  Wt::log("debug") << "StylusSession::getNextFolderOrder()";
+  
+  // Get the maximum order value from all existing folders
+  // If no folders exist, start with 1
+  auto allFolders = find<TemplateFolder>().resultList();
+  
+  int maxOrder = 0;
+  for (const auto& folder : allFolders) {
+    if (folder->order > maxOrder) {
+      maxOrder = folder->order;
+    }
+  }
+  
+  return maxOrder + 1;
 }

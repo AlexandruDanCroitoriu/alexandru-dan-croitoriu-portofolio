@@ -32,7 +32,7 @@ void Stylus::initializeDialog()
     setStyleClass("!border-0 overflow-auto !bg-gray-800 text-white");
     titleBar()->hide();
     titleBar()->setStyleClass("p-0 flex items-center overflow-x-visible h-[40px]");
-    contents()->setStyleClass("h-[100vh] overflow-y-auto overflow-x-visible flex");
+    contents()->setStyleClass("h-[100svh] overflow-y-auto overflow-x-visible flex");
     setModal(false);
     setResizable(false);
     setMovable(false);

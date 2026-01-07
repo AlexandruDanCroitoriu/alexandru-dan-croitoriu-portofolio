@@ -17,8 +17,6 @@ class DboTempTreeView : public Wt::WContainerWidget
 public:
     DboTempTreeView(StylusSession& session);
 
-    void refresh();
-
     Wt::Signal<Wt::Dbo::ptr<TemplateFile>>& file_selected() { return file_selected_; }
     Wt::Signal<Wt::Dbo::ptr<MessageTemplate>>& template_selected() { return template_selected_; }
 

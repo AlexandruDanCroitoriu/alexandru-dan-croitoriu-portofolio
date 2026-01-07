@@ -17,6 +17,9 @@ class StylusSession : public dbo::Session
 public:
   explicit StylusSession(const std::string& sqliteDb);
 
+  /// Get the next available order number for a new TemplateFolder
+  int getNextFolderOrder();
+
 private:
   void createInitialData();
   bool created_ = false;

@@ -3,7 +3,7 @@
 #include <Wt/WApplication.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WAnchor.h>
-#include "008_Stylus/TemplatesManager/DboTempTreeView.h"
+#include "008_Stylus/TemplatesManager/TemplatesManager.h"
 
 namespace Stylus {
 
@@ -72,8 +72,9 @@ void Stylus::setupContent()
     content_stack_ = contents()->addNew<Wt::WStackedWidget>();
     menu_ = navbar_wrapper_->addNew<Wt::WMenu>(content_stack_);
     
-    menu_->setStyleClass("flex flex-col items-center h-full");
     navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid border-gray-600");
+    content_stack_->setStyleClass("grow");
+    menu_->setStyleClass("flex flex-col items-center h-full");
 
     std::unique_ptr<Wt::WContainerWidget> xml_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> css_files_wrapper = std::make_unique<Wt::WContainerWidget>();
@@ -82,7 +83,7 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> images_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
 
-    xml_files_wrapper->addNew<DboTempTreeView>(*session_);
+    xml_files_wrapper->addNew<TemplatesManager>(*session_);
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();

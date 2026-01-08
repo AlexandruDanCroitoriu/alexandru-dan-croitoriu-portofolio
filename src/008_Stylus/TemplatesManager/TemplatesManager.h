@@ -12,10 +12,10 @@ class MessageTemplate;
 namespace Stylus
 {
 
-class DboTempTreeView : public Wt::WContainerWidget
+class TemplatesManager : public Wt::WContainerWidget
 {
 public:
-    DboTempTreeView(StylusSession& session);
+    TemplatesManager(StylusSession& session);
 
     Wt::Signal<Wt::Dbo::ptr<TemplateFile>>& file_selected() { return file_selected_; }
     Wt::Signal<Wt::Dbo::ptr<MessageTemplate>>& template_selected() { return template_selected_; }
@@ -25,6 +25,8 @@ private:
 
     StylusSession& session_;
     Wt::WTree* tree_;
+    Wt::WContainerWidget* contentWrapper_;
+
     SelectedKind selectedKind_ = SelectedKind::None;
     long long selectedFolderId_ = -1;
     long long selectedFileId_ = -1;
@@ -34,6 +36,7 @@ private:
     Wt::Signal<Wt::Dbo::ptr<MessageTemplate>> template_selected_;
 
     void populateTree();
+    void renderSelection();
 
 
 };

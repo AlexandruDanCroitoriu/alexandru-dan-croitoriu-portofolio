@@ -25,6 +25,8 @@
 #include <Wt/WTimeEdit.h>
 #include <Wt/WLineEdit.h>
 #include <Wt/WComboBox.h>
+#include <Wt/WTextArea.h>
+#include <Wt/WColorPicker.h>
 
 #include "Wt/DomElement.h"
 #include <Wt/WRandom.h>
@@ -269,6 +271,12 @@ void TailwindThemeBase::apply(Wt::WWidget *widget, Wt::DomElement& element, int 
         element.addPropertyWord(Wt::Property::Class, "Wt-timeedit");
         return;
       }
+
+      Wt::WColorPicker *colorPicker = dynamic_cast<Wt::WColorPicker *>(widget);
+      if (colorPicker) {
+        element.addPropertyWord(Wt::Property::Class, "shadow appearance-none border rounded p-1 leading-tight focus:outline-none focus:shadow-outline");
+        return;
+      }
     }
     break;
     case Wt::DomElementType::SELECT:
@@ -280,7 +288,15 @@ void TailwindThemeBase::apply(Wt::WWidget *widget, Wt::DomElement& element, int 
       }
     }
     break;
-    
+  case Wt::DomElementType::TEXTAREA:
+    {
+      Wt::WTextArea *textArea = dynamic_cast<Wt::WTextArea *>(widget);
+      if (textArea) {
+        element.addPropertyWord(Wt::Property::Class, "shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline");
+        return;
+      }
+    }
+    break;
   default:
     break;
   }

@@ -1,4 +1,4 @@
-#include "008_Stylus/TemplatesManager/DboTempTreeView.h"
+#include "008_Stylus/TemplatesManager/TemplatesManager.h"
 #include "008_Stylus/TemplatesManager/RootNode.h"
 #include "008_Stylus/TemplatesManager/FolderNode.h"
 #include "008_Stylus/TemplatesManager/FileNode.h"
@@ -7,6 +7,7 @@
 #include "008_Stylus/Tables/TemplateFolder.h"
 #include "008_Stylus/Tables/TemplateFile.h"
 #include "008_Stylus/Tables/MessageTemplate.h"
+#include "008_Stylus/TemplatesManager/TempView.h"
 
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
@@ -18,26 +19,36 @@
 namespace Stylus
 {
 
-DboTempTreeView::DboTempTreeView(StylusSession& session)
+TemplatesManager::TemplatesManager(StylusSession& session)
     : session_(session)
 {
-    wApp->log("debug") << "DboTempTreeView::DboTempTreeView";
-    setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
+    wApp->log("debug") << "TemplatesManager::TemplatesManager";
+    setStyleClass("max-h-[100svh] flex overflow-hidden");
+    
+    auto treeWrapper = addNew<Wt::WContainerWidget>();
+    treeWrapper->setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
 
-    tree_ = addWidget(std::make_unique<Wt::WTree>());
+    
+    tree_ = treeWrapper->addWidget(std::make_unique<Wt::WTree>());
     tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)]");
     tree_->setSelectionMode(Wt::SelectionMode::Single);
+
+    auto contentWrapper_ = addNew<Wt::WContainerWidget>();
+    contentWrapper_->setStyleClass("h-[100svh] overflow-auto p-4 grow fle");
+    // Assign to member for later rendering
+    this->contentWrapper_ = contentWrapper_;
+
     populateTree();
 }
 
 
-void DboTempTreeView::populateTree()
+void TemplatesManager::populateTree()
 {
-    wApp->log("debug") << "DboTempTreeView::populateTree";
+    wApp->log("debug") << "TemplatesManager::populateTree";
     auto root_node = std::make_unique<RootNode>(session_);
     auto root_ptr = root_node.get();
     root_ptr->setLoadPolicy(Wt::ContentLoading::Eager);
-    root_ptr->changed().connect(this, &DboTempTreeView::populateTree);
+    root_ptr->changed().connect(this, &TemplatesManager::populateTree);
     tree_->setTreeRoot(std::move(root_node));
 
     Wt::Dbo::Transaction t(session_);
@@ -47,7 +58,7 @@ void DboTempTreeView::populateTree()
     {
         auto folder_node = std::make_unique<FolderNode>(session_, folder);
         auto folder_ptr = folder_node.get();
-        folder_node->changed().connect(this, &DboTempTreeView::populateTree);
+        folder_node->changed().connect(this, &TemplatesManager::populateTree);
         root_ptr->addChildNode(std::move(folder_node));
 
         // Restore selection if this is the previously selected folder
@@ -65,6 +76,7 @@ void DboTempTreeView::populateTree()
                 selectedFolderId_ = folder.id();
                 selectedFileId_ = -1;
                 selectedTemplateId_ = -1;
+                renderSelection();
             }
         });
 
@@ -92,7 +104,7 @@ void DboTempTreeView::populateTree()
         {
             auto file_node = std::make_unique<FileNode>(session_, file);
             auto file_ptr = file_node.get();
-            file_ptr->changed().connect(this, &DboTempTreeView::populateTree);
+            file_ptr->changed().connect(this, &TemplatesManager::populateTree);
             folder_ptr->addChildNode(std::move(file_node));
 
             // Restore selection if this is the previously selected file
@@ -113,7 +125,7 @@ void DboTempTreeView::populateTree()
                 auto template_node = std::make_unique<TemplateNode>(session_, tmpl);
                 auto template_ptr = template_node.get();
                 file_ptr->addChildNode(std::move(template_node));
-                template_ptr->changed().connect(this, &DboTempTreeView::populateTree);
+                template_ptr->changed().connect(this, &TemplatesManager::populateTree);
                 template_ptr->selected().connect(this, [=](bool selected)
                 {
                     if (selected)
@@ -123,6 +135,7 @@ void DboTempTreeView::populateTree()
                         selectedFileId_ = file.id();
                         selectedFolderId_ = folder.id();
                         template_selected_.emit(tmpl);
+                        renderSelection();
                     }
                 });
 
@@ -142,6 +155,7 @@ void DboTempTreeView::populateTree()
                     selectedFolderId_ = folder.id();
                     selectedTemplateId_ = -1;
                     file_selected_.emit(file);
+                    renderSelection();
                 }
             });
         }
@@ -150,5 +164,75 @@ void DboTempTreeView::populateTree()
     t.commit();
 }
 
+
+void TemplatesManager::renderSelection()
+{
+    if (!contentWrapper_)
+        return;
+
+    // Clear previous content
+    contentWrapper_->clear();
+
+    Wt::Dbo::Transaction t(session_);
+
+    switch (selectedKind_)
+    {
+    case SelectedKind::Template:
+    {
+        if (selectedTemplateId_ < 0) break;
+        auto tmplList = session_.find<MessageTemplate>()
+            .where("id = ?")
+            .bind(selectedTemplateId_)
+            .limit(1)
+            .resultList();
+        for (auto tmpl : tmplList)
+        {
+            contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+        }
+        break;
+    }
+    case SelectedKind::File:
+    {
+        if (selectedFileId_ < 0) break;
+        auto orderedTemplates = session_.find<MessageTemplate>()
+            .where("file_id = ?")
+            .bind(selectedFileId_)
+            .orderBy("order_index")
+            .resultList();
+        for (auto tmpl : orderedTemplates)
+        {
+            contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+        }
+        break;
+    }
+    case SelectedKind::Folder:
+    {
+        if (selectedFolderId_ < 0) break;
+        auto orderedFiles = session_.find<TemplateFile>()
+            .where("folder_id = ?")
+            .bind(selectedFolderId_)
+            .orderBy("order_index")
+            .resultList();
+        for (auto file : orderedFiles)
+        {
+            auto orderedTemplates = session_.find<MessageTemplate>()
+                .where("file_id = ?")
+                .bind(file.id())
+                .orderBy("order_index")
+                .resultList();
+            for (auto tmpl : orderedTemplates)
+            {
+                contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+            }
+        }
+        break;
+    }
+    case SelectedKind::None:
+    default:
+        break;
+    }
+
+    t.commit();
+}
 
 }

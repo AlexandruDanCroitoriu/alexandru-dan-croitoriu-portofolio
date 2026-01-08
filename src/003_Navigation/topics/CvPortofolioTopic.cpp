@@ -21,7 +21,7 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
 {
     wApp->log("debug") << "CvPortofolioTopic::cvPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
-    container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
+    container->addStyleClass("w-full container mx-auto space-y-2 p-6");
 
     // Title
     auto title = container->addNew<Wt::WText>("<h2 class='text-3xl font-bold text-gray-800 mb-4'>CV & Portfolio</h2>");

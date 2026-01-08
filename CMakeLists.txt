@@ -55,6 +55,7 @@ set(SOURCES
     
     ${SOURCE_DIR}/002_Components/MonacoEditor.cpp
     ${SOURCE_DIR}/002_Components/topics/MonacoTopic.cpp
+    ${SOURCE_DIR}/002_Components/topics/WtComponentsGalery.cpp
 
     # Navigation sources
     ${SOURCE_DIR}/003_Navigation/Navigation.cpp
@@ -101,7 +102,8 @@ set(SOURCES
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FolderNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/FileNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplateNode.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/DboTempTreeView.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplatesManager.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TempView.cpp
 
 )
 

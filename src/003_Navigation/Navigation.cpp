@@ -1,6 +1,7 @@
 #include "003_Navigation/Navigation.h"
 #include "003_Navigation/NavigationTopic.h"
 #include "002_Components/topics/MonacoTopic.h"
+#include "002_Components/topics/WtComponentsGalery.h"
 #include "003_Navigation/topics/CvPortofolioTopic.h"
 #include "007_Blog/topics/BlogTopic.h"
 #include "007_Blog/topics/NewPostTopic.h"
@@ -229,6 +230,7 @@ void Navigation::setupRoutes()
     // Topics instances captured by value in route lambdas
     auto cvTopic = std::make_shared<CvPortofolioTopic>();
     auto monacoTopic = std::make_shared<MonacoTopic>();
+    auto wtComponentsGalery = std::make_shared<WtComponentsGalery>();
     auto blogTopic = std::make_shared<BlogTopic>(session_);
     auto userSettings = std::make_shared<UserSettingsTopic>(session_);
     auto notFound = std::make_shared<NotFoundTopic>();
@@ -289,6 +291,9 @@ void Navigation::setupRoutes()
     routes_["/components/monaco"] = [monacoTopic]() {
         return monacoTopic->createMonacoEditorDemo();
     };
+    routes_["/components/wt-components"] = [wtComponentsGalery]() {
+        return wtComponentsGalery->createFormInputsDemo();
+    };
     routes_["/account/settings"] = [userSettings]() {
         return userSettings->createSettingsPage();
     };
@@ -331,6 +336,7 @@ void Navigation::buildSidebar()
     auto section = navList_->addNew<Wt::WContainerWidget>();
     section->addStyleClass("flex flex-col space-y-1 pl-4 mt-1");
     makeAnchor(section, "Monaco Editor", "/components/monaco");
+    makeAnchor(section, "Wt Components Gallery", "/components/wt-components");
 }
 
 void Navigation::connectRouting()

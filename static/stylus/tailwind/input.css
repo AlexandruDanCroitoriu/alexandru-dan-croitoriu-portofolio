@@ -7,7 +7,9 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-
+textarea {
+  field-sizing: content; /* used to be `form-sizing` but changed to this */
+}
 
 @theme {
     /* Fonts */

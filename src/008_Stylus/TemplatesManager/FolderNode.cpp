@@ -38,6 +38,9 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
     arrowUp->setStyleClass(arrowStyles + " mr-1 ml-auto");
     arrowDown->setStyleClass(arrowStyles);
     
+    arrowUp->clicked().connect(this, &FolderNode::moveFolderUp);
+    arrowDown->clicked().connect(this, &FolderNode::moveFolderDown);
+    
 
     label_wrapper_->mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)
     {
@@ -272,11 +275,19 @@ void FolderNode::createNewFileDialog()
                 return;
             }
 
+            // Determine next order index within the folder (1..n)
+            auto currentFiles = session_.find<TemplateFile>()
+                .where("folder_id = ?")
+                .bind(folder_.id())
+                .resultList();
+            int nextOrder = static_cast<int>(currentFiles.size()) + 1;
+
             // Create and persist the new file
             auto newFile = session_.addNew<TemplateFile>();
             newFile.modify()->fileName_ = fileName;
             newFile.modify()->expanded_ = false;
             newFile.modify()->folder_ = folder_;
+            newFile.modify()->order = nextOrder;
             folder_.modify()->expanded_ = true; // Ensure folder is expanded to show new file
             t.commit();
         }
@@ -305,6 +316,67 @@ void FolderNode::showPopup(const Wt::WMouseEvent& event)
     }
 
     popup_->popup(Wt::WPoint(event.document().x, event.document().y));
+}
+
+void FolderNode::moveFolderUp()
+{
+    if (!folder_)
+        return;
+
+    Wt::Dbo::Transaction t(session_);
+    
+    int currentOrder = folder_->order;
+    
+    // If folder is already at order 1, cannot move up
+    if (currentOrder <= 1)
+    {
+        t.commit();
+        return;
+    }
+    
+    // Find the folder with order_index = currentOrder - 1
+    auto folderToSwap = session_.find<TemplateFolder>()
+        .where("order_index = ?")
+        .bind(static_cast<long long>(currentOrder - 1))
+        .resultValue();
+    
+    if (folderToSwap)
+    {
+        // Swap the order indices
+        int tempOrder = folder_.modify()->order;
+        folder_.modify()->order = folderToSwap.modify()->order;
+        folderToSwap.modify()->order = tempOrder;
+    }
+    
+    t.commit();
+    changed_.emit();
+}
+
+void FolderNode::moveFolderDown()
+{
+    if (!folder_)
+        return;
+
+    Wt::Dbo::Transaction t(session_);
+    
+    int currentOrder = folder_->order;
+    
+    // Find the folder with order_index = currentOrder + 1
+    auto folderToSwap = session_.find<TemplateFolder>()
+        .where("order_index = ?")
+        .bind(static_cast<long long>(currentOrder + 1))
+        .resultValue();
+    
+    if (folderToSwap)
+    {
+        // Swap the order indices
+        int tempOrder = folder_.modify()->order;
+        folder_.modify()->order = folderToSwap.modify()->order;
+        folderToSwap.modify()->order = tempOrder;
+    }
+    
+    t.commit();
+    changed_.emit();
 }
 
 }

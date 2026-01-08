@@ -21,6 +21,7 @@ public:
   {
     Wt::Dbo::field(a, fileName_, "file_name");
     Wt::Dbo::field(a, expanded_, "expanded");
+    Wt::Dbo::field(a, order, "order_index");
     Wt::Dbo::belongsTo(a, folder_, "folder");
     Wt::Dbo::hasMany(a, templates_, Wt::Dbo::ManyToOne, "file");
   }

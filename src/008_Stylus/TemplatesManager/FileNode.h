@@ -28,8 +28,11 @@ private:
 
     void createNewTemplateDialog();
     void createRenameFileDialog();
+    void createChangeFolderDialog();
     void createDeleteFileDialog();
     void showPopup(const Wt::WMouseEvent& event);
+    void moveFileUp();
+    void moveFileDown();
     Wt::Signal<> changed_;
 };
 

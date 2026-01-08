@@ -22,7 +22,7 @@ DboTempTreeView::DboTempTreeView(StylusSession& session)
     : session_(session)
 {
     wApp->log("debug") << "DboTempTreeView::DboTempTreeView";
-    setStyleClass("h-[100svh] border-r border-gray-600 overflow-auto max-w-sm min-w-[240px]");
+    setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
 
     tree_ = addWidget(std::make_unique<Wt::WTree>());
     tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)]");
@@ -50,6 +50,24 @@ void DboTempTreeView::populateTree()
         folder_node->changed().connect(this, &DboTempTreeView::populateTree);
         root_ptr->addChildNode(std::move(folder_node));
 
+        // Restore selection if this is the previously selected folder
+        if (selectedKind_ == SelectedKind::Folder && selectedFolderId_ == folder.id())
+        {
+            tree_->select(folder_ptr);
+        }
+
+        // Track selection changes
+        folder_ptr->selected().connect(this, [=](bool selected)
+        {
+            if (selected)
+            {
+                selectedKind_ = SelectedKind::Folder;
+                selectedFolderId_ = folder.id();
+                selectedFileId_ = -1;
+                selectedTemplateId_ = -1;
+            }
+        });
+
         // When a folder is re-expanded, re-open any child files that were previously expanded.
         folder_ptr->expanded().connect([folder_ptr]() {
             for (auto child : folder_ptr->childNodes())
@@ -64,15 +82,33 @@ void DboTempTreeView::populateTree()
             }
         });
 
-        for (auto file : folder->files_)
+        auto orderedFiles = session_.find<TemplateFile>()
+            .where("folder_id = ?")
+            .bind(folder.id())
+            .orderBy("order_index")
+            .resultList();
+
+        for (auto file : orderedFiles)
         {
             auto file_node = std::make_unique<FileNode>(session_, file);
             auto file_ptr = file_node.get();
             file_ptr->changed().connect(this, &DboTempTreeView::populateTree);
             folder_ptr->addChildNode(std::move(file_node));
 
-            // Add templates under the file
-            for (auto tmpl : file->templates_)
+            // Restore selection if this is the previously selected file
+            if (selectedKind_ == SelectedKind::File && selectedFileId_ == file.id())
+            {
+                tree_->select(file_ptr);
+            }
+
+            // Add templates under the file (ordered)
+            auto orderedTemplates = session_.find<MessageTemplate>()
+                .where("file_id = ?")
+                .bind(file.id())
+                .orderBy("order_index")
+                .resultList();
+
+            for (auto tmpl : orderedTemplates)
             {
                 auto template_node = std::make_unique<TemplateNode>(session_, tmpl);
                 auto template_ptr = template_node.get();
@@ -82,15 +118,29 @@ void DboTempTreeView::populateTree()
                 {
                     if (selected)
                     {
+                        selectedKind_ = SelectedKind::Template;
+                        selectedTemplateId_ = tmpl.id();
+                        selectedFileId_ = file.id();
+                        selectedFolderId_ = folder.id();
                         template_selected_.emit(tmpl);
                     }
                 });
+
+                // Restore selection if this is the previously selected template
+                if (selectedKind_ == SelectedKind::Template && selectedTemplateId_ == tmpl.id())
+                {
+                    tree_->select(template_ptr);
+                }
             }
 
             file_ptr->selected().connect(this, [=](bool selected)
             {
                 if (selected)
                 {
+                    selectedKind_ = SelectedKind::File;
+                    selectedFileId_ = file.id();
+                    selectedFolderId_ = folder.id();
+                    selectedTemplateId_ = -1;
                     file_selected_.emit(file);
                 }
             });

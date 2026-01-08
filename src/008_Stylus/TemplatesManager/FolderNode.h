@@ -30,6 +30,8 @@ private:
     void createRemoveFolderDialog();
     void createNewFileDialog();
     void showPopup(const Wt::WMouseEvent& event);
+    void moveFolderUp();
+    void moveFolderDown();
     Wt::Signal<> changed_;
 };
 

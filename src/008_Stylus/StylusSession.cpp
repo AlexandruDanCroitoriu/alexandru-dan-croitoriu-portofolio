@@ -9,6 +9,7 @@
 #include <Wt/WApplication.h>
 
 #include <memory>
+#include <exception>
 
 StylusSession::StylusSession(const std::string &sqliteDb)
 {
@@ -66,6 +67,7 @@ void StylusSession::createInitialData()
         tf->fileName_ = "file-" + std::to_string(i) + "-" + std::to_string(j);
         tf->folder_ = folder;
         tf->expanded_ = true;
+        tf->order = j;  // Keep initial files ordered 1..n inside each folder
 
         // Create 3 message templates per file
         for (int k = 1; k <= 3; ++k) {
@@ -74,6 +76,7 @@ void StylusSession::createInitialData()
           mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
           mt->templateXml_ = "<div>Template " + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k) + "</div>";
           mt->file_ = tempFile;
+          mt->order = k;
         }
       }
     }

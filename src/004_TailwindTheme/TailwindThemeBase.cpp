@@ -24,6 +24,7 @@
 #include <Wt/WTabWidget.h>
 #include <Wt/WTimeEdit.h>
 #include <Wt/WLineEdit.h>
+#include <Wt/WComboBox.h>
 
 #include "Wt/DomElement.h"
 #include <Wt/WRandom.h>
@@ -270,7 +271,16 @@ void TailwindThemeBase::apply(Wt::WWidget *widget, Wt::DomElement& element, int 
       }
     }
     break;
-
+    case Wt::DomElementType::SELECT:
+    {
+      Wt::WComboBox *comboBox = dynamic_cast<Wt::WComboBox *>(widget);
+      if (comboBox) {
+        element.addPropertyWord(Wt::Property::Class, "shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline");
+        return;
+      }
+    }
+    break;
+    
   default:
     break;
   }

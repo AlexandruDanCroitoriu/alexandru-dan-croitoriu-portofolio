@@ -11,6 +11,7 @@ class MessageTemplate : public Wt::Dbo::Dbo<MessageTemplate>
 public:
   std::string messageId_;
   std::string templateXml_;
+  int order;
 
   Wt::Dbo::ptr<TemplateFile> file_;
 
@@ -19,6 +20,7 @@ public:
   {
     Wt::Dbo::field(a, messageId_, "message_id");
     Wt::Dbo::field(a, templateXml_, "template_xml");
+    Wt::Dbo::field(a, order, "order_index");
     Wt::Dbo::belongsTo(a, file_, "file");
   }
 };

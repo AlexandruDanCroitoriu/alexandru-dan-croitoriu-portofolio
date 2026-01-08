@@ -27,7 +27,10 @@ private:
 
     void createRenameTemplateDialog();
     void createRemoveTemplateDialog();
+    void createChangeFileDialog();
     void showPopup(const Wt::WMouseEvent& event);
+    void moveTemplateUp();
+    void moveTemplateDown();
     Wt::Signal<> changed_;
 };
 

@@ -446,6 +446,9 @@
   .w-\[35px\] {
     width: 35px;
   }
+  .w-\[100\%\] {
+    width: 100%;
+  }
   .w-\[calc\(100\%\+18px\)\] {
     width: calc(100% + 18px);
   }
@@ -906,6 +909,9 @@
   .tracking-wide {
     --tw-tracking: var(--tracking-wide);
     letter-spacing: var(--tracking-wide);
+  }
+  .text-black {
+    color: var(--color-black);
   }
   .text-blue-600 {
     color: var(--color-blue-600);

@@ -292,8 +292,14 @@ void Navigation::setupRoutes()
         return monacoTopic->createMonacoEditorDemo();
     };
     routes_["/components/wt-components"] = [wtComponentsGalery]() {
-        return wtComponentsGalery->createFormInputsDemo();
+        return wtComponentsGalery->createWtComponentsGalery();
     };
+    pathPatterns_.push_back({
+        std::regex("^/components/wt-components/(line-edit|textarea)$"),
+        [wtComponentsGalery](const std::smatch&) -> std::unique_ptr<Wt::WWidget> {
+            return wtComponentsGalery->createWtComponentsGalery();
+        }
+    });
     routes_["/account/settings"] = [userSettings]() {
         return userSettings->createSettingsPage();
     };
@@ -506,7 +512,11 @@ void Navigation::navigateTo(const std::string& rawPath)
                 contentsStack_->addWidget(std::move(newWidget));
             }
             contentsStack_->setCurrentWidget(widget);
-            markActive("");  // Don't highlight sidebar for dynamic paths
+            if (pathWithoutQuery.rfind("/components/wt-components/", 0) == 0) {
+                markActive("/components/wt-components");
+            } else {
+                markActive("");  // Don't highlight sidebar for other dynamic paths
+            }
             return;
         }
     }

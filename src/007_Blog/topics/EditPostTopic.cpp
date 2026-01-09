@@ -50,7 +50,7 @@ std::unique_ptr<Wt::WWidget> EditPostTopic::createEditPostPage()
   // Capture session and slug by value to avoid dangling references in deferred execution
   auto session = session_;
   auto slug = slug_;
-  return deferCreate([session, slug]()
+  return deferCreateTopicPage([session, slug]()
                      {
     EditPostTopic topic(session, slug);
     return topic.editPage(); });

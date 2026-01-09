@@ -14,7 +14,7 @@ CvPortofolioTopic::CvPortofolioTopic()
 
 std::unique_ptr<Wt::WWidget> CvPortofolioTopic::createCvPage()
 {
-    return deferCreate([this]() { return cvPage(); });
+    return deferCreateTopicPage([this]() { return cvPage(); });
 }
 
 std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()

@@ -160,5 +160,5 @@ std::unique_ptr<Wt::WWidget> MonacoTopic::monacoEditorDemo()
 std::unique_ptr<Wt::WWidget> MonacoTopic::createMonacoEditorDemo()
 {
     wApp->log("debug") << "MonacoTopic::createMonacoEditorDemo()";
-    return  deferCreate([this]() { return monacoEditorDemo(); } );
+    return  deferCreateTopicPage([this]() { return monacoEditorDemo(); } );
 }

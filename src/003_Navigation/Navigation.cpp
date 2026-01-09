@@ -98,7 +98,7 @@ void Navigation::setUI()
 
     // Create mobile menu toggle button
     menuToggleButton_ = contentsArea_->addNew<Wt::WPushButton>();
-    menuToggleButton_->addStyleClass("md:hidden fixed top-4 right-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-700 transition-colors");
+    menuToggleButton_->addStyleClass("lg:hidden fixed top-4 right-4 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-700 transition-colors");
     menuToggleButton_->setText("☰");
     menuToggleButton_->clicked().connect(this, &Navigation::toggleMenu);
 
@@ -156,11 +156,11 @@ void Navigation::setStyleV1()
     sidebar_->addStyleClass("w-64 p-2 bg-gray-800 text-white flex flex-col transition-all duration-300");
     sidebar_->addStyleClass("fixed inset-y-0 left-0 z-50");
     sidebar_->addStyleClass("h-[100svh] overflow-y-auto");
-    sidebar_->addStyleClass("transform md:transform-none transition-transform duration-300 ease-in-out");
-    sidebar_->addStyleClass("-translate-x-full md:translate-x-0");
+    sidebar_->addStyleClass("transform lg:transform-none transition-transform duration-300 ease-in-out");
+    sidebar_->addStyleClass("-translate-x-full lg:translate-x-0");
 
     // Main content area styling
-    contentsArea_->addStyleClass("flex-1 flex flex-col w-full md:ml-64");
+    contentsArea_->addStyleClass("flex-1 flex flex-col w-full lg:ml-64");
 
     // Mobile overlay styling
     contentsCover_->addStyleClass("fixed inset-0 bg-black/40 hidden z-40"); 

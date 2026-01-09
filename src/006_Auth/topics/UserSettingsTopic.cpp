@@ -16,7 +16,7 @@ UserSettingsTopic::UserSettingsTopic(std::shared_ptr<Session> session)
 std::unique_ptr<Wt::WWidget> UserSettingsTopic::createSettingsPage()
 {
     wApp->log("debug") << "UserSettingsTopic::createSettingsPage()";
-    return deferCreate([this]() { return settingsPage(); });
+    return deferCreateTopicPage([this]() { return settingsPage(); });
 }
 
 std::unique_ptr<Wt::WWidget> UserSettingsTopic::settingsPage()

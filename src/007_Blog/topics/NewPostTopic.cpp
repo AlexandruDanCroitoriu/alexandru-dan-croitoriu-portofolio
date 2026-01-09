@@ -31,7 +31,7 @@ NewPostTopic::NewPostTopic(std::shared_ptr<Session> session)
 std::unique_ptr<Wt::WWidget> NewPostTopic::createNewPostPage()
 {
   wApp->log("debug") << "NewPostTopic::createNewPostPage()";
-  return deferCreate([this]() { return newPostPage(); });
+  return deferCreateTopicPage([this]() { return newPostPage(); });
 }
 
 std::unique_ptr<Wt::WWidget> NewPostTopic::newPostPage()

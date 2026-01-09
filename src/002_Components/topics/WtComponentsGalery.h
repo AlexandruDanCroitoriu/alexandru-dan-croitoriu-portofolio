@@ -23,5 +23,5 @@ private:
 
     std::string makeIncludeLine(const std::string& header, const std::string& docUrl) const;
     std::string makeMethodCall(const std::string& object, const std::string& docUrl, const std::string& method,
-                               const std::string& args, const std::string& comment = "") const;
+                               const std::string& args, const std::string& inherited = "") const;
 };

@@ -13,8 +13,6 @@ public:
         : f_(f), loaded_(false)
     {
         wApp->log("debug") << "DeferredWidget::DeferredWidget(Function f)";
-        addStyleClass("deferred-widget max-h-[100svh] overflow-y-auto"); // used for debugging when checking the doom in the browser
-        addStyleClass("[&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-gray-500 [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full"); // custom scrollbar styles
     }
 
 protected:
@@ -34,8 +32,18 @@ private:
 };
 
 template <typename Function>
+std::unique_ptr<DeferredWidget<Function>> deferCreateTopicPage(Function f)
+{
+    wApp->log("debug") << "deferCreateTopicPage(Function f)";
+    auto defferdWidget = std::make_unique<DeferredWidget<Function>>(f);
+    defferdWidget->addStyleClass("deferred-widget max-h-[100svh] overflow-y-auto"); // used for debugging when checking the doom in the browser
+    defferdWidget->addStyleClass("[&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-gray-500 [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full"); // custom scrollbar styles
+    return defferdWidget;
+}
+template <typename Function>
 std::unique_ptr<DeferredWidget<Function>> deferCreate(Function f)
 {
     wApp->log("debug") << "deferCreate(Function f)";
-    return std::make_unique<DeferredWidget<Function>>(f);
+    auto deferredWidget = std::make_unique<DeferredWidget<Function>>(f);
+    return deferredWidget;
 }

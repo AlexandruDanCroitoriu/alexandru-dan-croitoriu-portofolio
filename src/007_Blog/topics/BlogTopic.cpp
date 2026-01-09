@@ -16,7 +16,7 @@ BlogTopic::BlogTopic(std::shared_ptr<Session> session)
 std::unique_ptr<Wt::WWidget> BlogTopic::createBlogPage()
 {
   wApp->log("debug") << "BlogTopic::createBlogPage()";
-  return deferCreate([this]() { return blogPage(); });
+  return deferCreateTopicPage([this]() { return blogPage(); });
 }
 
 std::unique_ptr<Wt::WWidget> BlogTopic::blogPage()

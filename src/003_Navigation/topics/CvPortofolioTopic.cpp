@@ -5,7 +5,10 @@
 #include <Wt/WContainerWidget.h>
 #include <Wt/WRadioButton.h>
 #include <Wt/WButtonGroup.h>
+#include <Wt/WImage.h>
 #include <Wt/WApplication.h>
+#include <Wt/WAnchor.h>
+#include <Wt/WLink.h>
 
 CvPortofolioTopic::CvPortofolioTopic()
 {
@@ -21,7 +24,7 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
 {
     wApp->log("debug") << "CvPortofolioTopic::cvPage()";
     auto container = std::make_unique<Wt::WContainerWidget>();
-    container->addStyleClass("w-full container mx-auto space-y-2 p-6");
+    container->addStyleClass("w-full max-w-5xl mx-auto space-y-2 p-6");
 
     // Title
     auto title = container->addNew<Wt::WText>("<h2 class='text-3xl font-bold text-gray-800 mb-4'>CV & Portfolio</h2>");
@@ -51,9 +54,9 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     codingCvRadio->addStyleClass("[&>input]:checked:[&~span]:bg-gray-700");
 
 
-    auto gridContainer = container->addNew<Wt::WContainerWidget>();
+    auto sectionsWrapper = container->addNew<Wt::WContainerWidget>();
 
-    std::string gridCellStyle = "opacity-0 transition-opacity duration-700 ease-in-out ";
+    std::string gridCellStyle = "transition-opacity duration-700 ease-in-out ";
     gridCellStyle += "bg-green-300 rounded-md shadow-md w-full h-60 ";
     Wt::WString jsFunc =
     R"(
@@ -81,22 +84,57 @@ std::unique_ptr<Wt::WWidget> CvPortofolioTopic::cvPage()
     });
     )";
 
+    // Growndswell Details Block
+    {
+    auto groundswellDetails = sectionsWrapper->addNew<Wt::WContainerWidget>();
+    groundswellDetails->addStyleClass("rounded-md shadow-md w-full p-6 bg-white relative");
+    auto groundsugroundswellellSkillRoleWrapper = groundswellDetails->addNew<Wt::WContainerWidget>();
+    groundsugroundswellellSkillRoleWrapper->addStyleClass("flex items-center justify-between flex-wrap");
+    auto growndswellRolesWrapper = groundsugroundswellellSkillRoleWrapper->addNew<Wt::WContainerWidget>();
+    growndswellRolesWrapper->addStyleClass("flex items-start flex-wrap space-x-6 space-y-2");
+    auto growndswellSkillsWrapper = groundsugroundswellellSkillRoleWrapper->addNew<Wt::WContainerWidget>();
+    growndswellSkillsWrapper->addStyleClass("flex items-start flex-wrap space-x-2 space-y-2");
+
+    auto etlDeveloperRole = growndswellRolesWrapper->addNew<Wt::WText>(
+        "<div class='text-2xl font-bold text-gray-800'>ETL Developer</div>"
+        "<div class='text-sm font-semibold text-gray-600'>Informatica PowerCenter</div>"
+    );
+    etlDeveloperRole->setTextFormat(Wt::TextFormat::XHTML);
+
+    auto softwareDeveloperRole = growndswellRolesWrapper->addNew<Wt::WText>(
+        "<div class='text-2xl font-bold text-gray-800'>Software Developer</div>"
+        "<div class='text-sm font-semibold text-gray-600'>C++17 / Wt / Wt::Dbo / Ice </div>"
+    );
+
+
+    auto informaticaLogo = growndswellSkillsWrapper->addNew<Wt::WImage>("static/icons/informatica-logo.png");
+    informaticaLogo->setStyleClass("h-10 border border-gray-300 rounded-md hover:shadow-lg hover:border-gray-400 transition-all hover:bg-gray-100 p-1");
+
+    auto cppLogo = growndswellSkillsWrapper->addNew<Wt::WImage>("static/icons/cpp-logo.png");
+    cppLogo->setStyleClass("h-10 border border-gray-300 rounded-md hover:shadow-lg hover:border-gray-400 transition-all hover:bg-gray-300 p-1");
+    
+    }
+
+
+    
+    
     for ( int i = 0; i < 10; ++i )
     {
-        auto block = gridContainer->addNew<Wt::WContainerWidget>();
+        auto block = sectionsWrapper->addNew<Wt::WContainerWidget>();
         block->addStyleClass(gridCellStyle);
         // jsFunc += "observer.observe(document.getElementById('" + block->id() + "'));";
+        jsFunc += block->jsRef() + ".classList.add('opacity-0');"; // Initial state
         jsFunc += "observer.observe(" + block->jsRef() + ");";
         // jsFunc += "console.log(" + block->jsRef() + ");";
     }
 
-    gridContainer->doJavaScript(jsFunc.toUTF8());
+    sectionsWrapper->doJavaScript(jsFunc.toUTF8());
     
-    buttonGroup->checkedChanged().connect([gridContainer, codingCvRadio, allCvRadio](Wt::WRadioButton* selectedRadioButton) {
+    buttonGroup->checkedChanged().connect([sectionsWrapper, codingCvRadio, allCvRadio](Wt::WRadioButton* selectedRadioButton) {
         if (codingCvRadio == selectedRadioButton) {
-            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 1fr)]");
+            sectionsWrapper->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 1fr)]");
         } else if (allCvRadio == selectedRadioButton) {
-            gridContainer->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 2fr)]");
+            sectionsWrapper->setStyleClass("grid gap-4 grid-cols-[repeat(auto-fit, 2fr)]");
         }else {
             wApp->log("error") << "CvPortofolioTopic::cvPage() - Unknown radio button selected";
         }

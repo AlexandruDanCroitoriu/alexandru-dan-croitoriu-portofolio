@@ -11,6 +11,8 @@
 
 namespace Stylus {
 
+    class TemplatesManager;
+
 class Stylus : public Wt::WDialog
 {
 public:
@@ -34,6 +36,8 @@ private:
     Wt::WContainerWidget* tailwind_files_wrapper_;
     Wt::WContainerWidget* images_files_wrapper_;
     Wt::WContainerWidget* settings_wrapper_;
+
+    TemplatesManager* templates_manager_;
 
     Wt::WMenuItem* xml_menu_item_;
     Wt::WMenuItem* css_menu_item_;

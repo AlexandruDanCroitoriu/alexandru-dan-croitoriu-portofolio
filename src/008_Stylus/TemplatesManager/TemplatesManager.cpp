@@ -1,13 +1,14 @@
 #include "008_Stylus/TemplatesManager/TemplatesManager.h"
-#include "008_Stylus/TemplatesManager/RootNode.h"
-#include "008_Stylus/TemplatesManager/FolderNode.h"
-#include "008_Stylus/TemplatesManager/FileNode.h"
-#include "008_Stylus/TemplatesManager/TemplateNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/RootNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/FolderNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/FileNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/TemplateNode.h"
 #include "008_Stylus/StylusSession.h"
 #include "008_Stylus/Tables/TemplateFolder.h"
 #include "008_Stylus/Tables/TemplateFile.h"
 #include "008_Stylus/Tables/MessageTemplate.h"
-#include "008_Stylus/TemplatesManager/TempView.h"
+#include "008_Stylus/TemplatesManager/PreviewWidgets/TempView.h"
+#include "008_Stylus/TemplatesManager/PreviewWidgets/XmlBrain.h"
 
 #include <Wt/Dbo/Transaction.h>
 #include <Wt/WApplication.h>
@@ -27,14 +28,13 @@ TemplatesManager::TemplatesManager(StylusSession& session)
     
     auto treeWrapper = addNew<Wt::WContainerWidget>();
     treeWrapper->setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
-
     
     tree_ = treeWrapper->addWidget(std::make_unique<Wt::WTree>());
     tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)]");
     tree_->setSelectionMode(Wt::SelectionMode::Single);
 
     auto contentWrapper_ = addNew<Wt::WContainerWidget>();
-    contentWrapper_->setStyleClass("h-[100svh] overflow-auto p-4 grow fle");
+    contentWrapper_->setStyleClass("h-[100svh] overflow-auto p-4 grow flex flex-col items-stretch space-y-4");
     // Assign to member for later rendering
     this->contentWrapper_ = contentWrapper_;
 
@@ -162,6 +162,7 @@ void TemplatesManager::populateTree()
     }
 
     t.commit();
+    renderSelection();
 }
 
 
@@ -172,7 +173,8 @@ void TemplatesManager::renderSelection()
 
     // Clear previous content
     contentWrapper_->clear();
-
+    tempViews_.clear();
+    
     Wt::Dbo::Transaction t(session_);
 
     switch (selectedKind_)
@@ -187,7 +189,9 @@ void TemplatesManager::renderSelection()
             .resultList();
         for (auto tmpl : tmplList)
         {
-            contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+            auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+            tempView->setViewMode(TemplateViewMode::Editor);
+            tempViews_.push_back(tempView);
         }
         break;
     }
@@ -201,7 +205,9 @@ void TemplatesManager::renderSelection()
             .resultList();
         for (auto tmpl : orderedTemplates)
         {
-            contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+            auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+            tempView->setViewMode(TemplateViewMode::Editor);
+            tempViews_.push_back(tempView);
         }
         break;
     }
@@ -222,7 +228,9 @@ void TemplatesManager::renderSelection()
                 .resultList();
             for (auto tmpl : orderedTemplates)
             {
-                contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+                auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session_, tmpl));
+                tempView->setViewMode(TemplateViewMode::Editor);
+                tempViews_.push_back(tempView);
             }
         }
         break;
@@ -234,5 +242,15 @@ void TemplatesManager::renderSelection()
 
     t.commit();
 }
+
+void TemplatesManager::keyWentDown(Wt::WKeyEvent e)
+{
+    // for(auto tempView : tempViews_)
+    // {
+    //     if(tempView->xmlBrain_->selectedNode_)
+    //         tempView->keyWentDown(e);
+    // }
+}
+
 
 }

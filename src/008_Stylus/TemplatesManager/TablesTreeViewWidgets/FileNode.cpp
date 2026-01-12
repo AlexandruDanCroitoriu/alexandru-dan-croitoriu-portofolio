@@ -1,4 +1,4 @@
-#include "008_Stylus/TemplatesManager/FileNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/FileNode.h"
 #include "008_Stylus/StylusSession.h"
 #include "008_Stylus/Tables/TemplateFile.h"
 #include "008_Stylus/Tables/MessageTemplate.h"

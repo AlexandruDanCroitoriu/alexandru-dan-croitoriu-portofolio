@@ -74,7 +74,18 @@ void StylusSession::createInitialData()
           auto messageTemp = add(std::make_unique<MessageTemplate>());
           auto mt = messageTemp.modify();
           mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
-          mt->templateXml_ = "<div>Template " + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k) + "</div>";
+            mt->templateXml_ = 
+R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
+  <div class="px-4 py-5 sm:px-6">
+    <div>Card Header</div>
+  </div>
+  <div class="px-4 py-5 sm:p-6">
+    <div>Card Content</div>
+  </div>
+  <div class="px-4 py-4 sm:px-6">
+    <div>Card Footer</div>
+  </div>
+</div>)";
           mt->file_ = tempFile;
           mt->order = k;
         }

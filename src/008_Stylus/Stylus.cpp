@@ -83,7 +83,7 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> images_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
 
-    xml_files_wrapper->addNew<TemplatesManager>(*session_);
+    templates_manager_ = xml_files_wrapper->addNew<TemplatesManager>(*session_);
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();
@@ -119,6 +119,8 @@ void Stylus::setupContent()
 void Stylus::keyWentDown(Wt::WKeyEvent e)
 {
     wApp->log("debug") << "Stylus::keyWentDown(Wt::WKeyEvent e)";
+    // templates_manager_->keyWentDown(e);
+
     if (e.modifiers().test(Wt::KeyboardModifier::Alt)) {
         if (e.key() == Wt::Key::Q) {
             if (isHidden()) {

@@ -97,13 +97,15 @@ set(SOURCES
     ${SOURCE_DIR}/008_Stylus/Tables/MessageTemplate.cpp
     ${SOURCE_DIR}/008_Stylus/Tables/TemplateFile.cpp
     ${SOURCE_DIR}/008_Stylus/Tables/TemplateFolder.cpp
-    ${SOURCE_DIR}/008_Stylus/Utils/XmlBrain.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/RootNode.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/FolderNode.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/FileNode.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplateNode.cpp
     ${SOURCE_DIR}/008_Stylus/TemplatesManager/TemplatesManager.cpp
-    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TempView.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TablesTreeViewWidgets/RootNode.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TablesTreeViewWidgets/FolderNode.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TablesTreeViewWidgets/FileNode.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/TablesTreeViewWidgets/TemplateNode.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/PreviewWidgets/XmlBrain.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/PreviewWidgets/TempView.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/PreviewWidgets/XMLTreeNode.cpp
+    ${SOURCE_DIR}/008_Stylus/TemplatesManager/PreviewWidgets/XMLElemNode.cpp
 
 )
 

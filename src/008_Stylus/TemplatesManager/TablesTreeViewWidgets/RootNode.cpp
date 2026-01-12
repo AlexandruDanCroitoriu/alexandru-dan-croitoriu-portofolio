@@ -1,4 +1,4 @@
-#include "008_Stylus/TemplatesManager/RootNode.h"
+#include "008_Stylus/TemplatesManager/TablesTreeViewWidgets/RootNode.h"
 
 #include <Wt/WApplication.h>
 #include <Wt/WDialog.h>

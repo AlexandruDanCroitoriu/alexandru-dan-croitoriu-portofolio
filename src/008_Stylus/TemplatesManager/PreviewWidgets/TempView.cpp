@@ -21,7 +21,7 @@ namespace Stylus
     {
         wApp->log("debug") << "TempView::TempView(StylusSession& session)";
         // WTemplate does not accept TextFormat in constructor; set it separately
-        setStyleClass("border border-gray-600 rounded-md p-4 bg-gray-800 text-white flex");
+        setStyleClass("border border-gray-600 rounded-md p-4 flex min-w-fit");
         leftArea_ = addNew<Wt::WContainerWidget>();
         leftArea_->setStyleClass("pr-2 border-r border-gray-600");
         mainArea_ = addNew<Wt::WContainerWidget>();

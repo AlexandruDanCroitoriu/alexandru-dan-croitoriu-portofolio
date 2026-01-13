@@ -29,7 +29,7 @@ void Stylus::initializeDialog()
     wApp->log("debug") << "Stylus::initializeDialog()";
     setOffsets(0, Wt::Side::Top | Wt::Side::Bottom | Wt::Side::Left | Wt::Side::Right);
     titleBar()->children()[0]->removeFromParent();
-    setStyleClass("!border-0 overflow-auto !bg-gray-800 text-white");
+    setStyleClass("!border-0 overflow-auto !bg-gray-950 text-white");
     titleBar()->hide();
     titleBar()->setStyleClass("p-0 flex items-center overflow-x-visible h-[40px]");
     contents()->setStyleClass("h-[100svh] overflow-y-auto overflow-x-visible flex");

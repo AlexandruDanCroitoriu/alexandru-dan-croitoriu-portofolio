@@ -10,7 +10,7 @@ namespace Stylus
     XMLElemNode::XMLElemNode(std::shared_ptr<XmlBrain> xmlBrain, tinyxml2::XMLNode *node)
         : xmlBrain_(xmlBrain), node_(node)
     {
-        setStyleClass("ring-1 ring-transparent");
+        setStyleClass("ring ring-transparent");
         mouseWentOver().connect(this, [=]() {
             toggleStyleClass("!ring-green-700", true);
         });
@@ -28,6 +28,7 @@ namespace Stylus
         if(xmlBrain_->selectedNode_ && node_ && xmlBrain_->selectedNode_ == node_)
         {
             addStyleClass("!ring-green-500");
+            setAttributeValue("style", "zoom: 1.1;");
         }
         if(!node_) return;
 

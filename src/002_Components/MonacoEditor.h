@@ -50,12 +50,6 @@ public:
     void textSaved();
     
     /**
-     * @brief Loads content from a file into the editor
-     * @param resourcePath Path to the file to load
-     */
-    void setEditorText(std::string resourcePath);
-    
-    /**
      * @brief Sets editor content directly via JavaScript (avoids resource registration)
      * @param content The text content to set in the editor
      */
@@ -67,9 +61,10 @@ public:
     void saveFile();
     
     /**
-     * @brief Toggles line wrapping in the editor
+     * @brief Sets line wrapping in the editor
+     * @param wrap True to enable line wrapping, false to disable
      */
-    void toggleLineWrap();
+    void setLineWrap(bool wrap);
     
     /**
      * @brief Toggles the minimap display in the editor

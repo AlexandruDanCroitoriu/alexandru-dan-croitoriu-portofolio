@@ -15,7 +15,7 @@ namespace Stylus
         contentWrapper_ = addWidget(std::make_unique<Wt::WContainerWidget>());
 
         labelWrapper_->setStyleClass("flex space-x-2 truncate rounded-md mr-[3px] cursor-pointer overflow-visible ring-1 ring-transparent");
-        contentWrapper_->setStyleClass("flex flex-col ml-[10px] rounded-md");
+        contentWrapper_->setStyleClass("flex flex-col ml-3 rounded-md");
 
         if(node_){
             if(node_->ToElement()){

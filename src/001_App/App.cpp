@@ -13,7 +13,7 @@ App::App(const Wt::WEnvironment& env)
     : Wt::WApplication(env)
 {
     Wt::log("debug") << "App::App(const Wt::WEnvironment& env)";
-    
+    setHtmlClass("dark");
     // Initialize database session
     session_ = std::make_shared<Session>("../../dbo/portofolio.db");
     

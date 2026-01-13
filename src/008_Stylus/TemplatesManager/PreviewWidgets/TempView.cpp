@@ -27,9 +27,9 @@ namespace Stylus
         auto settingsArea = addNew<Wt::WContainerWidget>();
         settingsArea->setStyleClass("flex flex-col p-1 border-r border-gray-600");
         leftArea_ = addNew<Wt::WContainerWidget>();
-        leftArea_->setStyleClass("pr-2 border-r border-gray-600");
+        leftArea_->setStyleClass("pr-2 border-r border-gray-600 min-w-[240px]");
         mainArea_ = addNew<Wt::WContainerWidget>();
-        mainArea_->setStyleClass("grow px-4 py-2");
+        mainArea_->setStyleClass("px-4 py-2");
         // rightArea_ = addNew<Wt::WContainerWidget>();
         // rightArea_->setStyleClass("pl-2 border-l border-gray-600");
 
@@ -47,7 +47,8 @@ namespace Stylus
             }
         });
         globalKeyConnection_ = wApp->globalKeyWentDown().connect([this](Wt::WKeyEvent e) {
-            keyWentDown(e);
+            if(messageTemplate_->viewMode_ == ViewMode::Editor || xmlBrain_->selectedNode_)
+                keyWentDown(e);
         });
         
         auto switchViewMoode = settingsArea->addNew<Wt::WIconPair>(
@@ -96,20 +97,21 @@ namespace Stylus
         leftArea_->clear();
         mainArea_->clear();
         // rightArea_->clear();
+        auto mainWrapper = mainArea_->addNew<Wt::WContainerWidget>();
 
         
         
         if(messageTemplate_->viewMode_ == ViewMode::Template)
         {
             auto monaco = leftArea_->addNew<MonacoEditor>("xml");
-            monaco->setStyleClass("h-full w-90");
+            monaco->setStyleClass("h-full w-full");
             monaco->setContent(messageTemplate_->templateXml_);
             monaco->setLineNumber(false);
-            monaco->toggleLineWrap();
-            auto temp = mainArea_->addNew<Wt::WTemplate>(Wt::WString::fromUTF8(messageTemplate_->templateXml_));
+            monaco->setLineWrap(false);
+            auto temp = mainWrapper->addNew<Wt::WTemplate>(Wt::WString::fromUTF8(messageTemplate_->templateXml_));
         }else {
             leftArea_->addNew<XMLTreeNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
-            auto elem_node = mainArea_->addNew<XMLElemNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
+            auto elem_node = mainWrapper->addNew<XMLElemNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
         }
     }
 

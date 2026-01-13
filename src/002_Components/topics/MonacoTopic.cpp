@@ -99,7 +99,7 @@ std::unique_ptr<Wt::WWidget> MonacoTopic::monacoEditorDemo()
     auto lineWrapOn = std::make_shared<bool>(true);
     lineWrapBtn->clicked().connect([lineWrapBtn, editor, lineWrapOn]() {
         *lineWrapOn = !*lineWrapOn;
-        editor->toggleLineWrap();
+        editor->setLineWrap(*lineWrapOn);
         lineWrapBtn->setText(*lineWrapOn ? "↳ Line Wrap" : "→ No Wrap");
     });
 

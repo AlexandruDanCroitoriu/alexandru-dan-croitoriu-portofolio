@@ -14,12 +14,12 @@
 StylusSession::StylusSession(const std::string &sqliteDb, bool dev)
 {
   Wt::log("debug") << "StylusSession::StylusSession()";
-  
+
   // Stylus always uses SQLite
   auto sqliteConnection = std::make_unique<Wt::Dbo::backend::Sqlite3>(sqliteDb);
-  #ifdef DEBUG
+#ifdef DEBUG
   sqliteConnection->setProperty("show-queries", "true");
-  #endif
+#endif
   Wt::log("info") << "Using SQLite database for Stylus: " << sqliteDb;
 
   setConnection(std::move(sqliteConnection));
@@ -28,59 +28,69 @@ StylusSession::StylusSession(const std::string &sqliteDb, bool dev)
   mapClass<TemplateFolder>("template_folder");
   mapClass<MessageTemplate>("message_template");
 
-  try {
-    if (!created_) {
+  try
+  {
+    if (!created_)
+    {
       createTables();
       created_ = true;
       Wt::log("info") << "Created Stylus database tables.";
-    } else {
+    }
+    else
+    {
       Wt::log("info") << "Using existing Stylus database tables";
     }
-  } catch (Wt::Dbo::Exception& e) {
+  }
+  catch (Wt::Dbo::Exception &e)
+  {
     Wt::log("info") << "Using existing Stylus database tables";
   }
 
-  if(dev)
+  if (dev)
     createInitialDataDev();
-  else 
+  else
     createInitialDataProd();
 }
 
 void StylusSession::createInitialDataDev()
 {
   Wt::log("debug") << "StylusSession::createInitialData()";
-  
+
   Wt::Dbo::Transaction t(*this);
 
   // Check if any folders already exist
   auto existingFolders = find<TemplateFolder>().resultList();
 
-  if (existingFolders.empty()) {
+  if (existingFolders.empty())
+  {
     // Create 3 default folders with files and templates
-    for (int i = 1; i <= 5; ++i) {
+    for (int i = 1; i <= 5; ++i)
+    {
       auto folder = add(std::make_unique<TemplateFolder>());
       auto f = folder.modify();
       f->folderName_ = "Templates Folder " + std::to_string(i);
       f->expanded_ = true;
-      f->order = getNextFolderOrder();  // Use helper method for consistent ordering
+      f->order = getNextFolderOrder(); // Use helper method for consistent ordering
 
       // Create 3 template files per folder
-      for (int j = 1; j <= 3; ++j) {
+      for (int j = 1; j <= 3; ++j)
+      {
         auto tempFile = add(std::make_unique<TemplateFile>());
         auto tf = tempFile.modify();
         tf->fileName_ = "file-" + std::to_string(i) + "-" + std::to_string(j);
         tf->folder_ = folder;
         tf->expanded_ = true;
-        tf->order = j;  // Keep initial files ordered 1..n inside each folder
+        tf->order = j; // Keep initial files ordered 1..n inside each folder
 
         // Create 3 message templates per file
-        for (int k = 1; k <= 3; ++k) {
+        for (int k = 1; k <= 3; ++k)
+        {
           auto messageTemp = add(std::make_unique<MessageTemplate>());
           auto mt = messageTemp.modify();
           mt->viewMode_ = ViewMode::Template;
           mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
-            mt->templateXml_ = 
-R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
+          mt->templateXml_ =
+              R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
   <div class="px-4 py-5 sm:px-6">
     <div>Card Header</div>
   </div>
@@ -100,19 +110,19 @@ R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/5
     Wt::log("info") << "Created initial Stylus templates and folders.";
     t.commit();
   }
-
 }
 
 void StylusSession::createInitialDataProd()
 {
   Wt::log("debug") << "StylusSession::createInitialDataProd()";
-  
+
   Wt::Dbo::Transaction t(*this);
 
   // Check if any folders already exist
   auto existingFolders = find<TemplateFolder>().resultList();
 
-  if (existingFolders.empty()) {
+  if (existingFolders.empty())
+  {
     auto folder = add(std::make_unique<TemplateFolder>());
     auto f = folder.modify();
     f->folderName_ = "Tailwind Plus Templates";
@@ -124,36 +134,94 @@ void StylusSession::createInitialDataProd()
     tf->folder_ = folder;
     tf->expanded_ = true;
     tf->order = 1;
-    auto messageTemp = add(std::make_unique<MessageTemplate>());
-    auto mt = messageTemp.modify();
+
+    auto cardWithHeaderAndFooter = add(std::make_unique<MessageTemplate>());
+    auto mt4 = cardWithHeaderAndFooter.modify();
+    mt4->viewMode_ = ViewMode::Template;
+    mt4->messageId_ = "card-with-header-and-footer";
+    mt4->templateXml_ =
+R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
+  <div class="px-4 py-5 sm:px-6">
+    <div class="relative min-h-10 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+  <div class="px-4 py-5 sm:p-6">
+    <div class="relative min-h-40 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+  <div class="px-4 py-4 sm:px-6"> 
+    <div class="relative min-h-10 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+</div>
+)";
+    mt4->file_ = tempFile;
+    mt4->order = 4;
+
+    auto cardWithFooter = add(std::make_unique<MessageTemplate>());
+    auto mt3 = cardWithFooter.modify();
+    mt3->viewMode_ = ViewMode::Template;
+    mt3->messageId_ = "card-with-footer";
+    mt3->templateXml_ =
+R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
+  <div class="px-4 py-5 sm:p-6">
+    <div class="relative min-h-40 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+  <div class="px-4 py-4 sm:px-6">
+    <div class="relative min-h-10 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+</div>
+)";
+    mt3->file_ = tempFile;
+    mt3->order = 3;
+
+    auto cardWithHeader = add(std::make_unique<MessageTemplate>());
+    auto mt2 = cardWithHeader.modify();
+    mt2->viewMode_ = ViewMode::Template;
+    mt2->messageId_ = "card-with-header";
+    mt2->templateXml_ =
+R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
+  <div class="px-4 py-5 sm:px-6">
+    <div class="relative min-h-10 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+  <div class="px-4 py-5 sm:p-6">
+    <div class="relative min-h-40 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
+  </div>
+</div>)";
+    mt2->file_ = tempFile;
+    mt2->order = 2;
+
+    auto basicCard = add(std::make_unique<MessageTemplate>());
+    auto mt = basicCard.modify();
     mt->viewMode_ = ViewMode::Template;
     mt->messageId_ = "basic-card";
-    mt->templateXml_ = 
-R"(<div class="overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
+    mt->templateXml_ =
+        R"(<div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
   <div class="px-4 py-5 sm:p-6">
+    <div class="relative min-h-40 min-w-96 rounded border border-dashed border-white/10 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.10)_0_1px,transparent_1px_6px)]"></div>
   </div>
 </div>)";
     mt->file_ = tempFile;
     mt->order = 1;
+    
+    Wt::log("info") << "Created initial Stylus production templates and folders.";
   }
   t.commit();
 }
 
-
 int StylusSession::getNextFolderOrder()
 {
   Wt::log("debug") << "StylusSession::getNextFolderOrder()";
-  
+
   // Get the maximum order value from all existing folders
   // If no folders exist, start with 1
   auto allFolders = find<TemplateFolder>().resultList();
-  
+
   int maxOrder = 0;
-  for (const auto& folder : allFolders) {
-    if (folder->order > maxOrder) {
+  for (const auto &folder : allFolders)
+  {
+    if (folder->order > maxOrder)
+    {
       maxOrder = folder->order;
     }
   }
-  
+
   return maxOrder + 1;
 }

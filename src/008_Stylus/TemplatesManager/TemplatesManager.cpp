@@ -36,11 +36,13 @@ namespace Stylus
         treeWrapper->setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
 
         auto settingsArea = treeWrapper->addNew<Wt::WContainerWidget>();
-        settingsArea->setStyleClass("flex items-center border-b border-gray-600 p-1");
+        settingsArea->setStyleClass("flex items-center border-b border-gray-600 p-1 space-x-2");
 
         auto buttonGroup = std::make_shared<Wt::WButtonGroup>();
         auto devRadio = settingsArea->addNew<Wt::WRadioButton>("Dev DBO");
+        devRadio->setStyleClass("[&>input]:hidden [&>span]:px-1 [&>span]:border [&>span]:border-gray-600 [&>span]:rounded-md [&>input:checked]:[&~span]:bg-gray-700");
         auto prodRadio = settingsArea->addNew<Wt::WRadioButton>("Prod DBO");
+        prodRadio->setStyleClass("[&>input]:hidden [&>span]:px-1 [&>span]:border [&>span]:border-gray-600 [&>span]:rounded-md [&>input:checked]:[&~span]:bg-gray-700");
         buttonGroup->addButton(devRadio);
         buttonGroup->addButton(prodRadio);
 
@@ -263,12 +265,17 @@ namespace Stylus
         // Clear previous content
         contentWrapper_->clear();
 
-
-        for (auto tmpl : messageTemplate)
+        if(messageTemplate.size() == 1)
         {
-            auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, tmpl));
-            // tempView->setViewMode(ViewMode::Editor);
-            // tempViews_.push_back(tempView);
+            auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, messageTemplate[0]));
+            tempView->addStyleClass("h-full");
+        }else {
+            for (auto tmpl : messageTemplate)
+            {
+                auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, tmpl));
+                // tempView->setViewMode(ViewMode::Editor);
+                // tempViews_.push_back(tempView);
+            }
         }
 
         // std::shared_ptr<StylusSession> session;

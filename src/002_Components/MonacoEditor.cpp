@@ -2,8 +2,46 @@
 #include <Wt/WApplication.h>
 #include <Wt/WRandom.h>
 #include <Wt/WLogger.h>
+#include <Wt/WResource.h>
+#include <Wt/Http/Request.h>
+#include <Wt/Http/Response.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <Wt/WServer.h>
+
+/**
+ * @brief Custom WResource for serving string content
+ * 
+ * This resource serves dynamic string content (e.g., editor text) via HTTP.
+ * It handles requests by returning the stored content with appropriate MIME type.
+ */
+class StringContentResource : public Wt::WResource {
+public:
+    /**
+     * @brief Constructor
+     * @param content The string content to serve
+     * @param mimeType MIME type for the content (default: text/plain)
+     */
+    StringContentResource(const std::string& content, const std::string& mimeType = "text/plain; charset=utf-8")
+        : content_(content), mimeType_(mimeType) {
+    }
+    
+    /**
+     * @brief Handles HTTP requests for this resource
+     * @param request The HTTP request
+     * @param response The HTTP response to populate
+     */
+    void handleRequest(const Wt::Http::Request& request, Wt::Http::Response& response) override {
+        response.setMimeType(mimeType_);
+        response.out() << content_;
+    }
+
+private:
+    std::string content_;   ///< The content to serve
+    std::string mimeType_;  ///< The MIME type for the content
+};
+#include <filesystem>
 
 MonacoEditor::MonacoEditor(std::string language)
     : js_signal_text_changed_(this, "editorTextChanged"),
@@ -30,8 +68,8 @@ MonacoEditor::MonacoEditor(std::string language)
             window.)" + editor_js_var_name_ + R"( = monaco.editor.create(document.getElementById(')" + id() + R"('), {
                 language: ')" + language + R"(',
                 theme: 'vs-dark',
-                wordWrap: 'on',
-                lineNumbers: 'on',
+                // wordWrap: 'on',
+                // lineNumbers: 'on',
                 tabSize: 4,
                 insertSpaces: false,
                 detectIndentation: false,
@@ -144,91 +182,68 @@ bool MonacoEditor::unsavedChanges()
     return true;
 }
 
-void MonacoEditor::setEditorText(std::string resourcePath)
-{
-    wApp->log("debug") << "MonacoEditor::setEditorText(std::string resourcePath): " << resourcePath;
-    resetLayout();
-    auto resourcePathUrl = resourcePath + "?v=" + Wt::WRandom::generateId();
-    doJavaScript(
-        R"(
-            setTimeout(function() {
-                if(!window.)" + editor_js_var_name_ + R"() {
-                    setTimeout(function() {
-                        console.log("Setting editor text to: )" + resourcePathUrl + R"(");
-                        if (window.)" + editor_js_var_name_ + R"() {
-                            fetch(')" + resourcePathUrl + R"(')
-                            .then(response => response.text())
-                            .then(css => {
-                                window.)" + editor_js_var_name_ + R"(_current_text = css;
-                                window.)" + editor_js_var_name_ + R"(.setValue(css);
-                            });
-                        } else {
-                            console.error("Editor instance is stil l not initialized.");
-                        }
-                    }, 2000);
-                    return;
-                }
-                console.log("Setting editor text to: )" + resourcePathUrl + R"(");
-                fetch(')" + resourcePathUrl + R"(')
-                    .then(response => response.text())
-                    .then(css => {
-                        window.)" + editor_js_var_name_ + R"(_current_text = css;
-                        window.)" + editor_js_var_name_ + R"(.setValue(css);
-                    });
-            }, 10); // Delay to ensure the editor is ready
-        )");
-    current_text_ = getFileText(resourcePath);
-    unsaved_text_ = current_text_;
-    selected_file_path_ = resourcePath;
-    resetLayout();
-}
-
 void MonacoEditor::resetLayout()
 {
     wApp->log("debug") << "MonacoEditor::resetLayout()";
-    doJavaScript("setTimeout(function() { window." + editor_js_var_name_ + ".layout() }, 200);");
+    doJavaScript(
+        R"(
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 20;
+                var doLayout = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        ed.layout();
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(doLayout, 200);
+                    }
+                };
+                doLayout();
+            })();
+        )");
 }
 
 void MonacoEditor::setContent(const std::string& content)
 {
     wApp->log("debug") << "MonacoEditor::setContent(const std::string& content): " << content;
-    // Set content directly via JavaScript without using the resource system
-    // This avoids resource path conflicts when editing the same post multiple times
-    std::string escapedContent = content;
     
-    // Escape backslashes and quotes for JavaScript string
-    size_t pos = 0;
-    while ((pos = escapedContent.find('\\', pos)) != std::string::npos) {
-        escapedContent.replace(pos, 1, "\\\\");
-        pos += 2;
-    }
-    pos = 0;
-    while ((pos = escapedContent.find('"', pos)) != std::string::npos) {
-        escapedContent.replace(pos, 1, "\\\"");
-        pos += 2;
-    }
-    pos = 0;
-    while ((pos = escapedContent.find('\n', pos)) != std::string::npos) {
-        escapedContent.replace(pos, 1, "\\n");
-        pos += 2;
-    }
-    pos = 0;
-    while ((pos = escapedContent.find('\r', pos)) != std::string::npos) {
-        escapedContent.replace(pos, 1, "\\r");
-        pos += 2;
-    }
+    // Create a WResource for serving the content
+    auto resource = std::make_shared<StringContentResource>(content);
+    
+    // Generate a unique path for this resource
+    std::string resourcePath = "/monaco_content/" + Wt::WRandom::generateId();
+    
+    // Register the resource with the server
+    Wt::WServer::instance()->addResource(resource, resourcePath);
+    
+    // Get the absolute URL for the resource
+    std::string resourceUrl = wApp->makeAbsoluteUrl(resourcePath);
     
     doJavaScript(
         R"(
-            setTimeout(function() {
-                if (window.)" + editor_js_var_name_ + R"() {
-                    var content = ")" + escapedContent + R"(";
-                    window.)" + editor_js_var_name_ + R"(_current_text = content;
-                    window.)" + editor_js_var_name_ + R"(.setValue(content);
-                } else {
-                    console.error("Editor instance )" + editor_js_var_name_ + R"( is not yet initialized");
-                }
-            }, 100);
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 20;
+                var setContent = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        fetch(')" + resourceUrl + R"(')
+                            .then(response => response.text())
+                            .then(contentData => {
+                                window.)" + editor_js_var_name_ + R"(_current_text = contentData;
+                                window.)" + editor_js_var_name_ + R"(.setValue(contentData);
+                            })
+                            .catch(error => console.error('Failed to load content:', error));
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(setContent, 200);
+                    } else {
+                        console.error("Editor instance )" + editor_js_var_name_ + R"( is not initialized after " + maxAttempts + " attempts");
+                    }
+                };
+                setContent();
+            })();
         )");
     
     current_text_ = content;
@@ -288,40 +303,69 @@ void MonacoEditor::saveFile()
     Wt::log("info") << "File path: " << selected_file_path_ << " saved successfully.";
 }
 
-void MonacoEditor::toggleLineWrap()
+void MonacoEditor::setLineWrap(bool wrap)
 {
-    wApp->log("debug") << "MonacoEditor::toggleLineWrap()";
-    doJavaScript(R"(
-        setTimeout(function() {
-            if (window.)" + editor_js_var_name_ + R"() {
-                const currentWordWrap = window.)" + editor_js_var_name_ + R"(.getOptions().get(monaco.editor.EditorOption.wordWrap);
-                const newWordWrap = currentWordWrap === 'off' ? 'on' : 'off';
-                window.)" + editor_js_var_name_ + R"(.updateOptions({ wordWrap: newWordWrap });
-            }
-        }, 20);
-    )");
+    wApp->log("debug") << "MonacoEditor::setLineWrap(bool wrap): " << (wrap ? "true" : "false");
+    doJavaScript(
+        R"(
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 10;
+                var setWrap = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        ed.updateOptions({ wordWrap: ')" + std::string(wrap ? "on" : "off") + R"(' });
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(setWrap, 100);
+                    }
+                };
+                setWrap();
+            })();
+        )");
 }
+
 void MonacoEditor::toggleMinimap()
 {
     wApp->log("debug") << "MonacoEditor::toggleMinimap()";
-    doJavaScript(R"(
-        setTimeout(function() {
-            if (window.)" + editor_js_var_name_ + R"() {
-                const currentMinimap = window.)" + editor_js_var_name_ + R"(.getOptions().get(monaco.editor.EditorOption.minimap).enabled;
-                window.)" + editor_js_var_name_ + R"(.updateOptions({ minimap: { enabled: !currentMinimap } });
-            }
-        }, 100);
-    )");
+    doJavaScript(
+        R"(
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 10;
+                var toggleMap = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        const currentMinimap = ed.getOptions().get(monaco.editor.EditorOption.minimap).enabled;
+                        ed.updateOptions({ minimap: { enabled: !currentMinimap } });
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(toggleMap, 100);
+                    }
+                };
+                toggleMap();
+            })();
+        )");
 }
 
 void MonacoEditor::setLineNumber(bool show)
 {
     wApp->log("debug") << "MonacoEditor::setLineNumber(bool show): " << (show ? "true" : "false");
-    doJavaScript(R"(
-        setTimeout(function() {
-            if (window.)" + editor_js_var_name_ + R"() {
-                window.)" + editor_js_var_name_ + R"(.updateOptions({ lineNumbers: ')" + std::string(show ? "on" : "off") + R"(' });
-            }
-        }, 100);
-    )");
+    doJavaScript(
+        R"(
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 10;
+                var setLineNum = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        ed.updateOptions({ lineNumbers: ')" + std::string(show ? "on" : "off") + R"(' });
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(setLineNum, 100);
+                    }
+                };
+                setLineNum();
+            })();
+        )");
 }

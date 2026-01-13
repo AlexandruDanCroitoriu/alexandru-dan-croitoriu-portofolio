@@ -11,6 +11,11 @@ textarea {
   field-sizing: content; /* used to be `form-sizing` but changed to this */
 }
 
+
+* {
+  @apply [&::-webkit-scrollbar]:w-2.5 [&::-webkit-scrollbar-track]:bg-gray-500 [&::-webkit-scrollbar-thumb]:bg-gray-800 [&::-webkit-scrollbar-thumb]:rounded-full;
+}
+
 .bg-squares {
   width: 100%;
   height: 100%;

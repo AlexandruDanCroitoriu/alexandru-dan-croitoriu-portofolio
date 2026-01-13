@@ -2,38 +2,36 @@
 
 #include <Wt/WContainerWidget.h>
 #include <Wt/Dbo/ptr.h>
+#include <memory>
 
 class StylusSession;
 class MessageTemplate;
+enum class ViewMode;
 
 namespace Stylus
 {
         class XmlBrain;
 
-        enum TemplateViewMode
-        {
-                Template,
-                Editor
-        };
+
 
         class TempView : public Wt::WContainerWidget
         {
         public:
-                TempView(StylusSession &session, Wt::Dbo::ptr<MessageTemplate> file);
+                TempView(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<MessageTemplate> messageTemplate);
                 ~TempView();
-                void setViewMode(TemplateViewMode mode = TemplateViewMode::Editor);
+                void setViewMode(ViewMode mode);
                 
                 void keyWentDown(Wt::WKeyEvent e);
                 std::shared_ptr<XmlBrain> xmlBrain_;
         private:
-                StylusSession &session_;
-                Wt::Dbo::ptr<MessageTemplate> file_;
+                std::shared_ptr<StylusSession> session_;
+                Wt::Dbo::ptr<MessageTemplate> messageTemplate_;
 
                 Wt::WContainerWidget *leftArea_;
                 Wt::WContainerWidget *mainArea_;
-                Wt::WContainerWidget *rightArea_;
+                // Wt::WContainerWidget *rightArea_;
                 Wt::Signals::connection globalKeyConnection_;
-
+                void refreshView();
         };
 
 } // namespace Stylus

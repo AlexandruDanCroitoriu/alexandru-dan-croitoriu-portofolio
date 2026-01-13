@@ -14,13 +14,13 @@ namespace Stylus
 class RootNode : public Wt::WTreeNode
 {
 public:
-    RootNode(StylusSession& session);
+    RootNode(std::shared_ptr<StylusSession> session);
 
     Wt::Signal<std::string> file_changed_;
     Wt::WContainerWidget* label_wrapper_;
     Wt::Signal<> &changed(){ return changed_; }
 private:
-    StylusSession& session_;
+    std::shared_ptr<StylusSession> session_;
     std::unique_ptr<Wt::WPopupMenu> popup_;
 
     void createNewFolderDialog();

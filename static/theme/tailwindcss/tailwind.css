@@ -373,6 +373,9 @@
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
   }
+  .mb-12 {
+    margin-bottom: calc(var(--spacing) * 12);
+  }
   .ml-\[10px\] {
     margin-left: 10px;
   }
@@ -438,11 +441,17 @@
   .min-h-fit {
     min-height: fit-content;
   }
+  .w-6 {
+    width: calc(var(--spacing) * 6);
+  }
   .w-22 {
     width: calc(var(--spacing) * 22);
   }
   .w-64 {
     width: calc(var(--spacing) * 64);
+  }
+  .w-90 {
+    width: calc(var(--spacing) * 90);
   }
   .w-\[35px\] {
     width: 35px;
@@ -1146,15 +1155,6 @@
   .-outline-offset-1 {
     outline-offset: calc(1px * -1);
   }
-  .outline-offset-2 {
-    outline-offset: 2px;
-  }
-  .\!outline-green-500 {
-    outline-color: var(--color-green-500) !important;
-  }
-  .\!outline-green-700 {
-    outline-color: var(--color-green-700) !important;
-  }
   .outline-\[\#ff0000\] {
     outline-color: #ff0000;
   }
@@ -1166,9 +1166,6 @@
   }
   .outline-gray-300 {
     outline-color: var(--color-gray-300);
-  }
-  .outline-transparent {
-    outline-color: transparent;
   }
   .outline-white\/10 {
     outline-color: color-mix(in srgb, #fff 10%, transparent);
@@ -1302,6 +1299,16 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-gray-700);
+      }
+    }
+  }
+  .hover\:bg-gray-700\/50 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, oklch(37.3% 0.034 259.733) 50%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-gray-700) 50%, transparent);
+        }
       }
     }
   }
@@ -1615,6 +1622,14 @@
 }
 textarea {
   field-sizing: content;
+}
+.bg-squares {
+  width: 100%;
+  height: 100%;
+  --color: rgba(114, 114, 114, 0.3);
+  background-color: #191a1a;
+  background-image: linear-gradient(0deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent), linear-gradient(90deg, transparent 24%, var(--color) 25%, var(--color) 26%, transparent 27%,transparent 74%, var(--color) 75%, var(--color) 76%, transparent 77%,transparent);
+  background-size: 55px 55px;
 }
 &:where(.dark, .dark *) {
   --color-body: var(--color-gray-950);

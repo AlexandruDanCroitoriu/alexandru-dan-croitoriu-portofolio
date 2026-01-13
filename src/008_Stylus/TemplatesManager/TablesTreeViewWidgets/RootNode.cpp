@@ -15,7 +15,7 @@
 namespace Stylus
 {
 
-RootNode::RootNode(StylusSession& session)
+RootNode::RootNode(std::shared_ptr<StylusSession> session)
     : Wt::WTreeNode("DBO Root"),
     session_(session)
 {
@@ -87,8 +87,8 @@ void RootNode::createNewFolderDialog()
 
         // Check for duplicate folder names
         {
-            Wt::Dbo::Transaction t(session_);
-            auto existingFolder = session_.find<TemplateFolder>().where("folder_name = ?").bind(folderName).resultList();
+            Wt::Dbo::Transaction t(*session_);
+            auto existingFolder = session_->find<TemplateFolder>().where("folder_name = ?").bind(folderName).resultList();
             if (!existingFolder.empty())
             {
                 errorText->setText("A folder with this name already exists.");
@@ -98,8 +98,8 @@ void RootNode::createNewFolderDialog()
             t.commit();
         }
 
-        Wt::Dbo::Transaction t(session_);
-        auto newFolder = session_.add(std::make_unique<TemplateFolder>());
+        Wt::Dbo::Transaction t(*session_);
+        auto newFolder = session_->add(std::make_unique<TemplateFolder>());
         newFolder.modify()->folderName_ = folderName;
         newFolder.modify()->expanded_ = true;
         t.commit();

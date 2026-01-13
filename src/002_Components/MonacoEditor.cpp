@@ -310,6 +310,18 @@ void MonacoEditor::toggleMinimap()
                 const currentMinimap = window.)" + editor_js_var_name_ + R"(.getOptions().get(monaco.editor.EditorOption.minimap).enabled;
                 window.)" + editor_js_var_name_ + R"(.updateOptions({ minimap: { enabled: !currentMinimap } });
             }
-        }, 20);
+        }, 100);
+    )");
+}
+
+void MonacoEditor::setLineNumber(bool show)
+{
+    wApp->log("debug") << "MonacoEditor::setLineNumber(bool show): " << (show ? "true" : "false");
+    doJavaScript(R"(
+        setTimeout(function() {
+            if (window.)" + editor_js_var_name_ + R"() {
+                window.)" + editor_js_var_name_ + R"(.updateOptions({ lineNumbers: ')" + std::string(show ? "on" : "off") + R"(' });
+            }
+        }, 100);
     )");
 }

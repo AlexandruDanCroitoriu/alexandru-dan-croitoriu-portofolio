@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-
+namespace Stylus {
 
 struct StylusState {
     StylusState();
@@ -22,3 +22,4 @@ struct StylusState {
     tinyxml2::XMLElement* copyNode_ = nullptr;
 
 };
+}; // namespace Stylus

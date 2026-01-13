@@ -24,7 +24,8 @@ private:
     void setupKeyboardShortcuts();
     void keyWentDown(Wt::WKeyEvent e);
 
-    std::shared_ptr<StylusSession> session_;
+    std::shared_ptr<StylusSession> sessionDev_;
+    std::shared_ptr<StylusSession> sessionProd_;
 
     Wt::WContainerWidget* navbar_wrapper_;
     Wt::WMenu* menu_;
@@ -46,7 +47,7 @@ private:
     Wt::WMenuItem* images_menu_item_;
     Wt::WMenuItem* settings_menu_item_;
 
-    StylusState stylus_state_;
+    std::shared_ptr<StylusState> stylus_state_;
 };
 
 }

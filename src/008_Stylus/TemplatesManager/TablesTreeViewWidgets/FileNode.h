@@ -5,6 +5,7 @@
 #include <Wt/WSignal.h>
 #include <Wt/Dbo/ptr.h>
 #include <Wt/WSignal.h>
+#include <memory>
 
 class TemplateFile;
 class StylusSession;
@@ -15,7 +16,7 @@ namespace Stylus
 class FileNode : public Wt::WTreeNode
 {
 public:
-    FileNode(StylusSession& session, Wt::Dbo::ptr<TemplateFile> file);
+    FileNode(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<TemplateFile> file);
 
     Wt::Signal<std::string> file_changed_;
     Wt::WContainerWidget* label_wrapper_;
@@ -23,7 +24,7 @@ public:
 
     Wt::Signal<> &changed() { return changed_; }
 private:
-    StylusSession& session_;
+    std::shared_ptr<StylusSession> session_;
     std::unique_ptr<Wt::WPopupMenu> popup_;
 
     void createNewTemplateDialog();

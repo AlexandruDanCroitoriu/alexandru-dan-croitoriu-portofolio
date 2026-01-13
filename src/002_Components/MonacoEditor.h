@@ -77,6 +77,12 @@ public:
     void toggleMinimap();
     
     /**
+     * @brief Sets the line number display
+     * @param show True to show line numbers, false to hide them
+     */
+    void setLineNumber(bool show);
+    
+    /**
      * @brief Resets the editor layout (useful after size changes)
      */
     void resetLayout();

@@ -15,12 +15,13 @@ class MessageTemplate;
 class StylusSession : public dbo::Session
 {
 public:
-  explicit StylusSession(const std::string& sqliteDb);
+  explicit StylusSession(const std::string& sqliteDb, bool dev);
 
   /// Get the next available order number for a new TemplateFolder
   int getNextFolderOrder();
 
 private:
-  void createInitialData();
+  void createInitialDataDev();
+  void createInitialDataProd();
   bool created_ = false;
 };

@@ -19,10 +19,10 @@
 namespace Stylus
 {
 
-    FileNode::FileNode(StylusSession &session, Wt::Dbo::ptr<TemplateFile> file)
+        FileNode::FileNode(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<TemplateFile> file)
         : Wt::WTreeNode(file->fileName_),
           file_(file),
-          session_(session)
+            session_(std::move(session))
     {
         wApp->log("debug") << "FileNode::FileNode(" << file_->fileName_ << ")";
         label_wrapper_ = labelArea();
@@ -79,13 +79,14 @@ namespace Stylus
         {
             arrowUp->hide();
             arrowDown->hide();
+            wApp->log("debug") << "FileNode unselected: " << file_->fileName_;
         } });
 
         expanded().connect(this, [=]()
                            {
         if (file_)
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
             file_.modify()->expanded_ = true;
             t.commit();
         } });
@@ -94,7 +95,7 @@ namespace Stylus
                             {
         if (file_)
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
             file_.modify()->expanded_ = false;
             t.commit();
         }
@@ -145,10 +146,10 @@ namespace Stylus
 
         // Create and persist the new template with next order index
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
 
             int nextOrder = 1;
-            auto maxTemplate = session_.find<MessageTemplate>()
+            auto maxTemplate = session_->find<MessageTemplate>()
                 .where("file_id = ?")
                 .bind(file_.id())
                 .orderBy("order_index DESC")
@@ -159,7 +160,7 @@ namespace Stylus
                 nextOrder = maxTemplate->order + 1;
             }
 
-            auto newTemplate = session_.addNew<MessageTemplate>();
+            auto newTemplate = session_->addNew<MessageTemplate>();
             newTemplate.modify()->messageId_ = templateName;
             newTemplate.modify()->file_ = file_;
             newTemplate.modify()->order = nextOrder;
@@ -213,8 +214,8 @@ namespace Stylus
             return;
         }
         {
-            Wt::Dbo::Transaction t(session_);
-            auto existingFile = session_.find<TemplateFile>().where("file_name = ? AND folder_id = ?").bind(fileName).bind(file_->folder_.id()).resultList();
+            Wt::Dbo::Transaction t(*session_);
+            auto existingFile = session_->find<TemplateFile>().where("file_name = ? AND folder_id = ?").bind(fileName).bind(file_->folder_.id()).resultList();
             if (!existingFile.empty())
             {
                 errorText->setText("A file with this name already exists.");
@@ -257,7 +258,7 @@ namespace Stylus
     Wt::WString templateText;
     if(file_)
     {
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         auto dboTemplates = file_->templates_;
         if(!dboTemplates.empty())
         {
@@ -284,7 +285,7 @@ namespace Stylus
 
     deleteBtn->clicked().connect([=]() {
         // Perform file deletion logic here
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         auto folder = file_->folder_;
         auto folderId = folder ? folder.id() : -1;
         file_.remove();
@@ -292,7 +293,7 @@ namespace Stylus
         // Renormalize remaining files in the folder to keep order indexes contiguous
         if (folderId != -1)
         {
-            auto remainingFiles = session_.find<TemplateFile>()
+            auto remainingFiles = session_->find<TemplateFile>()
                 .where("folder_id = ?")
                 .bind(folderId)
                 .orderBy("order_index")
@@ -361,8 +362,8 @@ namespace Stylus
         // Load folders ordered by order_index
         std::vector<long long> folderIds;
         {
-            Wt::Dbo::Transaction t(session_);
-            auto folders = session_.find<TemplateFolder>().orderBy("order_index").resultList();
+            Wt::Dbo::Transaction t(*session_);
+            auto folders = session_->find<TemplateFolder>().orderBy("order_index").resultList();
             for (auto f : folders)
             {
                 combo->addItem(f->folderName_);
@@ -397,10 +398,10 @@ namespace Stylus
                 return;
             }
 
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
 
             // Check if destination folder already has a file with the same name
-            auto existingFile = session_.find<TemplateFile>()
+            auto existingFile = session_->find<TemplateFile>()
                 .where("folder_id = ? AND file_name = ?")
                 .bind(destFolderId)
                 .bind(file_->fileName_)
@@ -414,7 +415,7 @@ namespace Stylus
             }
 
             // Shift destination folder files by +1 to make room at order 1
-            auto destFilesDesc = session_.find<TemplateFile>()
+            auto destFilesDesc = session_->find<TemplateFile>()
                 .where("folder_id = ?")
                 .bind(destFolderId)
                 .orderBy("order_index DESC")
@@ -425,13 +426,13 @@ namespace Stylus
             }
             
             // Move current file to destination folder at order 1
-            auto destFolderPtr = session_.load<TemplateFolder>(destFolderId);
+            auto destFolderPtr = session_->load<TemplateFolder>(destFolderId);
             file_.modify()->folder_ = destFolderPtr;
             file_.modify()->order = 1;
             destFolderPtr.modify()->expanded_ = true; // Ensure destination folder is expanded to show moved file
 
             // Renormalize source folder orders after removing this file
-            auto srcFiles = session_.find<TemplateFile>()
+            auto srcFiles = session_->find<TemplateFile>()
                 .where("folder_id = ?")
                 .bind(srcFolderId)
                 .orderBy("order_index")
@@ -455,7 +456,7 @@ namespace Stylus
         if (!file_ || !file_->folder_)
             return;
 
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
 
         int currentOrder = file_->order;
         if (currentOrder <= 1)
@@ -464,7 +465,7 @@ namespace Stylus
             return;
         }
 
-        auto neighbor = session_.find<TemplateFile>()
+        auto neighbor = session_->find<TemplateFile>()
             .where("folder_id = ? AND order_index = ?")
             .bind(file_->folder_.id())
             .bind(static_cast<long long>(currentOrder - 1))
@@ -486,11 +487,11 @@ namespace Stylus
         if (!file_ || !file_->folder_)
             return;
 
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
 
         int currentOrder = file_->order;
 
-        auto neighbor = session_.find<TemplateFile>()
+        auto neighbor = session_->find<TemplateFile>()
             .where("folder_id = ? AND order_index = ?")
             .bind(file_->folder_.id())
             .bind(static_cast<long long>(currentOrder + 1))

@@ -19,10 +19,10 @@
 namespace Stylus
 {
 
-TemplateNode::TemplateNode(StylusSession& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
+TemplateNode::TemplateNode(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
     : Wt::WTreeNode(messageTemplate->messageId_),
         messageTemplate_(messageTemplate),
-        session_(session)
+    session_(std::move(session))
 {
     wApp->log("debug") << "TemplateNode::TemplateNode(" << messageTemplate->messageId_ << ")";
     addStyleClass("[&>.Wt-selected]:!bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
@@ -109,7 +109,7 @@ void TemplateNode::createRenameTemplateDialog()
             return;
         }
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
             messageTemplate_.modify()->messageId_ = templateName;
             t.commit();
         }
@@ -155,8 +155,8 @@ void TemplateNode::createChangeFileDialog()
 
     // Load folders
     {
-        Wt::Dbo::Transaction t(session_);
-        auto folders = session_.find<TemplateFolder>().orderBy("order_index").resultList();
+        Wt::Dbo::Transaction t(*session_);
+        auto folders = session_->find<TemplateFolder>().orderBy("order_index").resultList();
         long long currentFolderId = -1;
         if (messageTemplate_->file_ && messageTemplate_->file_->folder_)
         {
@@ -187,8 +187,8 @@ void TemplateNode::createChangeFileDialog()
         long long selectedFolderId = (*folderIds)[folderIdx];
         long long currentFileId = messageTemplate_->file_ ? messageTemplate_->file_.id() : -1;
 
-        Wt::Dbo::Transaction t(session_);
-        auto files = session_.find<TemplateFile>()
+        Wt::Dbo::Transaction t(*session_);
+        auto files = session_->find<TemplateFile>()
             .where("folder_id = ?")
             .bind(selectedFolderId)
             .orderBy("order_index")
@@ -236,10 +236,10 @@ void TemplateNode::createChangeFileDialog()
             return;
         }
 
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
 
         // Shift destination file templates by +1 to make room at order 1
-        auto destTemplatesDesc = session_.find<MessageTemplate>()
+        auto destTemplatesDesc = session_->find<MessageTemplate>()
             .where("file_id = ?")
             .bind(destFileId)
             .orderBy("order_index DESC")
@@ -250,7 +250,7 @@ void TemplateNode::createChangeFileDialog()
         }
         
         // Move current template to destination file at order 1
-        auto destFilePtr = session_.load<TemplateFile>(destFileId);
+        auto destFilePtr = session_->load<TemplateFile>(destFileId);
         messageTemplate_.modify()->file_ = destFilePtr;
         messageTemplate_.modify()->order = 1;
         // Ensure destination parents are expanded to reveal moved template
@@ -261,7 +261,7 @@ void TemplateNode::createChangeFileDialog()
         }
 
         // Renormalize source file orders after removing this template
-        auto srcTemplates = session_.find<MessageTemplate>()
+        auto srcTemplates = session_->find<MessageTemplate>()
             .where("file_id = ?")
             .bind(srcFileId)
             .orderBy("order_index")
@@ -307,14 +307,14 @@ void TemplateNode::createRemoveTemplateDialog()
 
     deleteBtn->clicked().connect([=]() {
         // Perform folder deletion logic here
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         auto file = messageTemplate_->file_;
         auto fileId = file ? file.id() : -1;
         messageTemplate_.remove();
 
         if (fileId != -1)
         {
-            auto remainingTemplates = session_.find<MessageTemplate>()
+            auto remainingTemplates = session_->find<MessageTemplate>()
                 .where("file_id = ?")
                 .bind(fileId)
                 .orderBy("order_index")
@@ -358,7 +358,7 @@ void TemplateNode::moveTemplateUp()
     if (!messageTemplate_ || !messageTemplate_->file_)
         return;
 
-    Wt::Dbo::Transaction t(session_);
+    Wt::Dbo::Transaction t(*session_);
 
     int currentOrder = messageTemplate_->order;
     if (currentOrder <= 1)
@@ -367,7 +367,7 @@ void TemplateNode::moveTemplateUp()
         return;
     }
 
-    auto neighbor = session_.find<MessageTemplate>()
+    auto neighbor = session_->find<MessageTemplate>()
         .where("file_id = ? AND order_index = ?")
         .bind(messageTemplate_->file_.id())
         .bind(static_cast<long long>(currentOrder - 1))
@@ -389,11 +389,11 @@ void TemplateNode::moveTemplateDown()
     if (!messageTemplate_ || !messageTemplate_->file_)
         return;
 
-    Wt::Dbo::Transaction t(session_);
+    Wt::Dbo::Transaction t(*session_);
 
     int currentOrder = messageTemplate_->order;
 
-    auto neighbor = session_.find<MessageTemplate>()
+    auto neighbor = session_->find<MessageTemplate>()
         .where("file_id = ? AND order_index = ?")
         .bind(messageTemplate_->file_.id())
         .bind(static_cast<long long>(currentOrder + 1))

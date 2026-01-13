@@ -18,10 +18,10 @@
 namespace Stylus
 {
 
-FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> folder)
+FolderNode::FolderNode(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<TemplateFolder> folder)
     : Wt::WTreeNode(folder->folderName_),
       folder_(folder),
-    session_(session)
+        session_(std::move(session))
 {
     wApp->log("debug") << "FolderNode::FolderNode(" << folder->folderName_ << ")";
     addStyleClass("[&>.Wt-selected]:!bg-gray-200 [&>.Wt-selected]:text-black [&>.Wt-selected]:rounded-md");
@@ -78,7 +78,7 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
     {
         if (folder_)
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
             folder_.modify()->expanded_ = true;
             t.commit();
         }
@@ -88,7 +88,7 @@ FolderNode::FolderNode(StylusSession& session, Wt::Dbo::ptr<TemplateFolder> fold
     {
         if (folder_)
         {
-            Wt::Dbo::Transaction t(session_);
+            Wt::Dbo::Transaction t(*session_);
             folder_.modify()->expanded_ = false;
             t.commit();
         }
@@ -141,8 +141,8 @@ void FolderNode::createRenameFolderDialog()
             return;
         }
         {
-            Wt::Dbo::Transaction t(session_);
-            auto existingFolder = session_.find<TemplateFolder>().where("folder_name = ?").bind(folderName).resultList();
+            Wt::Dbo::Transaction t(*session_);
+            auto existingFolder = session_->find<TemplateFolder>().where("folder_name = ?").bind(folderName).resultList();
             if (!existingFolder.empty())
             {
                 errorText->setText("A folder with this name already exists.");
@@ -185,7 +185,7 @@ void FolderNode::createRemoveFolderDialog()
     Wt::WString templateText;
     if(folder_)
     {
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         auto files = folder_->files_;
         if(!files.empty())
         {
@@ -212,7 +212,7 @@ void FolderNode::createRemoveFolderDialog()
 
     deleteBtn->clicked().connect([=]() {
         // Perform folder deletion logic here
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         folder_.remove();
         t.commit();
         dialog->accept();
@@ -263,8 +263,8 @@ void FolderNode::createNewFileDialog()
 
         // Check for duplicate file names within the folder
         {
-            Wt::Dbo::Transaction t(session_);
-            auto existingFile = session_.find<TemplateFile>()
+            Wt::Dbo::Transaction t(*session_);
+            auto existingFile = session_->find<TemplateFile>()
                 .where("file_name = ? AND folder_id = ?")
                 .bind(fileName)
                 .bind(folder_.id())
@@ -276,14 +276,14 @@ void FolderNode::createNewFileDialog()
             }
 
             // Determine next order index within the folder (1..n)
-            auto currentFiles = session_.find<TemplateFile>()
+            auto currentFiles = session_->find<TemplateFile>()
                 .where("folder_id = ?")
                 .bind(folder_.id())
                 .resultList();
             int nextOrder = static_cast<int>(currentFiles.size()) + 1;
 
             // Create and persist the new file
-            auto newFile = session_.addNew<TemplateFile>();
+            auto newFile = session_->addNew<TemplateFile>();
             newFile.modify()->fileName_ = fileName;
             newFile.modify()->expanded_ = false;
             newFile.modify()->folder_ = folder_;
@@ -323,7 +323,7 @@ void FolderNode::moveFolderUp()
     if (!folder_)
         return;
 
-    Wt::Dbo::Transaction t(session_);
+    Wt::Dbo::Transaction t(*session_);
     
     int currentOrder = folder_->order;
     
@@ -335,7 +335,7 @@ void FolderNode::moveFolderUp()
     }
     
     // Find the folder with order_index = currentOrder - 1
-    auto folderToSwap = session_.find<TemplateFolder>()
+    auto folderToSwap = session_->find<TemplateFolder>()
         .where("order_index = ?")
         .bind(static_cast<long long>(currentOrder - 1))
         .resultValue();
@@ -357,12 +357,12 @@ void FolderNode::moveFolderDown()
     if (!folder_)
         return;
 
-    Wt::Dbo::Transaction t(session_);
+    Wt::Dbo::Transaction t(*session_);
     
     int currentOrder = folder_->order;
     
     // Find the folder with order_index = currentOrder + 1
-    auto folderToSwap = session_.find<TemplateFolder>()
+    auto folderToSwap = session_->find<TemplateFolder>()
         .where("order_index = ?")
         .bind(static_cast<long long>(currentOrder + 1))
         .resultValue();

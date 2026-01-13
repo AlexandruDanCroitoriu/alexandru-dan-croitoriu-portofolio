@@ -9,16 +9,17 @@ namespace Stylus {
 
 Stylus::Stylus()
     : Wt::WDialog(),
-      session_(std::make_shared<StylusSession>("../../dbo/stylus.db")),
-      stylus_state_()
+      sessionDev_(std::make_shared<StylusSession>("../../dbo/stylus-dev.db", true)),
+      sessionProd_(std::make_shared<StylusSession>("../../dbo/stylus-prod.db", false)),
+      stylus_state_(std::make_shared<StylusState>())
 {
     wApp->log("debug") << "Stylus::Stylus(Session& session)";
     initializeDialog();
     setupKeyboardShortcuts();
     setupContent();
 
-    if(stylus_state_.stylusNode_->Attribute("open") && 
-       std::string(stylus_state_.stylusNode_->Attribute("open")).compare("true") == 0) {
+    if(stylus_state_->stylusNode_->Attribute("open") && 
+       std::string(stylus_state_->stylusNode_->Attribute("open")).compare("true") == 0) {
         // std::cout << "\n\nOpening Stylus dialog as per saved state." << std::endl;
         show();
     }
@@ -71,7 +72,7 @@ void Stylus::setupContent()
     navbar_wrapper_ = contents()->addNew<Wt::WContainerWidget>();
     content_stack_ = contents()->addNew<Wt::WStackedWidget>();
     menu_ = navbar_wrapper_->addNew<Wt::WMenu>(content_stack_);
-    
+    navbar_wrapper_->hide();
     navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid border-gray-600");
     content_stack_->setStyleClass("grow");
     menu_->setStyleClass("flex flex-col items-center h-full");
@@ -83,7 +84,7 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> images_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
 
-    templates_manager_ = xml_files_wrapper->addNew<TemplatesManager>(*session_);
+    templates_manager_ = xml_files_wrapper->addNew<TemplatesManager>(sessionDev_, sessionProd_, stylus_state_);
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();
@@ -125,12 +126,12 @@ void Stylus::keyWentDown(Wt::WKeyEvent e)
         if (e.key() == Wt::Key::Q) {
             if (isHidden()) {
                 show();
-                stylus_state_.stylusNode_->SetAttribute("open", "true");
+                stylus_state_->stylusNode_->SetAttribute("open", "true");
             } else {
                 hide();
-                stylus_state_.stylusNode_->SetAttribute("open", "false");
+                stylus_state_->stylusNode_->SetAttribute("open", "false");
             }
-            stylus_state_.doc_->SaveFile(stylus_state_.stateFilePath_.c_str());
+            stylus_state_->doc_->SaveFile(stylus_state_->stateFilePath_.c_str());
         } else if (e.key() == Wt::Key::Key_1) {
             menu_->select(0);
         } else if (e.key() == Wt::Key::Key_2) {

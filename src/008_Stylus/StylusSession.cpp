@@ -11,7 +11,7 @@
 #include <memory>
 #include <exception>
 
-StylusSession::StylusSession(const std::string &sqliteDb)
+StylusSession::StylusSession(const std::string &sqliteDb, bool dev)
 {
   Wt::log("debug") << "StylusSession::StylusSession()";
   
@@ -39,10 +39,14 @@ StylusSession::StylusSession(const std::string &sqliteDb)
   } catch (Wt::Dbo::Exception& e) {
     Wt::log("info") << "Using existing Stylus database tables";
   }
-  createInitialData();
+
+  if(dev)
+    createInitialDataDev();
+  else 
+    createInitialDataProd();
 }
 
-void StylusSession::createInitialData()
+void StylusSession::createInitialDataDev()
 {
   Wt::log("debug") << "StylusSession::createInitialData()";
   
@@ -53,7 +57,7 @@ void StylusSession::createInitialData()
 
   if (existingFolders.empty()) {
     // Create 3 default folders with files and templates
-    for (int i = 1; i <= 3; ++i) {
+    for (int i = 1; i <= 5; ++i) {
       auto folder = add(std::make_unique<TemplateFolder>());
       auto f = folder.modify();
       f->folderName_ = "Templates Folder " + std::to_string(i);
@@ -73,6 +77,7 @@ void StylusSession::createInitialData()
         for (int k = 1; k <= 3; ++k) {
           auto messageTemp = add(std::make_unique<MessageTemplate>());
           auto mt = messageTemp.modify();
+          mt->viewMode_ = ViewMode::Template;
           mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
             mt->templateXml_ = 
 R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
@@ -97,6 +102,43 @@ R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/5
   }
 
 }
+
+void StylusSession::createInitialDataProd()
+{
+  Wt::log("debug") << "StylusSession::createInitialDataProd()";
+  
+  Wt::Dbo::Transaction t(*this);
+
+  // Check if any folders already exist
+  auto existingFolders = find<TemplateFolder>().resultList();
+
+  if (existingFolders.empty()) {
+    auto folder = add(std::make_unique<TemplateFolder>());
+    auto f = folder.modify();
+    f->folderName_ = "Tailwind Plus Templates";
+    f->expanded_ = true;
+    f->order = getNextFolderOrder();
+    auto tempFile = add(std::make_unique<TemplateFile>());
+    auto tf = tempFile.modify();
+    tf->fileName_ = "Cards";
+    tf->folder_ = folder;
+    tf->expanded_ = true;
+    tf->order = 1;
+    auto messageTemp = add(std::make_unique<MessageTemplate>());
+    auto mt = messageTemp.modify();
+    mt->viewMode_ = ViewMode::Template;
+    mt->messageId_ = "basic-card";
+    mt->templateXml_ = 
+R"(<div class="overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
+  <div class="px-4 py-5 sm:p-6">
+  </div>
+</div>)";
+    mt->file_ = tempFile;
+    mt->order = 1;
+  }
+  t.commit();
+}
+
 
 int StylusSession::getNextFolderOrder()
 {

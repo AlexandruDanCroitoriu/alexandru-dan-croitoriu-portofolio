@@ -50,7 +50,6 @@ namespace Stylus
                 first_child = first_child->NextSibling();
             }
         }else if(node_->ToText()){
-            std::cout << "\n\nAdding text node with content: " << node_->ToText()->Value() << std::endl;
             auto text_content = node_->ToText()->Value();
             auto text_widget = addNew<Wt::WText>(text_content);
         }

@@ -13,6 +13,7 @@ public:
   std::string fileName_;
   int order;
   bool expanded_ = true;
+  bool selected_ = false;
   Wt::Dbo::ptr<TemplateFolder> folder_;
   Wt::Dbo::collection< Wt::Dbo::ptr<MessageTemplate> > templates_;
 
@@ -21,6 +22,7 @@ public:
   {
     Wt::Dbo::field(a, fileName_, "file_name");
     Wt::Dbo::field(a, expanded_, "expanded");
+    Wt::Dbo::field(a, selected_, "selected");
     Wt::Dbo::field(a, order, "order_index");
     Wt::Dbo::belongsTo(a, folder_, "folder");
     Wt::Dbo::hasMany(a, templates_, Wt::Dbo::ManyToOne, "file");

@@ -11,28 +11,31 @@
 #include <Wt/WApplication.h>
 #include <Wt/WTemplate.h>
 #include <Wt/WText.h>
+#include <Wt/WIconPair.h>
+#include <Wt/WPushButton.h>
 
 namespace Stylus
 {
 
-    TempView::TempView(StylusSession& session, Wt::Dbo::ptr<MessageTemplate> file)
-        : session_(session),
-            file_(file)
+    TempView::TempView(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
+        : session_(std::move(session)),
+            messageTemplate_(messageTemplate)
     {
         wApp->log("debug") << "TempView::TempView(StylusSession& session)";
         // WTemplate does not accept TextFormat in constructor; set it separately
-        setStyleClass("border border-gray-600 rounded-md p-4 flex min-w-fit");
+        setStyleClass("border border-gray-600 rounded-md flex min-w-fit");
+        auto settingsArea = addNew<Wt::WContainerWidget>();
+        settingsArea->setStyleClass("flex flex-col p-1 border-r border-gray-600");
         leftArea_ = addNew<Wt::WContainerWidget>();
         leftArea_->setStyleClass("pr-2 border-r border-gray-600");
         mainArea_ = addNew<Wt::WContainerWidget>();
         mainArea_->setStyleClass("grow px-4 py-2");
-        rightArea_ = addNew<Wt::WContainerWidget>();
-        rightArea_->setStyleClass("pl-2 border-l border-gray-600");
+        // rightArea_ = addNew<Wt::WContainerWidget>();
+        // rightArea_->setStyleClass("pl-2 border-l border-gray-600");
 
-
-        xmlBrain_ = std::make_shared<XmlBrain>(session_, file_);
+        xmlBrain_ = std::make_shared<XmlBrain>(session_, messageTemplate_);
         xmlBrain_->stateChanged().connect(this, [=]() {
-            setViewMode();
+            refreshView();
         });
 
         mouseWentUp().connect(this, [=](const Wt::WMouseEvent& event)
@@ -46,6 +49,31 @@ namespace Stylus
         globalKeyConnection_ = wApp->globalKeyWentDown().connect([this](Wt::WKeyEvent e) {
             keyWentDown(e);
         });
+        
+        auto switchViewMoode = settingsArea->addNew<Wt::WIconPair>(
+            "static/icons/view-template.svg",
+            "static/icons/view-editor.svg"
+        );
+        switchViewMoode->setStyleClass("cursor-pointer mb-2 w-6 border border-gray-600 rounded hover:bg-gray-700/50 p-1");
+        
+        // Connect both icon states to toggle view mode
+        switchViewMoode->icon1Clicked().connect(this, [=]() {
+            setViewMode(ViewMode::Editor);
+            switchViewMoode->setState(1);  // Show icon2
+        });
+        switchViewMoode->icon2Clicked().connect(this, [=]() {
+            setViewMode(ViewMode::Template);
+            switchViewMoode->setState(0);  // Show icon1
+        });
+        
+        // Set initial icon state based on current view mode
+        if(messageTemplate_->viewMode_ == ViewMode::Template) {
+            switchViewMoode->setState(0);  // Show icon1 (view-template.svg)
+        } else {
+            switchViewMoode->setState(1);  // Show icon2 (view-editor.svg)
+        }
+        
+        refreshView();
     }
 
     TempView::~TempView()
@@ -54,24 +82,37 @@ namespace Stylus
         wApp->log("debug") << "TempView::~TempView() for temp with id " << xmlBrain_->messageTemplate_->id() << "\n";
     }
 
-    void TempView::setViewMode(TemplateViewMode mode)
+    void TempView::setViewMode(ViewMode mode)
     {
+        Wt::Dbo::Transaction t(*session_);
+        messageTemplate_.modify()->viewMode_ = mode;
+        t.commit();
+        refreshView();
 
+    }
+
+    void TempView::refreshView()
+    {
         leftArea_->clear();
         mainArea_->clear();
-        rightArea_->clear();
+        // rightArea_->clear();
 
         
         
-        if(mode == TemplateViewMode::Template)
+        if(messageTemplate_->viewMode_ == ViewMode::Template)
         {
             auto monaco = leftArea_->addNew<MonacoEditor>("xml");
-            auto temp = mainArea_->addNew<Wt::WTemplate>(Wt::WString::fromUTF8(file_->templateXml_));
+            monaco->setStyleClass("h-full w-90");
+            monaco->setContent(messageTemplate_->templateXml_);
+            monaco->setLineNumber(false);
+            monaco->toggleLineWrap();
+            auto temp = mainArea_->addNew<Wt::WTemplate>(Wt::WString::fromUTF8(messageTemplate_->templateXml_));
         }else {
             leftArea_->addNew<XMLTreeNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
             auto elem_node = mainArea_->addNew<XMLElemNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
         }
     }
+
 
     void TempView::keyWentDown(Wt::WKeyEvent e)
     {

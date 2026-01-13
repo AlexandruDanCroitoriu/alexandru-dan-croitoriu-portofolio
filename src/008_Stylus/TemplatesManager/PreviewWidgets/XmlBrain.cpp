@@ -8,8 +8,8 @@
 
 namespace Stylus
 {
-    XmlBrain::XmlBrain(StylusSession& session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
-        : session_(session),
+    XmlBrain::XmlBrain(std::shared_ptr<StylusSession> session, Wt::Dbo::ptr<MessageTemplate> messageTemplate)
+        : session_(std::move(session)),
           doc_(std::make_shared<tinyxml2::XMLDocument>()),
           selectedNode_(nullptr),
         messageTemplate_(messageTemplate)
@@ -20,7 +20,7 @@ namespace Stylus
         }
 
         std::string xmlContent;
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         xmlContent = messageTemplate->templateXml_;
         t.commit();
 
@@ -43,9 +43,9 @@ void XmlBrain::saveCurrentVersion()
     std::string updatedXml = printer.CStr();
 
     {
-        Wt::Dbo::Transaction t(session_);
+        Wt::Dbo::Transaction t(*session_);
         // auto messageTemplate = session_.find<MessageTemplate>().where("template_xml = ?").bind(updatedXml).resultValue();
-        auto messageTemplate = session_.find<MessageTemplate>().where("id = ?").bind(messageTemplate_->id()).resultValue();
+        auto messageTemplate = session_->find<MessageTemplate>().where("id = ?").bind(messageTemplate_->id()).resultValue();
         if (messageTemplate) {
             messageTemplate.modify()->templateXml_ = updatedXml;
         } else {

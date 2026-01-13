@@ -70,7 +70,7 @@ MonacoEditor::MonacoEditor(std::string language)
                 theme: 'vs-dark',
                 // wordWrap: 'on',
                 // lineNumbers: 'on',
-                tabSize: 4,
+                tabSize: 2,
                 insertSpaces: false,
                 detectIndentation: false,
                 trimAutoWhitespace: false,

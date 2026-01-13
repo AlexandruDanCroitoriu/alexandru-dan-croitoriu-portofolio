@@ -42,20 +42,25 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildLineEditExample()
 
     oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
     oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
-
     addLine(makeIncludeLine("Wt/WLineEdit.h", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#details"));
     addLine(makeIncludeLine("Wt/WLabel.h", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLabel.html#details"));
     addLine("");
     addLine("<span style='color: #61afef;'>auto</span> label = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WLabel</span>&gt;(<span style='color: #98c379;'>\"Input Label\"</span>);");
     addLine("<span style='color: #61afef;'>auto</span> lineEdit = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WLineEdit</span>&gt;();");
     addLine("label-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLabel.html#af468c613eab7d184c68fd6ae20978de5' target='_blank' style='color: #61afef;  text-decoration: underline;'>setBuddy</a>(lineEdit);");
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Signals</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Signals</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine("lineEdit-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a0b1824c15b82b513176cf0a9f0adcf29' target='_blank' style='color: #61afef;  text-decoration: underline;'>textInput()</a>.<span style='color: #61afef;'>connect</span>([=]() {});");
     addLine("lineEdit-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WFormWidget.html#a5216ba1594b5dc525cc47cad593c7ba8' target='_blank' style='color: #61afef;  text-decoration: underline;'>changed()</a>.<span style='color: #61afef;'>connect</span>([=]() {}); <span style='color: #6a9955;'>// From Wt::WFormWidget</span>");
     addLine("lineEdit-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a1f3d3f3f3e2f4f4b5e6c7d8e9f0a1b2c' target='_blank' style='color: #61afef;  text-decoration: underline;'>validated()</a>.<span style='color: #61afef;'>connect</span>([=](<span style='color: #61afef;'>Wt::ValidationState</span> state) {}); <span style='color: #6a9955;'>// From Wt::WFormWidget</span>");
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Value Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Value Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#af24caa7b5618d12c6638012d15ab5296",
                            "setValueText", "<span style='color: #98c379;'>\"Initial text\"</span>"));
     addLine("<span style='color: #61afef;'>Wt::WString</span> text = " +
@@ -68,43 +73,61 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildLineEditExample()
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a496146733c3d5fa0105b485bf9304e35",
                            "displayText", ""));
 
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Max Length Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Max Length Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#aaeca334d8a47be029b6a44912b01ed5d",
                            "setMaxLength", "128"));
     addLine("<span style='color: #61afef;'>int</span> maxLength = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a14d707a8577685eb33588539305f3b78",
                            "maxLength", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Placeholder Text Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Placeholder Text Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WFormWidget.html#aabebd75188d1363c022925845f6b3269",
                            "setPlaceholderText", "<span style='color: #98c379;'>\"Line edit input...\"</span>", "Wt::WFormWidget"));
     addLine("<span style='color: #61afef;'>Wt::WString</span> placeholderText = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WFormWidget.html#a75425fe7a19d61dbdf17492d3c7d4628",
                            "placeholderText", "", "Wt::WFormWidget"));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Input Mask Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Input Mask Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a0639ec7e420ba32ffb148303a79fb969",
                            "setInputMask", "<span style='color: #98c379;'>\"AAAA-9999\"</span>, <span style='color: #569cd6;'>Wt::InputMaskFlag::KeepMaskWhileBlurred</span>"));
     addLine("<span style='color: #569cd6;'>Wt::WString</span> inputMask = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a15a01f7030b64f7ac8dc2e363d5ce9e9",
                            "inputMask", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Input Mode Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Input Mode Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a5d772a843fb12447da0e295e6fae805b",
                            "setInputMode", "<span style='color: #569cd6;'>Wt::InputMode::Numeric</span>"));
     addLine("<span style='color: #569cd6;'>Wt::InputMode</span> inputMode = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#afea0d586e9bcc578d0f848f65bbf4c28",
                            "inputMode", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Echo Mode Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Echo Mode Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a27c9bc232bea0ab76ee266be3325a10e",
                            "setEchoMode", "<span style='color: #569cd6;'>Wt::EchoMode::Password</span>"));
     addLine("<span style='color: #569cd6;'>Wt::EchoMode</span> echoMode = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a906ed01bcd06a2f5b5dcbc102b29fa66",
                            "echoMode", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Selection Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Selection Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a5998d0a1c9f842fdf4561ebb71292378",
                            "setSelection", "0, 4"));
     addLine("<span style='color: #569cd6;'>bool</span> hasSelectedText = " +
@@ -116,16 +139,22 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildLineEditExample()
     addLine("<span style='color: #569cd6;'>Wt::WString</span> selectedText = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#aa571d1f8c525822d820b188fc167160a",
                            "selectedText", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Text Size Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Text Size Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a4c6c5a52deefa5a246e0638f1572d0d8",
                            "setTextSize", "4"));
     addLine("<span style='color: #61afef;'>int</span> lineEditSize = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a55bdc89327923f865d024f59541c20d0",
                            "textSize", ""));
 
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Autocomplete Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Autocomplete Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a67ea9e169101e96837e53cc9cc600a67",
                            "setAutoComplete", "false"));
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a9efd6b54f094aad70b2b525f27a4dca8",
@@ -136,8 +165,11 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildLineEditExample()
     addLine("<span style='color: #569cd6;'>Wt::AutoCompleteMode</span> autoCompleteMode = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a45e523b854d98ab7d59ea7f769807364",
                            "autoCompleteToken", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Validation Setter and Getter</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Validation Setter and Getter</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine(makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WFormWidget.html#a8b5fa8567e930691b95f1d0fa69359f1",
                            "setValidator", "<span style='color: #61afef;'>std::shared_ptr</span>&lt;<span style='color: #e06c75;'>Wt::WValidator</span>&gt; validator", "Wt::WFormWidget"));
     addLine("<span style='color: #61afef;'>std::shared_ptr</span>&lt;<span style='color: #e06c75;'>Wt::WValidator</span>&gt; validator = " +
@@ -146,8 +178,11 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildLineEditExample()
     addLine("<span style='color: #61afef;'>Wt::ValidationState</span> validationState = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLineEdit.html#a500cfde61dad0df1bb4dd0f3b7115f8a",
                            "validate", ""));
-    addLine("");
-    addLine("<span style='color: #6a9955;'>// Other Methods</span>");
+    oss << "</pre>";
+    oss << "</div>";
+    oss << "<div class='font-semibold text-gray-800 mt-2'>Other Methods</div>";
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
     addLine("<span style='color: #569cd6;'>Wt::WLabel*</span> labelBuddy = " +
             makeMethodCall("lineEdit", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WFormWidget.html#a71e7a278888ebe7857c89de55e16ee0e",
                            "label", "", "Wt::WFormWidget"));
@@ -182,23 +217,27 @@ std::unique_ptr<Wt::WWidget> WtComponentsGalery::buildTextAreaExample()
 
     auto textAreaLabel = contentWrapper->addNew<Wt::WLabel>("Text Area Label");
     auto textArea = contentWrapper->addNew<Wt::WTextArea>();
+    textArea->addStyleClass("field-sizing-content"); // Adjust size based on content
     textArea->setPlaceholderText("Text area input...");
     textAreaLabel->setBuddy(textArea);
 
     auto sourceTitle = contentWrapper->addNew<Wt::WTemplate>("<h4 class='font-semibold text-gray-800'>Code Example</h4>");
     sourceTitle->addStyleClass("mb-0");
-    contentWrapper->addNew<Wt::WTemplate>(
-        "<div class='bg-gray-800 border border-gray-700 rounded-lg'>"
-        "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>"
-        "<span style='color: #d19a66;'>#include</span> &lt;<span style='color: #56b6c2;'>Wt/WTextArea.h</span>&gt;\n"
-        "<span style='color: #d19a66;'>#include</span> &lt;<span style='color: #56b6c2;'>Wt/WLabel.h</span>&gt;\n\n"
-        "<span style='color: #61afef;'>auto</span> label = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WLabel</span>&gt;(<span style='color: #98c379;'>\"Text Area Label\"</span>);\n"
-        "<span style='color: #61afef;'>auto</span> textArea = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WTextArea</span>&gt;();\n"
-        "textArea-&gt;<span style='color: #61afef;'>setPlaceholderText</span>(<span style='color: #98c379;'>\"Text area input...\"</span>);\n\n"
-        "label-&gt;<span style='color: #61afef;'>setBuddy</span>(textArea);"
-        "</pre>"
-        "</div>"
-    );
+    std::ostringstream oss;
+    auto addLine = [&](const std::string &line)
+    { oss << line << "\n"; };
+    oss << "<div class='bg-gray-800 border border-gray-700 rounded-lg'>";
+    oss << "<pre class='p-4 overflow-x-auto text-sm text-gray-100 text-wrap wrap-anywhere'>";
+    addLine(makeIncludeLine("Wt/WTextArea.h", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WTextArea.html#details"));
+    addLine(makeIncludeLine("Wt/WLabel.h", "https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLabel.html#details"));
+    addLine("");
+    addLine("<span style='color: #61afef;'>auto</span> label = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WLabel</span>&gt;(<span style='color: #98c379;'>\"Text Area Label\"</span>);"); 
+    addLine("<span style='color: #61afef;'>auto</span> textArea = <span style='color: #61afef;'>addNew</span>&lt;<span style='color: #e06c75;'>Wt::WTextArea</span>&gt;();");
+    addLine("textArea-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WWidget.html#abb5949e98f47edb7db98d7b6df07a31c' target='_blank' style='color: #61afef;  text-decoration: underline;'>addStyleClass</a>(<span style='color: #98c379;'>\"field-sizing-content\"</span>);  <span style='color: #6a9955;'>// Adjust size based on content</span>");
+    addLine("label-&gt;<a href='https://www.webtoolkit.eu/wt/doc/reference/html/classWt_1_1WLabel.html#af468c613eab7d184c68fd6ae20978de5' target='_blank' style='color: #61afef;  text-decoration: underline;'>setBuddy</a>(textArea);");
+    oss << "</pre>";
+    oss << "</div>";
+    contentWrapper->addNew<Wt::WTemplate>(oss.str());
 
     return wrapper;
 }

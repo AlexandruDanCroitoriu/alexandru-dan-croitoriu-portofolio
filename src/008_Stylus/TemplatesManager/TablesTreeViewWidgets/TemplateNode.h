@@ -7,11 +7,11 @@
 #include <Wt/WSignal.h>
 #include <memory>
 
-class MessageTemplate;
-class StylusSession;
-
 namespace Stylus
 {
+
+class MessageTemplate;
+class StylusSession;
 
 class TemplateNode : public Wt::WTreeNode
 {

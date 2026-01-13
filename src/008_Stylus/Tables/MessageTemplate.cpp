@@ -3,4 +3,4 @@
 
 #include <Wt/Dbo/Impl.h>
 
-DBO_INSTANTIATE_TEMPLATES(MessageTemplate)
+DBO_INSTANTIATE_TEMPLATES(Stylus::MessageTemplate)

@@ -8,6 +8,8 @@
 
 namespace dbo = Wt::Dbo;
 
+namespace Stylus {
+
 class TemplateFolder;
 class TemplateFile;
 class MessageTemplate;
@@ -25,3 +27,5 @@ private:
   void createInitialDataProd();
   bool created_ = false;
 };
+
+} // namespace Stylus

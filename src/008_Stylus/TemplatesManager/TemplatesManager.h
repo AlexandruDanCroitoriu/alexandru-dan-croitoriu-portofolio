@@ -5,15 +5,14 @@
 #include <Wt/WSignal.h>
 #include <Wt/Dbo/ptr.h>
 
-class StylusSession;
-class TemplateFile;
-class MessageTemplate;
-
 namespace Stylus
 {
 
-    class TempView;
-    class StylusState;
+class StylusSession;
+class TemplateFile;
+class MessageTemplate;
+class TempView;
+class StylusState;
 
 class TemplatesManager : public Wt::WContainerWidget
 {

@@ -4,6 +4,8 @@
 
 #include <Wt/Dbo/Types.h>
 
+namespace Stylus {
+
 class TemplateFolder;
 class MessageTemplate;
 
@@ -29,5 +31,6 @@ public:
   }
 };
 
+} // namespace Stylus
 
-DBO_EXTERN_TEMPLATES(TemplateFile)
+DBO_EXTERN_TEMPLATES(Stylus::TemplateFile)

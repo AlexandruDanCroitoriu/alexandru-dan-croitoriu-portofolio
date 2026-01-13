@@ -11,6 +11,8 @@
 #include <memory>
 #include <exception>
 
+namespace Stylus {
+
 StylusSession::StylusSession(const std::string &sqliteDb, bool dev)
 {
   Wt::log("debug") << "StylusSession::StylusSession()";
@@ -225,3 +227,5 @@ int StylusSession::getNextFolderOrder()
 
   return maxOrder + 1;
 }
+
+} // namespace Stylus

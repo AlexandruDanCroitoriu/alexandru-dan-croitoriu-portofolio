@@ -376,17 +376,8 @@
   .mb-12 {
     margin-bottom: calc(var(--spacing) * 12);
   }
-  .ml-2 {
-    margin-left: calc(var(--spacing) * 2);
-  }
   .ml-3 {
     margin-left: calc(var(--spacing) * 3);
-  }
-  .ml-4 {
-    margin-left: calc(var(--spacing) * 4);
-  }
-  .ml-\[10px\] {
-    margin-left: 10px;
   }
   .ml-auto {
     margin-left: auto;
@@ -414,6 +405,9 @@
   }
   .table {
     display: table;
+  }
+  .field-sizing-content {
+    field-sizing: content;
   }
   .size-8 {
     width: calc(var(--spacing) * 8);
@@ -1684,27 +1678,6 @@
       padding-inline: calc(var(--spacing) * 1);
     }
   }
-  .\[\&input\]\:hidden {
-    &input {
-      display: none;
-    }
-  }
-  .\[\&span\]\:rounded-md {
-    &span {
-      border-radius: var(--radius-md);
-    }
-  }
-  .\[\&span\]\:border {
-    &span {
-      border-style: var(--tw-border-style);
-      border-width: 1px;
-    }
-  }
-  .\[\&span\]\:border-gray-600 {
-    &span {
-      border-color: var(--color-gray-600);
-    }
-  }
   .\[\&\>input\]\:\[\&\~span\]\:rounded-md {
     &>input {
       &~span {
@@ -1735,13 +1708,6 @@
       }
     }
   }
-  .\[\&\>input\:checked\]\:\[\&\~span\]\:bg-gray-400 {
-    &>input:checked {
-      &~span {
-        background-color: var(--color-gray-400);
-      }
-    }
-  }
   .\[\&\>input\:checked\]\:\[\&\~span\]\:bg-gray-700 {
     &>input:checked {
       &~span {
@@ -1750,7 +1716,7 @@
     }
   }
 }
-textarea {
+.field-sizing-content {
   field-sizing: content;
 }
 * {

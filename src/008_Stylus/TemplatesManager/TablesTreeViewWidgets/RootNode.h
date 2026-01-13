@@ -6,10 +6,10 @@
 #include <Wt/Dbo/ptr.h>
 #include <Wt/WSignal.h>
 
-class StylusSession;
-
 namespace Stylus
 {
+
+class StylusSession;
 
 class RootNode : public Wt::WTreeNode
 {

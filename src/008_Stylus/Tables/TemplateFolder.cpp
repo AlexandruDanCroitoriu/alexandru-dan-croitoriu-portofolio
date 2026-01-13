@@ -4,4 +4,4 @@
 
 #include <Wt/Dbo/Impl.h>
 
-DBO_INSTANTIATE_TEMPLATES(TemplateFolder)
+DBO_INSTANTIATE_TEMPLATES(Stylus::TemplateFolder)

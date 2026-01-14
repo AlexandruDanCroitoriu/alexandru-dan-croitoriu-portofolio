@@ -23,14 +23,27 @@ namespace Stylus
     {
         wApp->log("debug") << "TempView::TempView(StylusSession& session)";
         // WTemplate does not accept TextFormat in constructor; set it separately
-        setStyleClass("border border-gray-600 rounded-md flex min-w-fit");
-        auto settingsArea = addNew<Wt::WContainerWidget>();
-        settingsArea->setStyleClass("flex flex-col p-1 border-r border-gray-600");
+        setStyleClass("border border-gray-600 rounded-md flex w-full h-full");
         leftArea_ = addNew<Wt::WContainerWidget>();
-        leftArea_->setStyleClass("pr-2 border-r border-gray-600 min-w-[240px]");
-        mainArea_ = addNew<Wt::WContainerWidget>();
-        mainArea_->setStyleClass("px-4 py-2");
+        centralArea_ = addNew<Wt::WContainerWidget>();
+        centralMainArea_ = centralArea_->addNew<Wt::WContainerWidget>();
+        monaco_ = centralArea_->addNew<MonacoEditor>("xml");
+        // monaco_->setLineNumber(false);
+        monaco_->setLineWrap(false);
+        monaco_->setStyleClass("h-1/2 w-[calc(100%-2px)]");
+        monaco_->availableSave().connect(this, [=]() {
+            Wt::Dbo::Transaction transaction(*session_);
+            messageTemplate_.modify()->templateXml_ = monaco_->getUnsavedText();
+            transaction.commit();
+            xmlBrain_->reloadTemplateFromDb();
+            // refreshView();
+        });
+        monaco_->setContent(messageTemplate_->templateXml_);
         // rightArea_ = addNew<Wt::WContainerWidget>();
+        
+        centralArea_->setStyleClass("flex grow flex-wrap");
+        leftArea_->setStyleClass("pr-2 border-r border-gray-600 min-w-[180px]");
+        centralMainArea_->setStyleClass("px-4 py-2 h-1/2");
         // rightArea_->setStyleClass("pl-2 border-l border-gray-600");
 
         xmlBrain_ = std::make_shared<XmlBrain>(session_, messageTemplate_);
@@ -47,32 +60,9 @@ namespace Stylus
             }
         });
         globalKeyConnection_ = wApp->globalKeyWentDown().connect([this](Wt::WKeyEvent e) {
-            if(messageTemplate_->viewMode_ == ViewMode::Editor || xmlBrain_->selectedNode_)
+            if(xmlBrain_->selectedNode_)
                 keyWentDown(e);
         });
-        
-        auto switchViewMoode = settingsArea->addNew<Wt::WIconPair>(
-            "static/icons/view-template.svg",
-            "static/icons/view-editor.svg"
-        );
-        switchViewMoode->setStyleClass("cursor-pointer mb-2 w-6 border border-gray-600 rounded hover:bg-gray-700/50 p-1");
-        
-        // Connect both icon states to toggle view mode
-        switchViewMoode->icon1Clicked().connect(this, [=]() {
-            setViewMode(ViewMode::Editor);
-            switchViewMoode->setState(1);  // Show icon2
-        });
-        switchViewMoode->icon2Clicked().connect(this, [=]() {
-            setViewMode(ViewMode::Template);
-            switchViewMoode->setState(0);  // Show icon1
-        });
-        
-        // Set initial icon state based on current view mode
-        if(messageTemplate_->viewMode_ == ViewMode::Template) {
-            switchViewMoode->setState(0);  // Show icon1 (view-template.svg)
-        } else {
-            switchViewMoode->setState(1);  // Show icon2 (view-editor.svg)
-        }
         
         refreshView();
     }
@@ -83,36 +73,24 @@ namespace Stylus
         wApp->log("debug") << "TempView::~TempView() for temp with id " << xmlBrain_->messageTemplate_->id() << "\n";
     }
 
-    void TempView::setViewMode(ViewMode mode)
-    {
-        Wt::Dbo::Transaction t(*session_);
-        messageTemplate_.modify()->viewMode_ = mode;
-        t.commit();
-        refreshView();
-
-    }
-
     void TempView::refreshView()
     {
         leftArea_->clear();
-        mainArea_->clear();
+        centralMainArea_->clear();
         // rightArea_->clear();
-        auto mainWrapper = mainArea_->addNew<Wt::WContainerWidget>();
-
         
-        
-        if(messageTemplate_->viewMode_ == ViewMode::Template)
+        // check if document is valid
+        if (!xmlBrain_->doc_ || !xmlBrain_->doc_->RootElement())
         {
-            auto monaco = leftArea_->addNew<MonacoEditor>("xml");
-            monaco->setStyleClass("h-full w-full");
-            monaco->setContent(messageTemplate_->templateXml_);
-            monaco->setLineNumber(false);
-            monaco->setLineWrap(false);
-            auto temp = mainWrapper->addNew<Wt::WTemplate>(Wt::WString::fromUTF8(messageTemplate_->templateXml_));
-        }else {
-            leftArea_->addNew<XMLTreeNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
-            auto elem_node = mainWrapper->addNew<XMLElemNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
+            auto error = xmlBrain_->doc_->Parse(xmlBrain_->messageTemplate_->templateXml_.c_str());
+            auto errorText = centralMainArea_->addNew<Wt::WText>(error != tinyxml2::XML_SUCCESS ?
+                "\nError parsing XML template: " + std::string(xmlBrain_->doc_->ErrorIDToName(error)) + "\n" :
+                "\nError: XML document is empty or invalid.\n");
+            errorText->setStyleClass("text-red-600 font-bold");
+            return;
         }
+        leftArea_->addNew<XMLTreeNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
+        auto elem_node = centralMainArea_->addNew<XMLElemNode>(xmlBrain_, xmlBrain_->doc_->RootElement());
     }
 
 

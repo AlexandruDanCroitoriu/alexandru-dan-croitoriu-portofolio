@@ -25,6 +25,7 @@ public:
         std::shared_ptr<StylusSession> session_;
         Wt::Signal<> &stateChanged() { return stateChanged_; }
         void saveCurrentVersion();
+        void reloadTemplateFromDb();
         Wt::Dbo::ptr<MessageTemplate> messageTemplate_;
 private:
         Wt::Signal<> stateChanged_;

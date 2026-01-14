@@ -72,7 +72,11 @@ void Stylus::setupContent()
     navbar_wrapper_ = contents()->addNew<Wt::WContainerWidget>();
     content_stack_ = contents()->addNew<Wt::WStackedWidget>();
     menu_ = navbar_wrapper_->addNew<Wt::WMenu>(content_stack_);
-    navbar_wrapper_->hide();
+    if(stylus_state_->stylusNode_->Attribute("main-menu-open") && 
+       std::string(stylus_state_->stylusNode_->Attribute("main-menu-open")).compare("false") == 0) {
+        navbar_wrapper_->hide();
+    }
+    // navbar_wrapper_->hide();
     navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid border-gray-600");
     content_stack_->setStyleClass("grow");
     menu_->setStyleClass("flex flex-col items-center h-full");
@@ -85,6 +89,17 @@ void Stylus::setupContent()
     std::unique_ptr<Wt::WContainerWidget> settings_wrapper = std::make_unique<Wt::WContainerWidget>();
 
     templates_manager_ = xml_files_wrapper->addNew<TemplatesManager>(sessionDev_, sessionProd_, stylus_state_);
+    templates_manager_->toggleStylusMainNav_->icon1Clicked().connect(this, [=]() {
+        stylus_state_->stylusNode_->SetAttribute("main-menu-open", "true");
+        stylus_state_->doc_->SaveFile(stylus_state_->stateFilePath_.c_str());
+        navbar_wrapper_->show();
+    });
+    templates_manager_->toggleStylusMainNav_->icon2Clicked().connect(this, [=]() {
+        stylus_state_->stylusNode_->SetAttribute("main-menu-open", "false");
+        stylus_state_->doc_->SaveFile(stylus_state_->stateFilePath_.c_str());
+        navbar_wrapper_->hide();
+    });
+
 
     xml_files_wrapper_ = xml_files_wrapper.get();
     css_files_wrapper_ = css_files_wrapper.get();
@@ -123,7 +138,20 @@ void Stylus::keyWentDown(Wt::WKeyEvent e)
     // templates_manager_->keyWentDown(e);
 
     if (e.modifiers().test(Wt::KeyboardModifier::Alt)) {
-        if (e.key() == Wt::Key::Q) {
+        if (e.modifiers().test(Wt::KeyboardModifier::Shift)) {
+            // Future keyboard shortcuts with Alt+Shift combination
+            if(e.key() == Wt::Key::Key_1) {
+                // toggle main navbar
+                if(navbar_wrapper_->isHidden()) {
+                    navbar_wrapper_->show();
+                    stylus_state_->stylusNode_->SetAttribute("main-menu-open", "true");
+                } else {
+                    navbar_wrapper_->hide();
+                    stylus_state_->stylusNode_->SetAttribute("main-menu-open", "false");
+                }
+                stylus_state_->doc_->SaveFile(stylus_state_->stateFilePath_.c_str());
+            }
+        }else if (e.key() == Wt::Key::Q) {
             if (isHidden()) {
                 show();
                 stylus_state_->stylusNode_->SetAttribute("open", "true");
@@ -146,9 +174,7 @@ void Stylus::keyWentDown(Wt::WKeyEvent e)
             menu_->select(5);
         }
         
-        if (e.modifiers().test(Wt::KeyboardModifier::Shift)) {
-            // Future keyboard shortcuts with Alt+Shift combination
-        }
+    
     }
 }
 

@@ -89,7 +89,6 @@ void StylusSession::createInitialDataDev()
         {
           auto messageTemp = add(std::make_unique<MessageTemplate>());
           auto mt = messageTemp.modify();
-          mt->viewMode_ = ViewMode::Template;
           mt->messageId_ = "temp-" + std::to_string(i) + "-" + std::to_string(j) + "-" + std::to_string(k);
           mt->templateXml_ =
               R"(<div class="divide-y divide-white/10 overflow-hidden rounded-lg bg-gray-800/50 outline outline-1 -outline-offset-1 outline-white/10">
@@ -139,7 +138,6 @@ void StylusSession::createInitialDataProd()
 
     auto cardWithHeaderAndFooter = add(std::make_unique<MessageTemplate>());
     auto mt4 = cardWithHeaderAndFooter.modify();
-    mt4->viewMode_ = ViewMode::Template;
     mt4->messageId_ = "card-with-header-and-footer";
     mt4->templateXml_ =
 R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
@@ -159,7 +157,6 @@ R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shad
 
     auto cardWithFooter = add(std::make_unique<MessageTemplate>());
     auto mt3 = cardWithFooter.modify();
-    mt3->viewMode_ = ViewMode::Template;
     mt3->messageId_ = "card-with-footer";
     mt3->templateXml_ =
 R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
@@ -176,7 +173,6 @@ R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shad
 
     auto cardWithHeader = add(std::make_unique<MessageTemplate>());
     auto mt2 = cardWithHeader.modify();
-    mt2->viewMode_ = ViewMode::Template;
     mt2->messageId_ = "card-with-header";
     mt2->templateXml_ =
 R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">
@@ -192,7 +188,6 @@ R"(<div class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shad
 
     auto basicCard = add(std::make_unique<MessageTemplate>());
     auto mt = basicCard.modify();
-    mt->viewMode_ = ViewMode::Template;
     mt->messageId_ = "basic-card";
     mt->templateXml_ =
         R"(<div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800/50 dark:shadow-none dark:outline dark:outline-1 dark:-outline-offset-1 dark:outline-white/10">

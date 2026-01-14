@@ -31,6 +31,7 @@ StylusState::StylusState()
             std::cerr << "Error finding <stylus> node in XML file." << std::endl;
             stylusNode_ = doc_->NewElement("stylus");
             stylusNode_->SetAttribute("open", "true");
+            stylusNode_->SetAttribute("main-menu-open", "true");
             doc_->InsertFirstChild(stylusNode_);
         }
         xmlNode_ = stylusNode_->FirstChildElement("xml-manager");

@@ -20,6 +20,7 @@
 #include <Wt/WDialog.h>
 #include <Wt/WRadioButton.h>
 #include <Wt/WButtonGroup.h>
+#include <Wt/WTemplate.h>
 
 namespace Stylus
 {
@@ -38,6 +39,18 @@ namespace Stylus
         auto settingsArea = treeWrapper->addNew<Wt::WContainerWidget>();
         settingsArea->setStyleClass("flex items-center border-b border-gray-600 p-1 space-x-2");
 
+        toggleStylusMainNav_ = settingsArea->addNew<Wt::WIconPair>(
+            "static/icons/hamburger-open-white.svg",
+            "static/icons/hamburger-close-white.svg"
+        );
+        toggleStylusMainNav_->setStyleClass("cursor-pointer h-6 w-6 border border-gray-600 rounded hover:bg-gray-700/50 p-1 flex items-center justify-center");
+        if(stylusState_->stylusNode_->Attribute("main-menu-open") && 
+           std::string(stylusState_->stylusNode_->Attribute("main-menu-open")).compare("false") == 0) {
+            toggleStylusMainNav_->showIcon1();
+        } else {
+            toggleStylusMainNav_->showIcon2();
+        }
+
         auto buttonGroup = std::make_shared<Wt::WButtonGroup>();
         auto devRadio = settingsArea->addNew<Wt::WRadioButton>("Dev DBO");
         devRadio->setStyleClass("[&>input]:hidden [&>span]:px-1 [&>span]:border [&>span]:border-gray-600 [&>span]:rounded-md [&>input:checked]:[&~span]:bg-gray-700");
@@ -46,12 +59,14 @@ namespace Stylus
         buttonGroup->addButton(devRadio);
         buttonGroup->addButton(prodRadio);
 
+        
+
+
         tree_ = treeWrapper->addWidget(std::make_unique<Wt::WTree>());
         tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)] mb-12");
         tree_->setSelectionMode(Wt::SelectionMode::Single);
 
         contentWrapper_ = addNew<Wt::WContainerWidget>();
-        contentWrapper_->setStyleClass("h-[100svh] overflow-auto grow flex flex-col items-stretch space-y-4");
 
         buttonGroup->checkedChanged().connect(this, [=](Wt::WRadioButton *button)
                                               {
@@ -84,28 +99,31 @@ namespace Stylus
         buttonGroup->checkedChanged().emit(buttonGroup->checkedButton());
     }
 
-    void TemplatesManager::populateTree()
+    std::shared_ptr<StylusSession> TemplatesManager::getSelectedSession()
     {
-        wApp->log("debug") << "TemplatesManager::populateTree";
-        std::shared_ptr<StylusSession> session;
-
         if (stylusState_ && stylusState_->xmlNode_->Attribute("dbo-to-use"))
         {
             std::string dboToUse = stylusState_->xmlNode_->Attribute("dbo-to-use");
             if (dboToUse.compare("prod") == 0)
             {
-                session = sessionProd_;
+                return sessionProd_;
             }
             else
             {
-                session = sessionDev_;
+                return sessionDev_;
             }
         }
         else
         {
             wApp->log("debug") << "Defaulting to Dev DBO";
-            session = sessionDev_;
+            return sessionDev_;
         }
+    }
+
+    void TemplatesManager::populateTree()
+    {
+        wApp->log("debug") << "TemplatesManager::populateTree";
+        std::shared_ptr<StylusSession> session = getSelectedSession();
         // session = sessionProd_;
 
         isRebuilding_ = true;  // Set flag to ignore selection signals during rebuild
@@ -115,10 +133,37 @@ namespace Stylus
         root_ptr->setLoadPolicy(Wt::ContentLoading::Eager);
         root_ptr->changed().connect(this, &TemplatesManager::populateTree);
         tree_->setTreeRoot(std::move(root_node));
-
+        root_ptr->selected().connect(this, [=](bool selected)
+                                        {
+            // Skip selection signal if we're rebuilding the tree
+            if (isRebuilding_ && !selected)
+                return;
+            
+            std::vector<Wt::Dbo::ptr<MessageTemplate>> templates;
+            Wt::Dbo::Transaction t(*session);
+            auto folders = session->find<TemplateFolder>().orderBy("order_index").resultList();
+            for (auto folder : folders)
+            {
+                folder.modify()->selected_ = false;
+                auto files = session->find<TemplateFile>()
+                                    .where("folder_id = ?")
+                                    .bind(folder.id())
+                                    .resultList();
+                for (auto file : files)
+                {
+                    file.modify()->selected_ = false;
+                    auto fileTemplates = session->find<MessageTemplate>()
+                                            .where("file_id = ?")
+                                            .bind(file.id())
+                                            .resultList();
+                    templates.insert(templates.end(), fileTemplates.begin(), fileTemplates.end());  
+                }
+            }
+            t.commit();
+            renderTemplates(templates);
+            });
         Wt::Dbo::Transaction t(*session);
         auto folders = session->find<TemplateFolder>().orderBy("order_index").resultList();
-
         bool selectedRestored = false;
 
         for (auto folder : folders)
@@ -137,21 +182,27 @@ namespace Stylus
                     return;
                 
                 Wt::Dbo::Transaction t(*session);
-                if (selected)
-                {
-                    std::vector<Wt::Dbo::ptr<MessageTemplate>> messageTemplates;
-                    for (auto file : folder->files_)
-                    {
-                        for (auto tmpl : file->templates_)
-                        {
-                            messageTemplates.push_back(tmpl);
-                        }
-                    }
-                    renderSelection(messageTemplates);
-                }
                 auto f = folder.modify();
                 f->selected_ = selected;
-                t.commit(); });
+                if (selected)
+                {
+                    std::vector<Wt::Dbo::ptr<MessageTemplate>> templates;
+                    auto files = session->find<TemplateFile>()
+                                        .where("folder_id = ?")
+                                        .bind(folder.id())
+                                        .resultList();
+                    for (auto file : files)
+                    {
+                        auto fileTemplates = session->find<MessageTemplate>()
+                                                .where("file_id = ?")
+                                                .bind(file.id())
+                                                .resultList();
+                        templates.insert(templates.end(), fileTemplates.begin(), fileTemplates.end());  
+                    }
+                    renderTemplates(templates);
+                }
+                t.commit(); 
+            });
             if (folder->selected_ && !selectedRestored)
             {
                 tree_->select(folder_ptr);
@@ -191,22 +242,19 @@ namespace Stylus
                         return;
                     
                     Wt::Dbo::Transaction t(*session);
+                    file.modify()->selected_ = selected;
                     if (selected)
                     {
-                        std::vector<Wt::Dbo::ptr<MessageTemplate>> messageTemplates;
-                        auto templates = session->find<MessageTemplate>()
-                                            .where("file_id = ?")
-                                            .bind(file.id())
-                                            .orderBy("order_index")
-                                            .resultList();
-                        for (auto tmpl : templates)
-                        {
-                            messageTemplates.push_back(tmpl);
-                        }
-                        renderSelection(messageTemplates);
+                        std::vector<Wt::Dbo::ptr<MessageTemplate>> templates;
+                        auto fileTemplates = session->find<MessageTemplate>()
+                        .where("file_id = ?")
+                        .bind(file.id())
+                        .resultList();
+                        templates.insert(templates.end(), fileTemplates.begin(), fileTemplates.end());  
+                        renderTemplates(templates);
                     } 
-                    file.modify()->selected_ = selected;
-                    t.commit(); });
+                    t.commit(); 
+                });
                 if (file->selected_ && !selectedRestored)
                 {
                     tree_->select(file_ptr);
@@ -232,15 +280,14 @@ namespace Stylus
                         if (isRebuilding_ && !selected)
                             return;
                         
-                        if (selected)
-                        {
-                            std::vector<Wt::Dbo::ptr<MessageTemplate>> messageTemplates;
-                            messageTemplates.push_back(tmpl);
-                            renderSelection(messageTemplates);
-                        }
                         Wt::Dbo::Transaction t(*session);
                         tmpl.modify()->selected_ = selected;
-                        t.commit(); });
+                        t.commit(); 
+                        if (selected)
+                        {
+                            renderSelection(tmpl);
+                        }
+                    });
                     if (tmpl->selected_ && !selectedRestored)
                     {
                         tree_->select(template_ptr);
@@ -256,118 +303,52 @@ namespace Stylus
         // tree_->select(tree_->selectedNodes(), true); // Refresh selection to trigger rendering
         // renderSelection();
     }
-
-    void TemplatesManager::renderSelection(std::vector<Wt::Dbo::ptr<MessageTemplate>> messageTemplate)
+    
+    void TemplatesManager::renderTemplates(std::vector<Wt::Dbo::ptr<MessageTemplate>> templates)
     {
         if (!contentWrapper_)
             return;
 
         // Clear previous content
         contentWrapper_->clear();
-
-        if(messageTemplate.size() == 1)
-        {
-            auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, messageTemplate[0]));
-            tempView->addStyleClass("h-full");
-        }else {
-            for (auto tmpl : messageTemplate)
-            {
-                auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, tmpl));
-                // tempView->setViewMode(ViewMode::Editor);
-                // tempViews_.push_back(tempView);
-            }
+        if(!contentWrapper_->hasStyleClass("!flex-row")){
+            contentWrapper_->toggleStyleClass("!flex-row", true);
         }
+        contentWrapper_->setStyleClass("h-[100svh] overflow-auto grow grid grid-cols-2 lg:grid-cols-3 gap-4 p-4 auto-rows-max");
 
-        // std::shared_ptr<StylusSession> session;
+        std::shared_ptr<StylusSession> session = getSelectedSession();
 
-        // if (stylusState_ && stylusState_->xmlNode_->Attribute("dbo-to-use"))
-        // {
-        //     std::string dboToUse = stylusState_->xmlNode_->Attribute("dbo-to-use");
-        //     if (dboToUse.compare("prod") == 0)
-        //     {
-        //         session = sessionProd_;
-        //     }
-        //     else
-        //     {
-        //         session = sessionDev_;
-        //     }
-        // }
-        // else
-        // {
-        //     wApp->log("debug") << "Defaulting to Dev DBO";
-        //     session = sessionDev_;
-        // }
+        for (auto tmpl : templates)
+        {
+            auto temp = contentWrapper_->addWidget(std::make_unique<Wt::WTemplate>(tmpl->templateXml_));
+            temp->addStyleClass("hover:border hover:border-green-500 cursor-pointer h-fit");
 
-        // Wt::Dbo::Transaction t(*session);
+            temp->clicked().connect(this, [=]()
+            {
+                tree_->select(tree_->treeRoot()); // Deselect all
+                Wt::Dbo::Transaction t(*session);
+                tmpl.modify()->selected_ = true;
+                t.commit();
+                populateTree();
+            });
+        }
+    }
 
-        // switch (selectedKind_)
-        // {
-        // case SelectedKind::Template:
-        // {
-        //     if (selectedTemplateId_ < 0)
-        //         break;
-        //     auto tmplList = session->find<MessageTemplate>()
-        //                         .where("id = ?")
-        //                         .bind(selectedTemplateId_)
-        //                         .limit(1)
-        //                         .resultList();
-        //     for (auto tmpl : tmplList)
-        //     {
-        //         auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session, tmpl));
-        //         tempView->addStyleClass("h-full");
-        //         // tempView->setViewMode(ViewMode::Editor);
-        //         // tempViews_.push_back(tempView);
-        //     }
-        //     break;
-        // }
-        // case SelectedKind::File:
-        // {
-        //     if (selectedFileId_ < 0)
-        //         break;
-        //     auto orderedTemplates = session->find<MessageTemplate>()
-        //                                 .where("file_id = ?")
-        //                                 .bind(selectedFileId_)
-        //                                 .orderBy("order_index")
-        //                                 .resultList();
-        //     for (auto tmpl : orderedTemplates)
-        //     {
-        //         auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session, tmpl));
-        //         // tempView->setViewMode(ViewMode::Editor);
-        //         // tempViews_.push_back(tempView);
-        //     }
-        //     break;
-        // }
-        // case SelectedKind::Folder:
-        // {
-        //     if (selectedFolderId_ < 0)
-        //         break;
-        //     auto orderedFiles = session->find<TemplateFile>()
-        //                             .where("folder_id = ?")
-        //                             .bind(selectedFolderId_)
-        //                             .orderBy("order_index")
-        //                             .resultList();
-        //     for (auto file : orderedFiles)
-        //     {
-        //         auto orderedTemplates = session->find<MessageTemplate>()
-        //                                     .where("file_id = ?")
-        //                                     .bind(file.id())
-        //                                     .orderBy("order_index")
-        //                                     .resultList();
-        //         for (auto tmpl : orderedTemplates)
-        //         {
-        //             auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(session, tmpl));
-        //             // tempView->setViewMode(ViewMode::Editor);
-        //             // tempViews_.push_back(tempView);
-        //         }
-        //     }
-        //     break;
-        // }
-        // case SelectedKind::None:
-        // default:
-        //     break;
-        // }
+    void TemplatesManager::renderSelection(Wt::Dbo::ptr<MessageTemplate> messageTemplate)
+    {
+        if (!contentWrapper_)
+            return;
 
-        // t.commit();
+        // Clear previous content
+        contentWrapper_->clear();
+        if(contentWrapper_->hasStyleClass("!flex-row")){
+            contentWrapper_->toggleStyleClass("!flex-row", false);
+        }
+        contentWrapper_->setStyleClass("h-[100svh] overflow-y-auto overflow-x-hidden grow flex flex-col flex-wrap items-stretch space-y-4 space-x-4");
+
+        auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, messageTemplate));
+        // tempView->addStyleClass("h-full overflow-auto");
+
     }
 
     void TemplatesManager::keyWentDown(Wt::WKeyEvent e)

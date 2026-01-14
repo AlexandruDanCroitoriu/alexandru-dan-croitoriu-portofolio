@@ -91,7 +91,12 @@ MonacoEditor::MonacoEditor(std::string language)
                     Wt.emit(')" + id() + R"(', 'editorTextChanged', window.)" + editor_js_var_name_ + R"(.getValue());
                 }
             });
-            
+            window.addEventListener('resize', function() {
+                var ed = window.)" + editor_js_var_name_ + R"(;
+                if(ed) {
+                    ed.layout();
+                }
+            });
             window.)" + editor_js_var_name_ + R"(.getDomNode().addEventListener('keydown', function(e) {
                 if ((e.ctrlKey || e.metaKey)) {
                     if (e.key === 's') {
@@ -164,7 +169,7 @@ void MonacoEditor::setReadOnly(bool readOnly) {
                     ed.updateOptions({ readOnly: )" + std::string(readOnly ? "true" : "false") + R"( });
                 } else if(attempts < 10) {
                     attempts++;
-                    setTimeout(setRO, 100);
+                    setTimeout(setRO, attempts === 1 ? 0 : 100);
                 }
             };
             setRO();
@@ -196,7 +201,7 @@ void MonacoEditor::resetLayout()
                         ed.layout();
                     } else if(attempts < maxAttempts) {
                         attempts++;
-                        setTimeout(doLayout, 200);
+                        setTimeout(doLayout, attempts === 1 ? 0 : 200);
                     }
                 };
                 doLayout();
@@ -217,9 +222,6 @@ void MonacoEditor::setContent(const std::string& content)
     // Register the resource with the server
     Wt::WServer::instance()->addResource(resource, resourcePath);
     
-    // Get the absolute URL for the resource
-    std::string resourceUrl = wApp->makeAbsoluteUrl(resourcePath);
-    
     doJavaScript(
         R"(
             (function(){
@@ -228,16 +230,21 @@ void MonacoEditor::setContent(const std::string& content)
                 var setContent = function(){
                     var ed = window.)" + editor_js_var_name_ + R"(;
                     if(ed){
-                        fetch(')" + resourceUrl + R"(')
-                            .then(response => response.text())
-                            .then(contentData => {
-                                window.)" + editor_js_var_name_ + R"(_current_text = contentData;
-                                window.)" + editor_js_var_name_ + R"(.setValue(contentData);
-                            })
-                            .catch(error => console.error('Failed to load content:', error));
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                window.)" + editor_js_var_name_ + R"(_current_text = xhr.responseText;
+                                window.)" + editor_js_var_name_ + R"(.setValue(xhr.responseText);
+                            } else if (xhr.readyState === 4) {
+                                console.error('Failed to load content: HTTP ' + xhr.status);
+                            }
+                        };
+                        xhr.open('GET', ')" + resourcePath + R"(', true);
+                        xhr.overrideMimeType('text/plain; charset=utf-8');
+                        xhr.send();
                     } else if(attempts < maxAttempts) {
                         attempts++;
-                        setTimeout(setContent, 200);
+                        setTimeout(setContent, attempts === 1 ? 0 : 200);
                     } else {
                         console.error("Editor instance )" + editor_js_var_name_ + R"( is not initialized after " + maxAttempts + " attempts");
                     }
@@ -251,6 +258,63 @@ void MonacoEditor::setContent(const std::string& content)
     resetLayout();
 }
 
+void MonacoEditor::setContentPreserveCursor(const std::string& content)
+{
+    wApp->log("debug") << "MonacoEditor::setContentPreserveCursor(const std::string& content): " << content;
+    
+    // Create a WResource for serving the content
+    auto resource = std::make_shared<StringContentResource>(content);
+    
+    // Generate a unique path for this resource
+    std::string resourcePath = "/monaco_content/" + Wt::WRandom::generateId();
+    
+    // Register the resource with the server
+    Wt::WServer::instance()->addResource(resource, resourcePath);
+    
+    doJavaScript(
+        R"(
+            (function(){
+                var attempts = 0;
+                var maxAttempts = 20;
+                var setContent = function(){
+                    var ed = window.)" + editor_js_var_name_ + R"(;
+                    if(ed){
+                        // Save current cursor position
+                        var cursorPos = ed.getPosition();
+                        
+                        var xhr = new XMLHttpRequest();
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                window.)" + editor_js_var_name_ + R"(_current_text = xhr.responseText;
+                                window.)" + editor_js_var_name_ + R"(.setValue(xhr.responseText);
+                                
+                                // Restore cursor position if it's valid for the new content
+                                if (cursorPos && cursorPos.lineNumber <= ed.getModel().getLineCount()) {
+                                    ed.setPosition(cursorPos);
+                                    ed.revealPositionInCenter(cursorPos);
+                                }
+                            } else if (xhr.readyState === 4) {
+                                console.error('Failed to load content: HTTP ' + xhr.status);
+                            }
+                        };
+                        xhr.open('GET', ')" + resourcePath + R"(', true);
+                        xhr.overrideMimeType('text/plain; charset=utf-8');
+                        xhr.send();
+                    } else if(attempts < maxAttempts) {
+                        attempts++;
+                        setTimeout(setContent, attempts === 1 ? 0 : 200);
+                    } else {
+                        console.error("Editor instance )" + editor_js_var_name_ + R"( is not initialized after " + maxAttempts + " attempts");
+                    }
+                };
+                setContent();
+            })();
+        )");
+    
+    current_text_ = content;
+    unsaved_text_ = content;
+    resetLayout();
+}
 void MonacoEditor::setDarkTheme(bool dark)
 {
     wApp->log("debug") << "MonacoEditor::setDarkTheme(bool dark): " << (dark ? "true" : "false");
@@ -317,7 +381,7 @@ void MonacoEditor::setLineWrap(bool wrap)
                         ed.updateOptions({ wordWrap: ')" + std::string(wrap ? "on" : "off") + R"(' });
                     } else if(attempts < maxAttempts) {
                         attempts++;
-                        setTimeout(setWrap, 100);
+                        setTimeout(setWrap, attempts === 1 ? 0 : 100);
                     }
                 };
                 setWrap();
@@ -340,7 +404,7 @@ void MonacoEditor::toggleMinimap()
                         ed.updateOptions({ minimap: { enabled: !currentMinimap } });
                     } else if(attempts < maxAttempts) {
                         attempts++;
-                        setTimeout(toggleMap, 100);
+                        setTimeout(toggleMap, attempts === 1 ? 0 : 100);
                     }
                 };
                 toggleMap();
@@ -362,7 +426,7 @@ void MonacoEditor::setLineNumber(bool show)
                         ed.updateOptions({ lineNumbers: ')" + std::string(show ? "on" : "off") + R"(' });
                     } else if(attempts < maxAttempts) {
                         attempts++;
-                        setTimeout(setLineNum, 100);
+                        setTimeout(setLineNum, attempts === 1 ? 0 : 100);
                     }
                 };
                 setLineNum();

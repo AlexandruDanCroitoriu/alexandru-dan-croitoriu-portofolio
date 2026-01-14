@@ -56,6 +56,12 @@ public:
     void setContent(const std::string& content);
     
     /**
+     * @brief Sets editor content while preserving the cursor position
+     * @param content The text content to set in the editor
+     */
+    void setContentPreserveCursor(const std::string& content);
+    
+    /**
      * @brief Saves the current editor content to the selected file
      */
     void saveFile();

@@ -4,11 +4,13 @@
 #include <Wt/WTree.h>
 #include <Wt/WSignal.h>
 #include <Wt/Dbo/ptr.h>
+#include <Wt/WIconPair.h>
 
 namespace Stylus
 {
 
 class StylusSession;
+class TemplateFolder;
 class TemplateFile;
 class MessageTemplate;
 class TempView;
@@ -19,10 +21,8 @@ class TemplatesManager : public Wt::WContainerWidget
 public:
     TemplatesManager(std::shared_ptr<StylusSession> sessionDev, std::shared_ptr<StylusSession> sessionProd, std::shared_ptr<StylusState> stylusState);
 
-    // Wt::Signal<Wt::Dbo::ptr<TemplateFile>>& file_selected() { return file_selected_; }
-    // Wt::Signal<Wt::Dbo::ptr<MessageTemplate>>& template_selected() { return template_selected_; }
-
     void keyWentDown(Wt::WKeyEvent e);
+    Wt::WIconPair* toggleStylusMainNav_;
 private:
     std::shared_ptr<StylusState> stylusState_;
     
@@ -33,12 +33,10 @@ private:
     Wt::WContainerWidget* contentWrapper_;
     bool isRebuilding_ = false;  // Flag to suppress selection signals during tree rebuild
 
-    // Wt::Signal<Wt::Dbo::ptr<TemplateFile>> file_selected_;
-    // Wt::Signal<Wt::Dbo::ptr<MessageTemplate>> template_selected_;
-
     void populateTree();
-    void renderSelection(std::vector<Wt::Dbo::ptr<MessageTemplate>> messageTemplate);
-    // std::vector<TempView*> tempViews_;
+    void renderTemplates(std::vector<Wt::Dbo::ptr<MessageTemplate>> templates);
+    void renderSelection(Wt::Dbo::ptr<MessageTemplate> messageTemplate);
+    std::shared_ptr<StylusSession> getSelectedSession();
 
 };
 

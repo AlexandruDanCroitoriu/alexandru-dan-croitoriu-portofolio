@@ -16,6 +16,9 @@ namespace Stylus
 
         labelWrapper_->setStyleClass("flex space-x-2 truncate rounded-md mr-[3px] cursor-pointer overflow-visible ring-1 ring-transparent");
         contentWrapper_->setStyleClass("flex flex-col ml-3 rounded-md");
+        // Classes for the lines of the tree
+        labelWrapper_->addStyleClass("relative before:absolute before:-left-3 before:top-1/2 before:h-px before:w-3 before:bg-gray-600");
+        contentWrapper_->addStyleClass("relative pl-3 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-gray-600");
 
         if(node_){
             if(node_->ToElement()){

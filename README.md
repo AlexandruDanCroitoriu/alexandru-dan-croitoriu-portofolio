@@ -53,3 +53,8 @@ docker build \
 
 docker push maxuli/alexandru-dan-croitoriu-portofolio:latest
 ```
+
+
+### Things for myself to explore
+https://chrome.dev/css-wrapped-2025
+https://temporal.io/

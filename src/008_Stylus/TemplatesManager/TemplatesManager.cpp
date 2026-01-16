@@ -34,7 +34,13 @@ namespace Stylus
         setStyleClass("max-h-[100svh] flex overflow-hidden");
 
         auto treeWrapper = addNew<Wt::WContainerWidget>();
-        treeWrapper->setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px]");
+        treeWrapper->setStyleClass("h-[100svh] border-r border-gray-600 overflow-y-auto overflow-x-hidden max-w-sm min-w-[240px] relative");
+
+        // auto treeWrapperToggle = treeWrapper->addNew<Wt::WIconPair>(
+        //     "static/icons/hamburger-open-white.svg",
+        //     "static/icons/hamburger-close-white.svg"
+        // );
+        // treeWrapperToggle->setStyleClass("cursor-pointer h-6 w-6 border border-gray-600 rounded hover:bg-gray-700/50 p-1 flex items-center justify-center absolute top-2 -right-2");
 
         auto settingsArea = treeWrapper->addNew<Wt::WContainerWidget>();
         settingsArea->setStyleClass("flex items-center border-b border-gray-600 p-1 space-x-2");
@@ -58,9 +64,6 @@ namespace Stylus
         prodRadio->setStyleClass("[&>input]:hidden [&>span]:px-1 [&>span]:border [&>span]:border-gray-600 [&>span]:rounded-md [&>input:checked]:[&~span]:bg-gray-700");
         buttonGroup->addButton(devRadio);
         buttonGroup->addButton(prodRadio);
-
-        
-
 
         tree_ = treeWrapper->addWidget(std::make_unique<Wt::WTree>());
         tree_->addStyleClass("relative -left-[18px] w-[calc(100%+18px)] mb-12");
@@ -127,17 +130,17 @@ namespace Stylus
         // session = sessionProd_;
 
         isRebuilding_ = true;  // Set flag to ignore selection signals during rebuild
-        
+    
         auto root_node = std::make_unique<RootNode>(session);
         auto root_ptr = root_node.get();
         root_ptr->setLoadPolicy(Wt::ContentLoading::Eager);
         root_ptr->changed().connect(this, &TemplatesManager::populateTree);
         tree_->setTreeRoot(std::move(root_node));
         root_ptr->selected().connect(this, [=](bool selected)
-                                        {
+        {
             // Skip selection signal if we're rebuilding the tree
             if (isRebuilding_ && !selected)
-                return;
+            return;
             
             std::vector<Wt::Dbo::ptr<MessageTemplate>> templates;
             Wt::Dbo::Transaction t(*session);
@@ -146,9 +149,9 @@ namespace Stylus
             {
                 folder.modify()->selected_ = false;
                 auto files = session->find<TemplateFile>()
-                                    .where("folder_id = ?")
-                                    .bind(folder.id())
-                                    .resultList();
+                .where("folder_id = ?")
+                .bind(folder.id())
+                .resultList();
                 for (auto file : files)
                 {
                     file.modify()->selected_ = false;
@@ -321,7 +324,7 @@ namespace Stylus
         for (auto tmpl : templates)
         {
             auto temp = contentWrapper_->addWidget(std::make_unique<Wt::WTemplate>(tmpl->templateXml_));
-            temp->addStyleClass("hover:border hover:border-green-500 cursor-pointer h-fit");
+            temp->addStyleClass("hover:border hover:border-green-500 cursor-pointer ");
 
             temp->clicked().connect(this, [=]()
             {
@@ -346,9 +349,8 @@ namespace Stylus
         }
         contentWrapper_->setStyleClass("h-[100svh] overflow-y-auto overflow-x-hidden grow flex flex-col flex-wrap items-stretch space-y-4 space-x-4");
 
-        auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, messageTemplate));
+        auto tempView = contentWrapper_->addWidget(std::make_unique<TempView>(sessionDev_, messageTemplate, stylusState_));
         // tempView->addStyleClass("h-full overflow-auto");
-
     }
 
     void TemplatesManager::keyWentDown(Wt::WKeyEvent e)

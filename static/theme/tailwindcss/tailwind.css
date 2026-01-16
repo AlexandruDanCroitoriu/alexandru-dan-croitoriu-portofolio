@@ -271,6 +271,9 @@
   .top-4 {
     top: calc(var(--spacing) * 4);
   }
+  .-right-2 {
+    right: calc(var(--spacing) * -2);
+  }
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
@@ -468,17 +471,14 @@
   .w-\[35px\] {
     width: 35px;
   }
+  .w-\[240px\] {
+    width: 240px;
+  }
   .w-\[calc\(100\%\+18px\)\] {
     width: calc(100% + 18px);
   }
-  .w-\[calc\(100\%-1px\)\] {
-    width: calc(100% - 1px);
-  }
   .w-\[calc\(100\%-2px\)\] {
     width: calc(100% - 2px);
-  }
-  .w-\[calc\(100\%-12px\)\] {
-    width: calc(100% - 12px);
   }
   .w-auto {
     width: auto;
@@ -498,6 +498,9 @@
   .max-w-5xl {
     max-width: var(--container-5xl);
   }
+  .max-w-\[240px\] {
+    max-width: 240px;
+  }
   .max-w-none {
     max-width: none;
   }
@@ -515,9 +518,6 @@
   }
   .min-w-\[240px\] {
     min-width: 240px;
-  }
-  .min-w-fit {
-    min-width: fit-content;
   }
   .min-w-sm {
     min-width: var(--container-sm);
@@ -553,9 +553,6 @@
   }
   .appearance-none {
     appearance: none;
-  }
-  .auto-cols-max {
-    grid-auto-columns: max-content;
   }
   .auto-rows-max {
     grid-auto-rows: max-content;
@@ -913,12 +910,6 @@
   .fill-green-400 {
     fill: var(--color-green-400);
   }
-  .fill-white {
-    fill: var(--color-white);
-  }
-  .stroke-white {
-    stroke: var(--color-white);
-  }
   .\!p-1 {
     padding: calc(var(--spacing) * 1) !important;
   }
@@ -997,8 +988,8 @@
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
   }
-  .pl-2 {
-    padding-left: calc(var(--spacing) * 2);
+  .pl-3 {
+    padding-left: calc(var(--spacing) * 3);
   }
   .pl-4 {
     padding-left: calc(var(--spacing) * 4);
@@ -1295,20 +1286,64 @@
       color: var(--color-gray-400);
     }
   }
-  .hover\:size-1\.5 {
-    &:hover {
-      @media (hover: hover) {
-        width: calc(var(--spacing) * 1.5);
-        height: calc(var(--spacing) * 1.5);
-      }
+  .before\:absolute {
+    &::before {
+      content: var(--tw-content);
+      position: absolute;
     }
   }
-  .hover\:size-100 {
-    &:hover {
-      @media (hover: hover) {
-        width: calc(var(--spacing) * 100);
-        height: calc(var(--spacing) * 100);
-      }
+  .before\:top-0 {
+    &::before {
+      content: var(--tw-content);
+      top: calc(var(--spacing) * 0);
+    }
+  }
+  .before\:top-1\/2 {
+    &::before {
+      content: var(--tw-content);
+      top: calc(1/2 * 100%);
+    }
+  }
+  .before\:bottom-0 {
+    &::before {
+      content: var(--tw-content);
+      bottom: calc(var(--spacing) * 0);
+    }
+  }
+  .before\:-left-3 {
+    &::before {
+      content: var(--tw-content);
+      left: calc(var(--spacing) * -3);
+    }
+  }
+  .before\:left-0 {
+    &::before {
+      content: var(--tw-content);
+      left: calc(var(--spacing) * 0);
+    }
+  }
+  .before\:h-px {
+    &::before {
+      content: var(--tw-content);
+      height: 1px;
+    }
+  }
+  .before\:w-3 {
+    &::before {
+      content: var(--tw-content);
+      width: calc(var(--spacing) * 3);
+    }
+  }
+  .before\:w-px {
+    &::before {
+      content: var(--tw-content);
+      width: 1px;
+    }
+  }
+  .before\:bg-gray-600 {
+    &::before {
+      content: var(--tw-content);
+      background-color: var(--color-gray-600);
     }
   }
   .hover\:border {
@@ -1722,6 +1757,11 @@
       background-color: var(--color-gray-800);
     }
   }
+  .\[\&\>\.itemselected\]\:bg-gray-700 {
+    &>.itemselected {
+      background-color: var(--color-gray-700);
+    }
+  }
   .\[\&\>div\]\:h-full {
     &>div {
       height: 100%;
@@ -2028,6 +2068,11 @@
   syntax: "*";
   inherits: false;
 }
+@property --tw-content {
+  syntax: "*";
+  initial-value: "";
+  inherits: false;
+}
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
@@ -2076,6 +2121,7 @@
       --tw-drop-shadow-size: initial;
       --tw-duration: initial;
       --tw-ease: initial;
+      --tw-content: "";
     }
   }
 }

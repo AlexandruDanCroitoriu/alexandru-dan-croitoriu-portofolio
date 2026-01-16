@@ -79,7 +79,7 @@ void Stylus::setupContent()
     // navbar_wrapper_->hide();
     navbar_wrapper_->setStyleClass("flex flex-col items-center h-full border-r border-solid border-gray-600");
     content_stack_->setStyleClass("grow");
-    menu_->setStyleClass("flex flex-col items-center h-full");
+    menu_->setStyleClass("flex flex-col items-center h-full [&>.itemselected]:bg-gray-700");
 
     std::unique_ptr<Wt::WContainerWidget> xml_files_wrapper = std::make_unique<Wt::WContainerWidget>();
     std::unique_ptr<Wt::WContainerWidget> css_files_wrapper = std::make_unique<Wt::WContainerWidget>();

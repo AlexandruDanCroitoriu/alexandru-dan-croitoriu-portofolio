@@ -50,6 +50,7 @@ MonacoEditor::MonacoEditor(std::string language)
 {
     wApp->log("debug") << "MonacoEditor::MonacoEditor(std::string language):" << language;
     setLayoutSizeAware(true);
+    setCanReceiveFocus(true);
     setMinimumSize(Wt::WLength(1, Wt::LengthUnit::Pixel), Wt::WLength(1, Wt::LengthUnit::Pixel));
 
     // setMaximumSize(Wt::WLength::Auto, Wt::WLength(100, Wt::LengthUnit::ViewportHeight));

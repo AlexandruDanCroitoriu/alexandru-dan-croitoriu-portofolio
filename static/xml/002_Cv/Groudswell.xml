@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Stylus Editor -->
+<messages>
+    <message id="Cv.Groudswell.title">Groundswell</message>
+    <message id="Cv.Groudswell.role">ETL developer / Software Engineer</message>
+    <message id="Cv.Groudswell.period-start">04/2022</message>
+    <message id="Cv.Groudswell.period-end">04/2023</message>
+    <message id="Cv.Groudswell.summary">Held two separate roles at Groundswell:</message>
+    <message id="Cv.Groudswell.core-stack-wt">ETL Developer (first 4 months): Developed mappings and workflows in Informatica PowerCenter for data integration and warehousing projects.</message>
+    <message id="Cv.Groudswell.core-stack-ice">Software Engineer (remaining period): Developed a C++ web application using the Wt framework, following a client-server, three-tier architecture.</message>
+    <message id="Cv.Groudswell.core-stack-dbo">Built server-side rendered user interfaces and implemented backend logic using Wt Dbo for ORM and database interactions.</message>
+    <message id="Cv.Groudswell.core-stack-linux">Implemented inter-service communication using ZeroC Ice, an object-oriented RPC framework.</message>
+    <message id="Cv.Groudswell.core-stack-jenkins">Worked in a Linux environment with GCC, Make, and GDB, and managed source control with Git.</message>
+    <message id="Cv.Groudswell.core-stack-ci">Designed and maintained Jenkins CI/CD pipelines to automate nightly builds and deployments.</message>
+    <message id="Cv.Groudswell.gained-exp">Gained experience in:</message>
+    <message id="Cv.Groudswell.exp-1">C++ development for web applications, including backend business logic, database interactions, and server-side rendering using the Wt framework.</message>
+    <message id="Cv.Groudswell.exp-2">Distributed systems architecture and design principles for building reliable applications.</message>
+    <message id="Cv.Groudswell.exp-3">CI/CD with Jenkins.</message>
+    <message id="Cv.Groudswell.exp-4">Informatica PowerCenter for data warehousing operations (mapping design and development for ETL processes).</message>
+
+    <message id="Cv.Groudswell.job-header">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                        ${tr:Cv.Groudswell.title}
+                    </h2>
+                    <p class="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                        ${tr:Cv.Groudswell.role}
+                    </p>
+                </div>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold tracking-wide text-slate-600 shadow-sm">
+                    ${tr:Cv.Groudswell.period-start} - ${tr:Cv.Groudswell.period-end}
+                </span>
+            </div>
+        </div>
+    </message>
+    
+    <message id="Cv.Groudswell.job-content">
+        <div class="space-y-4 px-2 py-3 text-sm leading-6 text-slate-700 sm:px-4 sm:py-3">
+
+            <div class="px-2 py-1">
+                <p class="text-sm leading-6 text-slate-700">
+                    ${tr:Cv.Groudswell.summary}
+                </p>
+            </div>
+
+
+            <div class="px-2 py-1">
+                <ul class="space-y-2.5 text-sm leading-6 text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-wt}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-ice}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-dbo}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-linux}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-jenkins}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.core-stack-ci}</span>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="px-2 py-1">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    ${tr:Cv.Groudswell.gained-exp}
+                </p>
+
+                <ul class="space-y-2.5 text-sm leading-6 text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.exp-1}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.exp-2}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.exp-3}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Groudswell.exp-4}</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </message>
+</messages>

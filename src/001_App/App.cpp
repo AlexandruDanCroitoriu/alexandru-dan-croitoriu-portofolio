@@ -25,6 +25,7 @@ App::App(const Wt::WEnvironment& env)
     
     // Load Monaco Editor loader from local static files
     require("/static/monaco/vs/loader.js");
+    // require("https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1");
     // require("/static/js/animate-css-grid.js");
     // require("https://unpkg.com/animate-css-grid@latest");
 

@@ -47,6 +47,13 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindThemeBase::styleSheets() const
 {
   std::vector<Wt::WLinkedCssStyleSheet> result;
 
+
+  #ifdef DEBUG
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.css?v=" + Wt::WRandom::generateId())));
+  #else
+    result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.minify.css?v=" + Wt::WRandom::generateId())));
+  #endif
+
   if (!name_.empty()) {
     std::string themeDir = resourcesUrl();
 
@@ -61,11 +68,7 @@ std::vector<Wt::WLinkedCssStyleSheet> TailwindThemeBase::styleSheets() const
       result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink(themeDir + "wt_ie6.css")));
   }
 
-#ifdef DEBUG
-  result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.css?v=" + Wt::WRandom::generateId())));
-#else
-  result.push_back(Wt::WLinkedCssStyleSheet(Wt::WLink("static/theme/tailwindcss/tailwind.minify.css?v=" + Wt::WRandom::generateId())));
-#endif
+
 
   return result;
 }

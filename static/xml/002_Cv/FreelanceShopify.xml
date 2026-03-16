@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Stylus Editor -->
+<messages>
+    <message id="Cv.Shopify.title">Freelance</message>
+    <message id="Cv.Shopify.role">Shopify Developer</message>
+    <message id="Cv.Shopify.period-start">10/2025</message>
+    <message id="Cv.Shopify.period-end">Present</message>
+
+    <message id="Cv.Shopify.summary">Providing end-to-end Shopify support for small digital shop owners across store setup, customization, and optimization.</message>
+
+    <message id="Cv.Shopify.responsibilities">Main responsibilities</message>
+    <message id="Cv.Shopify.responsibility-1">Build and customize Shopify storefronts with practical, business-focused solutions.</message>
+    <message id="Cv.Shopify.responsibility-2">Develop and adjust Liquid templates and theme sections to match store requirements.</message>
+    <message id="Cv.Shopify.responsibility-3">Integrate third-party apps and configure core SEO and analytics settings.</message>
+    <message id="Cv.Shopify.responsibility-4">Provide maintenance and iterative improvements based on client feedback.</message>
+
+    <message id="Cv.Shopify.gained-exp">Key experience</message>
+    <message id="Cv.Shopify.exp-summary">Hands-on Shopify development across theme customization, app integrations, store optimization, and ongoing client collaboration.</message>
+    
+    <message id="Cv.Shopify.job-header">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                        ${tr:Cv.Shopify.title}
+                    </h2>
+                    <p class="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                        ${tr:Cv.Shopify.role}
+                    </p>
+                </div>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold tracking-wide text-slate-600 shadow-sm">
+                    ${tr:Cv.Shopify.period-start} - ${tr:Cv.Shopify.period-end}
+                </span>
+            </div>
+        </div>
+    </message>
+    <message id="Cv.Shopify.job-content">
+        <div class="space-y-4 px-2 py-3 text-sm leading-6 text-slate-700 sm:px-4 sm:py-3">
+            <div class="px-2 py-1">
+                <p class="text-sm leading-6 text-slate-700">${tr:Cv.Shopify.summary}</p>
+            </div>
+            <div class="px-2 py-1">
+                <p class="mb-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    ${tr:Cv.Shopify.responsibilities}
+                </p>
+                <ul class="space-y-2.5 text-sm leading-6 text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Shopify.responsibility-1}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Shopify.responsibility-2}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Shopify.responsibility-3}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.Shopify.responsibility-4}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="px-2 py-1">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    ${tr:Cv.Shopify.gained-exp}
+                </p>
+                <p class="border-l-2 border-slate-300 pl-3 text-sm leading-6 text-slate-700">
+                    ${tr:Cv.Shopify.exp-summary}
+                </p>
+            </div>
+        </div>
+    </message>
+
+ 
+    <message id="Cv.ShopifyPrevious.period-start">5/2023</message>
+    <message id="Cv.ShopifyPrevious.period-end">10/2024</message>
+
+    <message id="Cv.ShopifyPrevious.job-header">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                        ${tr:Cv.Shopify.title}
+                    </h2>
+                    <p class="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                        ${tr:Cv.Shopify.role}
+                    </p>
+                </div>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold tracking-wide text-slate-600 shadow-sm">
+                    ${tr:Cv.ShopifyPrevious.period-start} - ${tr:Cv.ShopifyPrevious.period-end}
+                </span>
+            </div>
+        </div>
+    </message>
+</messages>

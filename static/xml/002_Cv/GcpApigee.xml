@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Stylus Editor -->
+<messages>
+    <message id="Cv.GcpApigee.title"><a href="https://www.cognizant.com/ro/en" target="_blank" rel="noopener noreferrer" class="underline decoration-slate-300 decoration-2 underline-offset-4">Cognizant</a></message>
+    <message id="Cv.GcpApigee.role">Technical Support Engineer on Google Cloud Platform (Apigee) </message>
+    <message id="Cv.GcpApigee.period-start">10/2024</message>
+    <message id="Cv.GcpApigee.period-end">08/2025</message>
+
+    <message id="Cv.GcpApigee.summary">Provided enterprise-level technical support for enterprise customers using API management platforms built on Google Cloud Platform.</message>
+
+    <message id="Cv.GcpApigee.responsibilities">Main responsibilities</message>
+    <message id="Cv.GcpApigee.responsibility-1">Acted as a customer-facing support engineer, handling priority-based tickets and ensuring timely resolution of incidents and service requests.</message>
+    <message id="Cv.GcpApigee.responsibility-2">Reproduced customer-reported issues in test environments, maintained those reproductions until resolution, documented findings, and contributed to internal bug reports and documentation feedback.</message>
+    <message id="Cv.GcpApigee.responsibility-3">Troubleshot issues related to API design, configuration, and runtime behavior within complex distributed architectures.</message>
+    <message id="Cv.GcpApigee.responsibility-4">Investigated and resolved problems involving supporting GCP components such as Load Balancers, IAM, networking, logging, monitoring, API gateways (Apigee), and cluster configuration.</message>
+    <message id="Cv.GcpApigee.responsibility-5">Collaborated with software engineers and sales to de-escalate cases, validate fixes, and improve product functionality and documentation.</message>
+
+    <message id="Cv.GcpApigee.gained-exp">Key experience</message>
+    <message id="Cv.GcpApigee.exp-summary">I worked with Google Cloud infrastructure and services, including Kubernetes, Compute Engine, Cloud Storage, IAM, Load Balancing, logging, monitoring, and Cloud Networking. The role also involved troubleshooting complex issues, finding root causes, and helping improve system stability.</message>
+
+    <message id="Cv.GcpApigee.job-header">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+                <div class="flex items-center gap-3 flex-wrap pb-2">
+                    <h2 class="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+                        ${tr:Cv.GcpApigee.title}
+                    </h2>
+                    <p class="mt-1.5 inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+                        ${tr:Cv.GcpApigee.role}
+                    </p>
+                </div>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-semibold tracking-wide text-slate-600 shadow-sm">
+                    ${tr:Cv.GcpApigee.period-start} - ${tr:Cv.GcpApigee.period-end}
+                </span>
+            </div>
+        </div>
+    </message>
+
+    <message id="Cv.GcpApigee.job-content">
+        <div class="space-y-4 px-2 py-3 text-sm leading-6 text-slate-700 sm:px-4 sm:py-3">
+
+            <div class="px-2 py-1">
+                <p class="text-sm leading-6 text-slate-700">
+${tr:Cv.GcpApigee.summary}
+                </p>
+            </div>
+
+            <div class="px-2 py-1">
+                <p class="mb-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    ${tr:Cv.GcpApigee.responsibilities}
+                </p>
+
+                <ul class="space-y-2.5 text-sm leading-6 text-slate-700">
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.GcpApigee.responsibility-1}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.GcpApigee.responsibility-2}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.GcpApigee.responsibility-3}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.GcpApigee.responsibility-4}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <span class="mt-2 h-2 w-2 flex-none rounded-full bg-slate-400"></span>
+                        <span>${tr:Cv.GcpApigee.responsibility-5}</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="px-2 py-1">
+                <p class="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    ${tr:Cv.GcpApigee.gained-exp}
+                </p>
+                <p class="border-l-2 border-slate-300 pl-3 text-sm leading-6 text-slate-700">
+                    ${tr:Cv.GcpApigee.exp-summary}
+                </p>
+            </div>
+
+        </div>
+    </message>
+</messages>
